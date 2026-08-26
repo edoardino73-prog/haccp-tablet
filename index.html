@@ -1,0 +1,439 @@
+<!DOCTYPE html>
+<html lang="it">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+    <title>NVS - HACCP Mobile</title>
+    <link rel="manifest" href="manifest.json">
+    <style>
+        :root {
+            --primary: #65a30d; --primary-dark: #4d7c0f; --bg: #f8fafc; --surface: #ffffff;
+            --text: #0f172a; --text-light: #64748b; --border: #e2e8f0; --error: #ef4444; --warning: #f59e0b; --teal: #14b8a6;
+        }
+
+        body { font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif; background-color: var(--bg); color: var(--text); margin: 0; padding: 0; display: flex; flex-direction: column; min-height: 100vh; -webkit-tap-highlight-color: transparent; }
+        header { background-color: var(--primary); color: white; padding: 20px; text-align: center; font-size: 1.2em; font-weight: bold; box-shadow: 0 2px 10px rgba(0,0,0,0.1); position: sticky; top: 0; z-index: 100; }
+        .container { flex: 1; padding: 20px; display: flex; flex-direction: column; gap: 15px; }
+        .card { background: var(--surface); border-radius: 12px; padding: 25px; box-shadow: 0 4px 15px rgba(0,0,0,0.05); border: 1px solid var(--border); }
+        h2 { margin-top: 0; font-size: 1.3em; color: var(--primary); }
+
+        label { display: block; font-weight: bold; margin-bottom: 8px; font-size: 0.9em; color: var(--text-light); text-align: left; }
+        input[type="password"], input[type="number"], input[type="date"], select, input[type="text"] { width: 100%; padding: 16px; border: 2px solid var(--border); border-radius: 8px; box-sizing: border-box; font-size: 16px; color: var(--text); margin-bottom: 20px; transition: 0.2s; background: var(--surface); }
+        input:focus, select:focus { border-color: var(--primary); outline: none; box-shadow: 0 0 0 3px rgba(101, 163, 13, 0.2); }
+
+        .pin-pad { display: grid; grid-template-columns: repeat(3, 1fr); gap: 15px; justify-items: center; margin-top: 10px; max-width: 300px; margin-left: auto; margin-right: auto; }
+        .pin-btn { background: var(--bg); color: var(--text); border: 2px solid var(--border); font-size: 24px; font-weight: 600; width: 75px; height: 75px; border-radius: 50%; cursor: pointer; transition: 0.1s; display: flex; align-items: center; justify-content: center; box-shadow: 0 2px 4px rgba(0,0,0,0.05); user-select: none; }
+        .pin-btn:active { background: #e2e8f0; transform: scale(0.92); }
+        .pin-btn.action-canc { color: var(--error); background: #fef2f2; border-color: #fecaca; font-size: 18px; }
+        .pin-btn.action-ok { color: white; background: var(--primary); border-color: var(--primary-dark); font-size: 18px; }
+
+        .btn { width: 100%; padding: 18px; border: none; border-radius: 8px; font-size: 1.1em; font-weight: bold; cursor: pointer; transition: 0.2s; text-align: center; margin-bottom: 10px; }
+        .btn-primary { background: var(--primary); color: white; }
+        .btn-primary:active { background: var(--primary-dark); transform: scale(0.98); }
+        .btn-outline { background: transparent; border: 2px solid var(--primary); color: var(--primary); }
+        .btn-outline:active { background: #f7fee7; }
+        
+        .btn-menu { display: flex; align-items: center; justify-content: center; gap: 10px; height: 80px; font-size: 1.2em; background: var(--surface); color: var(--text); border: 2px solid var(--border); box-shadow: 0 4px 6px rgba(0,0,0,0.05); }
+        .btn-menu:active { border-color: var(--primary); background: #f0fdf4; }
+
+        .temp-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(140px, 1fr)); gap: 10px; margin-bottom: 20px;}
+        .check-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 15px; margin-bottom: 20px; }
+        .check-item { background: var(--bg); border: 2px solid var(--border); border-radius: 8px; padding: 15px; display: flex; align-items: center; gap: 10px; font-weight: bold; cursor: pointer; transition: 0.2s; font-size: 14px;}
+        .check-item.active { border-color: var(--primary); background: #f7fee7; color: var(--primary-dark); }
+        .check-item input[type="checkbox"] { display: none; }
+
+        #signatureModal { display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.8); z-index: 9999; align-items: center; justify-content: center; }
+        .sig-box { background: #fff; padding: 20px; border-radius: 12px; width: 90%; max-width: 400px; display: flex; flex-direction: column; gap: 15px; }
+        #signatureCanvas { border: 2px dashed #cbd5e1; border-radius: 8px; background: #f8fafc; width: 100%; height: 200px; touch-action: none; cursor: crosshair; }
+
+        .view { display: none; animation: slideIn 0.3s ease; }
+        .view.active { display: block; }
+        @keyframes slideIn { from { opacity: 0; transform: translateX(20px); } to { opacity: 1; transform: translateX(0); } }
+
+        #toast { position: fixed; bottom: -100px; left: 50%; transform: translateX(-50%); background: #334155; color: white; padding: 15px 25px; border-radius: 30px; font-weight: bold; transition: 0.3s; z-index: 10000; text-align: center; width: 80%; }
+        #toast.show { bottom: 30px; }
+        .error-box { display: none; background: #fef2f2; border: 2px solid var(--error); padding: 15px; border-radius: 8px; margin-bottom: 15px; }
+        #offline-badge { display: none; background: #f59e0b; color: white; text-align: center; padding: 8px; font-weight: bold; font-size: 14px; position: sticky; top: 62px; z-index: 99; }
+    </style>
+</head>
+<body>
+
+    <header id="mainHeader">NVS - Accesso Operatore</header>
+    <div id="offline-badge">⚠️ Connessione Assente: Salvataggio offline attivo.</div>
+
+    <!-- VISTA: LOGIN -->
+    <div id="view-login" class="container view active">
+        <div class="card" style="margin-top: 20px; text-align: center; max-width: 450px; margin-left: auto; margin-right: auto; width: 100%;">
+            <h1 style="font-size: 3em; margin: 0 0 10px 0;">👨‍🍳</h1>
+            <h2 style="color: var(--text); margin-bottom: 25px;">Login HACCP</h2>
+            <label>1. Seleziona Operatore</label>
+            <select id="loginOpSelect"><option value="" disabled selected>Caricamento operatori...</option></select>
+            <label>2. Inserisci il PIN</label>
+            <input type="password" id="loginPin" inputmode="numeric" placeholder="••••" style="text-align: center; font-size: 24px; letter-spacing: 8px;" onkeypress="if(event.key === 'Enter') checkPin()">
+            <div class="pin-pad">
+                <button class="pin-btn" onclick="addPin('1')">1</button><button class="pin-btn" onclick="addPin('2')">2</button><button class="pin-btn" onclick="addPin('3')">3</button>
+                <button class="pin-btn" onclick="addPin('4')">4</button><button class="pin-btn" onclick="addPin('5')">5</button><button class="pin-btn" onclick="addPin('6')">6</button>
+                <button class="pin-btn" onclick="addPin('7')">7</button><button class="pin-btn" onclick="addPin('8')">8</button><button class="pin-btn" onclick="addPin('9')">9</button>
+                <button class="pin-btn action-canc" onclick="clearPin()">C</button><button class="pin-btn" onclick="addPin('0')">0</button><button class="pin-btn action-ok" onclick="checkPin()">OK</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- VISTA: MENU PRINCIPALE -->
+    <div id="view-menu" class="container view">
+        <h3 style="color: var(--text-light); text-align:center; margin-top: 0;">Seleziona il Registro</h3>
+        
+        <button class="btn btn-menu" onclick="switchView('merci')" style="border-left: 6px solid var(--warning);">
+            <span style="font-size:1.5em;">📦</span> Ricezione Merci
+        </button>
+        <button class="btn btn-menu" onclick="switchView('tracc')" style="border-left: 6px solid var(--teal);">
+            <span style="font-size:1.5em;">🔍</span> Tracciabilità Lotti
+        </button>
+        <button class="btn btn-menu" onclick="switchView('temp')" style="border-left: 6px solid #65a30d;">
+            <span style="font-size:1.5em;">🌡️</span> Temperature Impianti
+        </button>
+        <button class="btn btn-menu" onclick="switchView('aree')" style="border-left: 6px solid #0284c7;">
+            <span style="font-size:1.5em;">✨</span> Sanificazione Aree
+        </button>
+        <button class="btn btn-menu" onclick="switchView('pulizie')" style="border-left: 6px solid #8b5cf6;">
+            <span style="font-size:1.5em;">🧹</span> Pulizie (Mod. 05)
+        </button>
+        
+        <button class="btn btn-outline" onclick="logout()" style="margin-top: auto; border-color:#cbd5e1; color:var(--text-light);">🚪 Esci</button>
+    </div>
+
+    <!-- VISTA: TRACCIABILITA' LOTTI FOTOGRAFICA (NEW) -->
+    <div id="view-tracc" class="container view">
+        <div class="card">
+            <h2 style="color: var(--teal);">🔍 Tracciabilità Lotti</h2>
+            <label>Data di Apertura/Utilizzo</label>
+            <input type="date" id="traccData">
+            
+            <label>Categoria Prodotto Critico</label>
+            <select id="traccCat">
+                <option value="Carne (Fresca/Surgelata)">Carne (Fresca/Surgelata)</option>
+                <option value="Pesce (Fresco/Surgelato)">Pesce (Fresco/Surgelato)</option>
+                <option value="Latticini e Formaggi">Latticini e Formaggi</option>
+                <option value="Uova e Ovoprodotti">Uova e Ovoprodotti</option>
+                <option value="Salumi e Insaccati">Salumi e Insaccati</option>
+                <option value="Pasta Fresca / Gastronomia">Pasta Fresca / Gastronomia</option>
+                <option value="Altro">Altro...</option>
+            </select>
+            
+            <label>Acquisisci Etichetta con Scadenza/Lotto</label>
+            <!-- Questo input invoca direttamente la fotocamera del tablet -->
+            <input type="file" accept="image/*" capture="environment" id="traccFile" style="display:none;" onchange="previewTraccFoto(event)">
+            
+            <button class="btn btn-outline" style="border-color: var(--teal); color: var(--teal); display:flex; align-items:center; justify-content:center; gap:10px; margin-bottom: 0;" onclick="document.getElementById('traccFile').click()">
+                <span style="font-size:1.3em;">📷</span> Apri Fotocamera
+            </button>
+
+            <!-- Contenitore Anteprima Foto -->
+            <div id="traccPreviewContainer" style="display:none; margin-top:20px; text-align:center;">
+                <img id="traccImgPreview" style="max-width:100%; border-radius:8px; border:2px solid var(--border); max-height:250px; object-fit:contain;">
+                <p style="font-size:13px; color:var(--success); font-weight:bold; margin-top:8px;">✅ Etichetta acquisita e ottimizzata</p>
+            </div>
+
+            <button class="btn btn-primary" style="background-color: var(--teal); margin-top:25px;" onclick="requestSignature('tracc')">Firma e Archivia Lotto</button>
+            <button class="btn btn-outline" style="border:none; color:var(--text-light);" onclick="switchView('menu')">Annulla</button>
+        </div>
+    </div>
+
+    <!-- VISTA: RICEZIONE MERCI -->
+    <div id="view-merci" class="container view">
+        <div class="card">
+            <h2 style="color: var(--warning);">📦 Controllo Merci in Arrivo</h2>
+            <label>Data Registrazione</label><input type="date" id="merciData">
+            <label>Fornitore</label><input type="text" id="merciFornitore" placeholder="Es. MARR, Macelleria, Ortofrutta...">
+            <label>Prodotto / Lotti principali (Opzionale)</label><input type="text" id="merciProdotto" placeholder="Es. Carne, Surgelati, Latticini...">
+            <div style="display:flex; gap:10px;">
+                <div style="flex:1;"><label>Temp. Rilevata (°C)</label><input type="number" id="merciTemp" step="0.1" inputmode="decimal" placeholder="Es. 4.0"></div>
+                <div style="flex:1;"><label>Stato Imballaggi</label><select id="merciImballaggi"><option value="Intatti">✅ Intatti</option><option value="Danneggiati">❌ Danneggiati</option></select></div>
+            </div>
+            <label>Esito Controllo</label><select id="merciEsito"><option value="Merce Accettata">✅ Merce Accettata</option><option value="Accettata con Riserva">⚠️ Accettata con Riserva</option><option value="Merce Respinta">❌ Merce Respinta / Reso</option></select>
+            <button class="btn btn-primary" style="background-color: var(--warning);" onclick="requestSignature('merci')">Firma e Salva Controllo</button>
+            <button class="btn btn-outline" style="border:none; color:var(--text-light);" onclick="switchView('menu')">Annulla</button>
+        </div>
+    </div>
+
+    <!-- VISTA: TEMPERATURE -->
+    <div id="view-temp" class="container view">
+        <div class="card">
+            <h2>🌡️ Rilevazione Temperature</h2>
+            <label>Data Registrazione</label><input type="date" id="tempData">
+            <button class="btn btn-outline" onclick="autoFillTemp()" style="margin-bottom:20px;">✅ Compila Valori a Norma</button>
+            <div class="temp-grid" id="dynamic-temp-grid"></div>
+            <div id="tempAlert" class="error-box"><label style="color:var(--error);">⚠️ Temperatura fuori norma. Azione Correttiva:</label><input type="text" id="tAction" placeholder="Es. Spostato merce..."></div>
+            <button class="btn btn-primary" onclick="requestSignature('temp')">Firma e Salva</button>
+            <button class="btn btn-outline" style="border:none; color:var(--text-light);" onclick="switchView('menu')">Annulla</button>
+        </div>
+    </div>
+
+    <!-- VISTA: SANIFICAZIONE AREE -->
+    <div id="view-aree" class="container view">
+        <div class="card">
+            <h2>✨ Sanificazione Aree</h2>
+            <label>Data Registrazione</label><input type="date" id="areeData">
+            <div class="check-grid" id="dynamic-aree-grid"></div>
+            <label>Note aggiuntive</label><input type="text" id="areeNote" placeholder="Eventuali anomalie...">
+            <button class="btn btn-primary" onclick="requestSignature('aree')">Firma e Salva</button>
+            <button class="btn btn-outline" style="border:none; color:var(--text-light);" onclick="switchView('menu')">Annulla</button>
+        </div>
+    </div>
+
+    <!-- VISTA: PULIZIE MOD 05 -->
+    <div id="view-pulizie" class="container view">
+        <div class="card">
+            <h2>🧹 Pulizie e Disinfezioni</h2>
+            <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:15px;">
+                <label style="margin:0;">Data</label>
+                <button class="btn-outline" style="padding:5px 10px; width:auto; border-radius:4px; font-size:0.8em;" onclick="selectAllTasks()">✅ Seleziona Tutte</button>
+            </div>
+            <input type="date" id="pulizieData">
+            <div class="check-grid" id="dynamic-pulizie-grid" style="grid-template-columns: 1fr;"></div>
+            <label>Note / Azioni Correttive</label><input type="text" id="pulizieNote" placeholder="Eventuali guasti...">
+            <button class="btn btn-primary" onclick="requestSignature('pulizie')">Firma e Salva</button>
+            <button class="btn btn-outline" style="border:none; color:var(--text-light);" onclick="switchView('menu')">Annulla</button>
+        </div>
+    </div>
+
+    <!-- MODAL FIRMA -->
+    <div id="signatureModal">
+        <div class="sig-box">
+            <h2 style="margin:0; text-align:center; color:var(--primary);">Firma OSA</h2>
+            <p style="margin:0; text-align:center; font-size:0.85em; color:var(--text-light);">Traccia la tua firma per validare</p>
+            <canvas id="signatureCanvas"></canvas>
+            <button class="btn btn-outline" onclick="clearSignature()" style="margin-bottom:0;">🗑️ Cancella e Rifai</button>
+            <div style="display:flex; gap:10px; margin-top:10px;">
+                <button class="btn btn-outline" style="flex:1; border-color:#cbd5e1; color:var(--text-light);" onclick="closeSignature()">Annulla</button>
+                <button class="btn btn-primary" style="flex:2;" onclick="confirmSignature()">✅ Conferma</button>
+            </div>
+        </div>
+    </div>
+
+    <div id="toast">Operazione completata!</div>
+
+    <!-- SCRIPT FIREBASE & LOGICA -->
+    <script type="module">
+        import { initializeApp } from "https://www.gstatic.com/firebasejs/10.4.0/firebase-app.js";
+        import { getFirestore, collection, addDoc, serverTimestamp, enableIndexedDbPersistence, onSnapshot, doc } from "https://www.gstatic.com/firebasejs/10.4.0/firebase-firestore.js";
+
+        const firebaseConfig = {
+            apiKey: "AIzaSyAACj8J2iOSAwS_DJaJQGvwB8-klMZ_NgE",
+            authDomain: "hccp-nvs.firebaseapp.com",
+            projectId: "hccp-nvs",
+            storageBucket: "hccp-nvs.firebasestorage.app",
+            messagingSenderId: "426557690382",
+            appId: "1:426557690382:web:9c45087394117f8953a25f"
+        };
+        const app = initializeApp(firebaseConfig);
+        const db = getFirestore(app);
+
+        enableIndexedDbPersistence(db).catch(err => console.warn("Offline fallback fallito", err));
+        window.addEventListener('offline', () => document.getElementById('offline-badge').style.display = 'block');
+        window.addEventListener('online', () => document.getElementById('offline-badge').style.display = 'none');
+
+        window.activeOp = null; window.currentTarget = null; let currentPin = "";
+        window.dbOperatori = []; let appConfig = { frigoriferi: [], aree: [], pulizie: [] }; 
+
+        onSnapshot(collection(db, "operatori"), (snapshot) => {
+            window.dbOperatori = []; const sel = document.getElementById('loginOpSelect');
+            if (sel) sel.innerHTML = '<option value="" disabled selected>-- Scegli il tuo nome --</option>';
+            snapshot.forEach((docSnap) => {
+                const op = docSnap.data(); window.dbOperatori.push(op);
+                if (sel) sel.innerHTML += `<option value="${op.pin}">${op.nome} (${op.qualifica})</option>`;
+            });
+        });
+
+        onSnapshot(doc(db, "configurazioni", "liste"), (docSnap) => {
+            if (docSnap.exists()) { appConfig = docSnap.data(); renderDynamicUI(); }
+        });
+
+        function renderDynamicUI() {
+            const tGrid = document.getElementById('dynamic-temp-grid'); tGrid.innerHTML = '';
+            (appConfig.frigoriferi || []).forEach((f) => {
+                tGrid.innerHTML += `<div class="form-group"><label>${f}</label><input type="number" step="0.1" inputmode="decimal" class="dyn-temp-input" data-name="${f}" oninput="checkTemp()"></div>`;
+            });
+            const aGrid = document.getElementById('dynamic-aree-grid'); aGrid.innerHTML = '';
+            (appConfig.aree || []).forEach((a) => {
+                aGrid.innerHTML += `<label class="check-item"><input type="checkbox" value="${a}"> ${a}</label>`;
+            });
+            const pGrid = document.getElementById('dynamic-pulizie-grid'); pGrid.innerHTML = '';
+            (appConfig.pulizie || []).forEach((p) => {
+                pGrid.innerHTML += `<label class="check-item"><input type="checkbox" value="${p}"> ${p}</label>`;
+            });
+            document.querySelectorAll('.check-grid input[type="checkbox"]').forEach(cb => {
+                cb.addEventListener('change', function() { if (this.checked) this.parentElement.classList.add('active'); else this.parentElement.classList.remove('active'); });
+            });
+        }
+
+        window.getToday = () => { const n=new Date(); return `${n.getFullYear()}-${String(n.getMonth()+1).padStart(2,'0')}-${String(n.getDate()).padStart(2,'0')}`; };
+        window.showToast = (msg) => { const t = document.getElementById('toast'); t.innerText = msg; t.classList.add('show'); setTimeout(() => t.classList.remove('show'), 3000); };
+
+        window.onload = () => {
+            const t = window.getToday();
+            ['tempData', 'areeData', 'pulizieData', 'merciData', 'traccData'].forEach(id => { if(document.getElementById(id)) document.getElementById(id).value = t; });
+        };
+
+        window.addPin = (num) => { const pinInput = document.getElementById('loginPin'); if(pinInput.value.length < 4) pinInput.value += num; };
+        window.clearPin = () => { document.getElementById('loginPin').value = ""; };
+        window.checkPin = () => {
+            const sel = document.getElementById('loginOpSelect'); const pinInput = document.getElementById('loginPin');
+            if (sel.selectedIndex <= 0 || !pinInput.value) return window.showToast("Seleziona operatore e inserisci PIN!");
+            if (pinInput.value === sel.value) {
+                window.activeOp = sel.options[sel.selectedIndex].text; 
+                document.getElementById('mainHeader').innerText = `O.S.A: ${window.activeOp}`;
+                window.switchView('menu'); pinInput.value = ""; sel.selectedIndex = 0;
+            } else { window.showToast("❌ PIN Errato"); window.clearPin(); }
+        };
+
+        window.logout = () => { window.activeOp = null; window.switchView('login'); };
+
+        window.switchView = (viewId) => {
+            document.querySelectorAll('.view').forEach(v => v.classList.remove('active'));
+            document.getElementById('view-' + viewId).classList.add('active');
+            if(viewId === 'login') document.getElementById('mainHeader').innerText = `NVS - Accesso Operatore`;
+            window.onload();
+        };
+
+        window.selectAllTasks = () => { document.querySelectorAll('#dynamic-pulizie-grid .check-item').forEach(item => { let cb = item.querySelector('input'); cb.checked = true; item.classList.add('active'); }); };
+        window.checkTemp = () => { let err = false; document.querySelectorAll('.dyn-temp-input').forEach(inp => { const val = parseFloat(inp.value); if (!isNaN(val)) { const name = inp.getAttribute('data-name').toLowerCase(); const limit = (name.includes('cong') || name.includes('cella')) ? -18 : 4; if (val > limit) err = true; }}); document.getElementById('tempAlert').style.display = err ? 'block' : 'none'; };
+        window.autoFillTemp = () => { document.querySelectorAll('.dyn-temp-input').forEach(inp => { const name = inp.getAttribute('data-name').toLowerCase(); inp.value = (name.includes('cong') || name.includes('cella')) ? (Math.random() * (-19.0 - -19.9) + -19.9).toFixed(1) : (Math.random() * (3.8 - 2.5) + 2.5).toFixed(1); }); window.checkTemp(); };
+
+        // --- GESTIONE FOTOCAMERA TRACCIABILITA' ---
+        window.traccBase64 = "";
+        window.previewTraccFoto = (event) => {
+            const file = event.target.files[0];
+            if(!file) return;
+
+            const reader = new FileReader();
+            reader.onload = (e) => {
+                const img = new Image();
+                img.onload = () => {
+                    // Motore di Compressione Immagine: Scala l'immagine a max 800px per renderla leggerissima (~100KB)
+                    const canvas = document.createElement('canvas');
+                    const MAX_WIDTH = 800;
+                    let scaleSize = 1;
+                    if(img.width > MAX_WIDTH) { scaleSize = MAX_WIDTH / img.width; }
+                    canvas.width = img.width * scaleSize;
+                    canvas.height = img.height * scaleSize;
+                    
+                    const ctx = canvas.getContext('2d');
+                    ctx.drawImage(img, 0, 0, canvas.width, canvas.height);
+                    
+                    window.traccBase64 = canvas.toDataURL('image/jpeg', 0.6); // Qualità 60%
+                    
+                    document.getElementById('traccImgPreview').src = window.traccBase64;
+                    document.getElementById('traccPreviewContainer').style.display = 'block';
+                };
+                img.src = e.target.result;
+            };
+            reader.readAsDataURL(file);
+        };
+
+        const canvas = document.getElementById('signatureCanvas'); let ctx = canvas.getContext('2d'); window.isDrawing = false;
+        const resizeCanvas = () => { const ratio = Math.max(window.devicePixelRatio || 1, 1); canvas.width = canvas.offsetWidth * ratio; canvas.height = canvas.offsetHeight * ratio; ctx.scale(ratio, ratio); ctx.lineWidth = 3; ctx.lineCap = 'round'; ctx.strokeStyle = '#0f172a'; };
+        const getPos = (e) => { const rect = canvas.getBoundingClientRect(); const clientX = e.touches ? e.touches[0].clientX : e.clientX; const clientY = e.touches ? e.touches[0].clientY : e.clientY; return { x: clientX - rect.left, y: clientY - rect.top }; };
+        const startDraw = (e) => { window.isDrawing = true; window.draw(e); }; const endDraw = () => { window.isDrawing = false; ctx.beginPath(); };
+        window.draw = (e) => { if (!window.isDrawing) return; e.preventDefault(); const pos = getPos(e); ctx.lineTo(pos.x, pos.y); ctx.stroke(); ctx.beginPath(); ctx.moveTo(pos.x, pos.y); };
+        canvas.addEventListener('mousedown', startDraw); canvas.addEventListener('mouseup', endDraw); canvas.addEventListener('mousemove', window.draw);
+        canvas.addEventListener('touchstart', startDraw, {passive:false}); canvas.addEventListener('touchend', endDraw); canvas.addEventListener('touchmove', window.draw, {passive:false});
+
+        window.requestSignature = (target) => {
+            if(target === 'temp') {
+                let hasOne = false; document.querySelectorAll('.dyn-temp-input').forEach(i => { if(i.value) hasOne = true; });
+                if(!hasOne) return window.showToast("Inserisci almeno una temperatura!");
+                if(document.getElementById('tempAlert').style.display === 'block' && !document.getElementById('tAction').value.trim()) return window.showToast("Manca Azione Correttiva!");
+            }
+            if(target === 'aree' && document.querySelectorAll('#dynamic-aree-grid input:checked').length === 0) return window.showToast("Spunta almeno un'area!");
+            if(target === 'pulizie' && document.querySelectorAll('#dynamic-pulizie-grid input:checked').length === 0) return window.showToast("Spunta almeno un'operazione!");
+            if(target === 'merci' && !document.getElementById('merciFornitore').value.trim()) return window.showToast("Inserisci il Fornitore!");
+            if(target === 'tracc' && !window.traccBase64) return window.showToast("📸 Devi scattare prima la foto dell'etichetta!");
+
+            window.currentTarget = target; document.getElementById('signatureModal').style.display = 'flex'; setTimeout(resizeCanvas, 100); 
+        };
+
+        window.closeSignature = () => { document.getElementById('signatureModal').style.display = 'none'; window.currentTarget = null; };
+        window.clearSignature = () => { ctx.clearRect(0, 0, canvas.width, canvas.height); ctx.beginPath(); };
+        const isCanvasBlank = () => { const blank = document.createElement('canvas'); blank.width = canvas.width; blank.height = canvas.height; return canvas.toDataURL() === blank.toDataURL(); };
+
+        window.confirmSignature = async () => {
+            if(isCanvasBlank()) return window.showToast("Devi firmare all'interno del riquadro!");
+            const sigBase64 = canvas.toDataURL('image/png'); window.closeSignature();
+            
+            // LOGICA TRACCIABILITA' FOTOGRAFICA
+            if (window.currentTarget === 'tracc') {
+                const payloadTracc = {
+                    data_dichiarata: document.getElementById('traccData').value,
+                    timestamp_server: serverTimestamp(),
+                    operatore: window.activeOp,
+                    categoria_prodotto: document.getElementById('traccCat').value,
+                    foto_base64: window.traccBase64,
+                    firma_base64: sigBase64
+                };
+                try {
+                    await addDoc(collection(db, "haccp_tracciabilita"), payloadTracc);
+                    window.showToast("✅ Lotto Archiviato!");
+                    window.traccBase64 = "";
+                    document.getElementById('traccPreviewContainer').style.display = 'none';
+                    document.getElementById('traccFile').value = '';
+                    window.switchView('menu');
+                } catch(e) { window.showToast("Errore di rete."); }
+                return;
+            }
+
+            // LOGICA SALVATAGGIO MERCI
+            if (window.currentTarget === 'merci') {
+                const payloadMerci = {
+                    data_dichiarata: document.getElementById('merciData').value,
+                    timestamp_server: serverTimestamp(),
+                    operatore: window.activeOp,
+                    fornitore: document.getElementById('merciFornitore').value.trim(),
+                    prodotto: document.getElementById('merciProdotto').value.trim(),
+                    temperatura: document.getElementById('merciTemp').value,
+                    imballaggi: document.getElementById('merciImballaggi').value,
+                    esito: document.getElementById('merciEsito').value,
+                    firma_base64: sigBase64
+                };
+                try {
+                    await addDoc(collection(db, "haccp_merci"), payloadMerci);
+                    window.showToast("✅ Merce Registrata!");
+                    ['merciFornitore', 'merciProdotto', 'merciTemp'].forEach(id => document.getElementById(id).value='');
+                    document.getElementById('merciImballaggi').value = 'Intatti';
+                    document.getElementById('merciEsito').value = 'Merce Accettata';
+                    window.switchView('menu');
+                } catch(e) { window.showToast("Errore di rete."); }
+                return;
+            }
+
+            // LOGICA REGISTRI NORMALI
+            let data_dichiarata = "", pulizie = [], temperature = {}, note = "";
+            if(window.currentTarget === 'temp') {
+                data_dichiarata = document.getElementById('tempData').value;
+                document.querySelectorAll('.dyn-temp-input').forEach(inp => { temperature[inp.getAttribute('data-name')] = inp.value; });
+                note = document.getElementById('tAction').value.trim();
+            } else if (window.currentTarget === 'aree') {
+                data_dichiarata = document.getElementById('areeData').value;
+                document.querySelectorAll('#dynamic-aree-grid input:checked').forEach(cb => pulizie.push(`S. Area: ${cb.value}`));
+                note = document.getElementById('areeNote').value.trim();
+            } else if (window.currentTarget === 'pulizie') {
+                data_dichiarata = document.getElementById('pulizieData').value;
+                document.querySelectorAll('#dynamic-pulizie-grid input:checked').forEach(cb => pulizie.push(cb.value));
+                note = document.getElementById('pulizieNote').value.trim();
+            }
+
+            try {
+                await addDoc(collection(db, "haccp_registri"), { data_dichiarata, timestamp_server: serverTimestamp(), operatore: window.activeOp, temperature, pulizie_eseguite: pulizie.length > 0 ? pulizie : null, note, firma_base64: sigBase64 });
+                window.showToast("✅ Registrazione Salvata!");
+                
+                if(window.currentTarget === 'temp') { document.querySelectorAll('.dyn-temp-input').forEach(inp => inp.value = ''); document.getElementById('tAction').value = ''; window.checkTemp(); } 
+                else if (window.currentTarget === 'aree') { document.querySelectorAll('#dynamic-aree-grid .check-item').forEach(item => { item.classList.remove('active'); item.querySelector('input').checked = false; }); document.getElementById('areeNote').value = ''; } 
+                else if (window.currentTarget === 'pulizie') { document.querySelectorAll('#dynamic-pulizie-grid .check-item').forEach(item => { item.classList.remove('active'); item.querySelector('input').checked = false; }); document.getElementById('pulizieNote').value = ''; }
+                window.switchView('menu');
+            } catch(e) { window.showToast("Errore di rete."); }
+        };
+    </script>
+</body>
+</html>
