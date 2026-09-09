@@ -99,7 +99,6 @@
         input:focus, select:focus { border-color: var(--primary-color); outline: none; background-color: #f0fdfa; }
 
         /* GRIGLIE RESPONSIVE PER TELEFONO */
-        /* Impostate a 1 colonna in automatico, perfette per click col pollice */
         .temp-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(130px, 1fr)); gap: 12px; margin-bottom: 20px;}
         .check-grid { display: grid; grid-template-columns: 1fr; gap: 10px; margin-bottom: 20px; } 
         .check-item { background: var(--bg-color); border: 1.5px solid var(--border-color); border-radius: 8px; padding: 16px; display: flex; align-items: center; gap: 12px; font-weight: 600; font-size: 1em; transition: 0.2s;}
@@ -566,7 +565,7 @@
         
         window.draw = (e) => { 
             if (!window.isDrawing) return; 
-            e.preventDefault(); // Blocca lo scroll della pagina su mobile
+            e.preventDefault(); 
             const pos = getPos(e); 
             ctx.lineTo(pos.x, pos.y); 
             ctx.stroke(); 
@@ -616,9 +615,10 @@
                 return window.showToast("⚠️ Devi firmare.");
             
             const sigBase64 = canvas.toDataURL('image/png'); 
+            const currentTarget = window.currentTarget; // Salvataggio sicuro del target prima di chiudere
             window.closeSignature();
             
-            if (window.currentTarget === 'tracc') {
+            if (currentTarget === 'tracc') {
                 try { 
                     await addDoc(collection(db, "haccp_tracciabilita"), { 
                         data_dichiarata: document.getElementById('traccData').value, 
@@ -635,7 +635,7 @@
                 return;
             }
 
-            if (window.currentTarget === 'merci') {
+            if (currentTarget === 'merci') {
                 try { 
                     await addDoc(collection(db, "haccp_merci"), { 
                         data_dichiarata: document.getElementById('merciData').value, 
@@ -654,7 +654,7 @@
                 return;
             }
 
-            let data_dichiarata = "", pulizie = null, temperature = null, note = "", tipo = window.currentTarget;
+            let data_dichiarata = "", pulizie = null, temperature = null, note = "", tipo = currentTarget;
             
             if(tipo === 'temp') { 
                 tipo = "temperature";
