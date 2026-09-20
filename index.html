@@ -2,14 +2,13 @@
 <html lang="it">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     <meta name="apple-mobile-web-app-capable" content="yes">
-    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
-    <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
-    <meta http-equiv="Pragma" content="no-cache">
-    <meta http-equiv="Expires" content="0">
-    <title>NVS - HACCP Mobile</title>
+    <meta name="mobile-web-app-capable" content="yes">
+    <title>NVS Mobile Ward - Sistema Reparto e HACCP</title>
     
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+
     <style>
         :root {
             --bg-color: #f8fafc;         
@@ -18,689 +17,1314 @@
             --secondary-color: #0f766e;  
             --text-main: #0f172a;
             --text-light: #475569;
-            --input-bg: #ffffff;
+            --input-bg: #f8fafc;
             --border-color: #cbd5e1;     
             --error-color: #e11d48; 
             --warning-color: #d97706; 
             --success-color: #059669; 
-            --merci-color: #d97706;
-            --tracc-color: #14b8a6;
-            --temp-color: #65a30d;
-            --aree-color: #0284c7;
-            --pulizie-color: #8b5cf6;
-            --pest-color: #ea580c; 
-            --sicurezza-color: #9333ea; 
-            --base-font-size: 16px; /* Evita l'auto-zoom su iOS */    
-            --radius: 12px; /* Angoli più morbidi per mobile */              
-            --transition: all 0.2s ease;
+            --dir-color: #4f46e5;
+            --terapia-color: #0284c7; 
+            --base-font-size: 13px;
+            --radius: 8px;               
         }
 
-        body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif; background-color: var(--bg-color); margin: 0; padding: 0; color: var(--text-main); font-size: var(--base-font-size); display: flex; flex-direction: column; height: 100vh; overflow: hidden; -webkit-tap-highlight-color: transparent; }
+        * { box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
+        body { font-family: 'Segoe UI', system-ui, sans-serif; background-color: var(--bg-color); margin: 0; padding: 0; color: var(--text-main); font-size: var(--base-font-size); display: flex; flex-direction: column; height: 100vh; overflow: hidden; user-select: none; }
 
-        /* SCHERMATA LOGIN */
-        #loginScreen { display: flex; flex-direction: column; align-items: center; justify-content: center; min-height: 100vh; width: 100%; position: fixed; top: 0; left: 0; z-index: 9999; background-color: var(--primary-color); padding: 15px; box-sizing: border-box;}
-        .login-header-title { text-align: center; color: white; margin-bottom: 20px; animation: slideUpFade 0.6s forwards; }
-        .login-header-title h1 { margin: 0; font-size: 2em; font-weight: 800; letter-spacing: 1px; }
-        .login-header-title h2 { margin: 5px 0 0 0; font-size: 1.1em; color: #ccfbf1; font-weight: 500;}
-        .login-box { background: #ffffff; padding: 20px; border-radius: var(--radius); box-shadow: 0 10px 25px rgba(0,0,0,0.3); text-align: center; width: 100%; max-width: 400px; border-top: 5px solid var(--secondary-color); animation: slideUpFade 0.6s forwards; box-sizing: border-box;}
-        
-        /* Griglia profili dinamica (auto-adattante) */
-        .profiles-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(90px, 1fr)); gap: 10px; justify-content: center; margin-bottom: 5px; max-height: 40vh; overflow-y: auto; padding: 5px; }
-        .profile-btn { display: flex; flex-direction: column; align-items: center; justify-content: center; padding: 12px 5px; border: 1px solid var(--border-color); border-radius: var(--radius); background: #f8fafc; cursor: pointer; transition: 0.2s; }
-        .profile-btn:active { background: #e2e8f0; transform: scale(0.95); }
-        .profile-avatar { width: 45px; height: 45px; border-radius: 50%; margin-bottom: 8px; background: var(--primary-color); color: white; display: flex; align-items: center; justify-content: center; font-size: 1.3em; font-weight: bold; }
-        
-        /* TASTIERINO PIN */
-        .pin-pad { display: grid; grid-template-columns: repeat(3, 1fr); gap: 12px; justify-items: center; margin-top: 15px; width: 100%; max-width: 280px; margin-left: auto; margin-right: auto; }
-        .pin-btn { background: var(--bg-color); color: var(--text-main); border: 2px solid var(--border-color); font-size: 22px; font-weight: 600; width: 70px; height: 70px; border-radius: 50%; cursor: pointer; display: flex; align-items: center; justify-content: center; user-select: none; touch-action: manipulation;}
-        .pin-btn:active { background: #e2e8f0; transform: scale(0.92); }
-        .pin-btn.action-canc { color: var(--error-color); background: #fef2f2; border-color: #fecaca; font-size: 18px; }
-        .pin-btn.action-ok { color: white; background: var(--primary-color); border-color: var(--secondary-color); font-size: 18px; }
-        
-        @keyframes slideUpFade { from { opacity: 0; transform: translateY(20px); } to { opacity: 1; transform: translateY(0); } }
+        @keyframes slideUp { from { opacity: 0; transform: translateY(20px); } to { opacity: 1; transform: translateY(0); } }
+        @keyframes fadeIn { from { opacity: 0; transform: translateY(-10px); } to { opacity: 1; transform: translateY(0); } }
 
-        /* NAVBAR & MENU (Ottimizzato per poco spazio verticale) */
-        #top-nav-container { position: sticky; top: 0; z-index: 1000; width: 100%; display: flex; flex-direction: column; flex-shrink: 0; box-shadow: 0 2px 10px rgba(0,0,0,0.1); }
-        .navbar { background: var(--primary-color); color: white; padding: 12px 15px; display: flex; justify-content: space-between; align-items: center; }
-        .navbar-brand { font-weight: bold; font-size: 1.1em; }
-        .navbar-actions { display: flex; gap: 8px; align-items: center; }
-        .nav-btn { background: rgba(255,255,255,0.15); border: none; color: white; padding: 8px 12px; border-radius: 6px; cursor: pointer; font-size: 1em; font-weight: bold; }
-        .nav-btn:active { background: rgba(255,255,255,0.3); }
-        .current-op-badge { background: #ffffff; color: var(--primary-color); padding: 5px 10px; border-radius: 6px; font-size: 0.85em; font-weight: bold; }
+        /* PERMESSI E QUALIFICHE */
+        body[data-qualifica="OSS"] .restrict-oss { display: none !important; }
+        body[data-qualifica="OSS"] textarea.restrict-oss-input, 
+        body[data-qualifica="OSS"] input.restrict-oss-input, 
+        body[data-qualifica="OSS"] select.restrict-oss-input { 
+            pointer-events: none; opacity: 0.7; 
+            background-image: repeating-linear-gradient(45deg, #f1f5f9, #f1f5f9 10px, #e2e8f0 10px, #e2e8f0 20px) !important;
+            cursor: not-allowed; border-color: #cbd5e1;
+        }
+        body:not([data-med-access="true"]) .only-medico { display: none !important; }
         
-        /* Tab a scorrimento orizzontale nativo */
-        .app-menu { display: flex; background: var(--box-bg); gap: 4px; overflow-x: auto; -webkit-overflow-scrolling: touch; scroll-snap-type: x mandatory; padding: 5px 10px 0 10px; border-bottom: 1px solid var(--border-color); scrollbar-width: none;}
-        .app-menu::-webkit-scrollbar { display: none; } /* Nasconde scrollbar */
-        .menu-tab { padding: 14px 16px; background: transparent; border: none; border-bottom: 3px solid transparent; color: var(--text-light); font-weight: 600; font-size: 0.95em; cursor: pointer; white-space: nowrap; scroll-snap-align: start; flex-shrink: 0;}
-        .menu-tab.active { color: var(--primary-color); border-bottom: 3px solid var(--primary-color); font-weight: bold; }
+        .inf-edit-area, .oss-edit-area { display: none !important; }
+        body[data-qualifica="Infermiere"] .inf-edit-area, body[data-role="admin"] .inf-edit-area { display: block !important; }
+        body[data-qualifica="OSS"] .oss-edit-area, body[data-role="admin"] .oss-edit-area { display: block !important; }
 
-        /* WORKSPACE & LAYOUT */
-        #appScreen { display: none; flex-direction: column; flex-grow: 1; height: 0; overflow: hidden; }
-        .main-content { padding: 10px; flex-grow: 1; overflow-y: auto; box-sizing: border-box; -webkit-overflow-scrolling: touch;}
+        .req-medico, .req-infermiere { display: none; }
+        body[data-qualifica="Medico"] .req-medico, body[data-qualifica="Direttore Sanitario"] .req-medico, body[data-role="admin"] .req-medico { display: block; }
+        body[data-qualifica="Infermiere"] .req-infermiere, body[data-role="admin"] .req-infermiere { display: block; }
+
+        .req-haccp { display: none !important; }
+        body[data-qualifica="Cuoca"] .req-haccp, 
+        body[data-qualifica="Cuoco"] .req-haccp, 
+        body[data-qualifica="Amministrazione"] .req-haccp, 
+        body[data-role="admin"] .req-haccp { display: flex !important; }
+
+        /* MODALI E LOGIN */
+        #signature-modal { display: none; position: fixed; top: 0; left: 0; width: 100vw; height: 100vh; background: rgba(15, 23, 42, 0.85); z-index: 30000; flex-direction: column; align-items: center; justify-content: center; backdrop-filter: blur(4px); }
+        .signature-box { background: white; padding: 20px; border-radius: 12px; width: 90%; max-width: 500px; box-shadow: 0 10px 30px rgba(0,0,0,0.3); text-align: center; display:flex; flex-direction:column; gap: 15px;}
+        #sig-canvas { border: 2px dashed var(--primary-color); border-radius: 6px; width: 100%; height: 220px; background: #f8fafc; cursor: crosshair; touch-action: none; }
+        .sig-controls { display: flex; justify-content: space-between; gap: 10px; }
+
+        #login-screen { position: fixed; top: 0; left: 0; width: 100vw; height: 100vh; background: var(--primary-color); display: flex; flex-direction: column; align-items: center; justify-content: center; z-index: 10000; color: white; }
+        .profiles-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(110px, 1fr)); gap: 15px; width: 90%; max-width: 800px; max-height: 50vh; overflow-y: auto; padding: 10px; }
+        .profile-card { background: rgba(255,255,255,0.1); border: 1px solid rgba(255,255,255,0.2); border-radius: 12px; padding: 15px 10px; text-align: center; cursor: pointer; transition: 0.2s; }
+        .profile-card:active { background: rgba(255,255,255,0.3); transform: scale(0.95); }
+        .profile-avatar { font-size: 2.5rem; margin-bottom: 5px; }
+        .profile-name { font-weight: bold; font-size: 1.1rem; }
+        .profile-role { font-size: 0.8rem; opacity: 0.9; }
         
-        .workspace { display: none; padding-bottom: 30px; }
+        #pin-pad-area { display: none; flex-direction: column; align-items: center; animation: slideUp 0.3s ease; }
+        .pin-display { font-size: 2.5rem; letter-spacing: 15px; margin: 15px 0; height: 50px; text-align: center; background: rgba(0,0,0,0.15); border-radius: 12px; width: 100%; min-width: 250px; display:flex; align-items:center; justify-content:center;}
+        .numpad { display: grid; grid-template-columns: repeat(3, 1fr); gap: 15px; }
+        .num-btn { width: 70px; height: 70px; border-radius: 50%; border: none; background: rgba(255,255,255,0.2); color: white; font-size: 1.8rem; display: flex; align-items: center; justify-content: center; cursor: pointer; box-shadow: 0 4px 6px rgba(0,0,0,0.1); }
+        .num-btn:active { background: rgba(255,255,255,0.4); transform: scale(0.9); }
+
+        #tablet-header { display: none; flex-shrink: 0; background: var(--box-bg); padding: 10px 15px; justify-content: space-between; align-items: center; box-shadow: 0 2px 10px rgba(0,0,0,0.05); z-index: 1000; border-bottom: 3px solid var(--primary-color); }
+        .header-btn { padding: 10px 18px; border-radius: 20px; font-weight: bold; font-size: 1em; cursor: pointer; border: none; display: flex; align-items: center; gap: 6px; box-shadow: 0 2px 4px rgba(0,0,0,0.1); transition: 0.2s; }
+        .header-btn:active { transform: scale(0.95); box-shadow: 0 1px 2px rgba(0,0,0,0.1); }
+        .btn-back { background: var(--primary-color); color: white; display: none; }
+        .btn-logout { background: #fee2e2; color: #b91c1c; border: 1px solid #fca5a5; }
+
+        #home-menu { display: none; padding: 15px; grid-template-columns: repeat(auto-fill, minmax(200px, 1fr)); gap: 15px; max-width: 1400px; margin: 0 auto; width: 100%; overflow-y: auto; height: 100%; align-content: start; flex-grow: 1; }
+        .module-btn { display: flex; flex-direction: column; align-items: center; justify-content: center; padding: 20px 15px; border-radius: 12px; font-size: 1.1em; font-weight: bold; color: white; border: none; box-shadow: 0 4px 10px rgba(0,0,0,0.1); cursor: pointer; transition: 0.2s; text-align: center; gap: 8px; }
+        .module-btn:active { transform: scale(0.96); box-shadow: 0 2px 5px rgba(0,0,0,0.1); }
+        .module-icon { font-size: 2.2em; filter: drop-shadow(0 2px 4px rgba(0,0,0,0.2)); }
+
+        .haccp-card { background: #ffffff; border-radius: 10px; border: 1px solid #e2e8f0; padding: 15px 10px; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 8px; box-shadow: 0 2px 6px rgba(0,0,0,0.04); cursor: pointer; font-weight: bold; color: var(--text-main); font-size: 1.1em; transition: 0.2s; text-align: center; }
+        .haccp-card:active { transform: scale(0.96); box-shadow: 0 1px 2px rgba(0,0,0,0.1); background: #f8fafc; }
+        .haccp-icon { font-size: 2em; }
+
+        #appScreen { display: none; flex-direction: row; flex-grow: 1; overflow: hidden; background: var(--bg-color); }
+        .sidebar { width: 260px; background: var(--box-bg); border-right: 1px solid var(--border-color); display: flex; flex-direction: column; overflow-y: auto; flex-shrink: 0; }
+        .sidebar-item { padding: 12px 10px; border-radius: 8px; cursor: pointer; margin: 5px 10px; display: flex; align-items: center; gap: 10px; transition: 0.2s; border: 2px solid transparent; font-size: 1.05em; background:#f8fafc;}
+        .sidebar-item:active { transform: scale(0.98); background: #e2e8f0; }
+        .sidebar-item.active { background: #e0f2fe; border-color: var(--primary-color); font-weight:bold; }
+        .sidebar-avatar { width: 35px; height: 35px; border-radius: 50%; object-fit: cover; background: #cbd5e1; display: flex; align-items: center; justify-content: center; font-size: 1.1em; }
+        
+        .main-content { padding: 15px; flex-grow: 1; overflow-y: auto; box-sizing: border-box; }
+        .workspace { display: none; }
         .workspace.active { display: block; animation: fadeIn 0.2s ease; }
 
-        /* CARDS & FORMS */
-        .card { background: var(--box-bg); padding: 15px; border-radius: var(--radius); border: 1px solid var(--border-color); margin-bottom: 15px; }
-        .card-header { margin-bottom: 15px; padding-bottom: 10px; border-bottom: 1px solid var(--border-color); }
-        .card-header h3 { margin: 0; font-size: 1.15em; display: flex; align-items: center; gap: 6px;}
+        .card { background: var(--box-bg); padding: 18px; border-radius: 12px; border: 1px solid var(--border-color); box-shadow: 0 2px 6px rgba(0,0,0,0.03); margin-bottom: 15px; }
+        .card-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 15px; border-bottom: 2px solid var(--primary-color); padding-bottom: 10px; flex-wrap: wrap; gap:10px;}
+        .card-header h3 { margin: 0; color: var(--primary-color); font-size: 1.2em; text-transform: uppercase; }
 
-        /* PULSANTI (Grandi per i tap) */
-        .btn-primary, .btn-success, .btn-danger, .btn-doc, .btn-outline { border: none; padding: 16px 20px; border-radius: var(--radius); font-weight: bold; font-size: 1.05em; cursor: pointer; text-align: center; width: 100%; box-sizing: border-box; touch-action: manipulation; }
-        .btn-primary { background: var(--secondary-color); color: white; }
-        .btn-success { background: var(--success-color); color: white; } 
-        .btn-outline { background: transparent; border: 2px solid var(--primary-color); color: var(--primary-color); }
-        .btn-primary:active, .btn-success:active, .btn-outline:active { transform: scale(0.97); opacity: 0.9; }
+        .btn-primary, .btn-success, .btn-danger, .btn-doc, .btn-outline { color: white; border: none; padding: 10px 16px; border-radius: 8px; font-weight: bold; cursor: pointer; font-size: 1rem; box-shadow: 0 2px 4px rgba(0,0,0,0.05); transition: 0.2s; display:inline-flex; align-items:center; justify-content:center; gap:8px;}
+        .btn-outline { background: transparent; border: 2px solid var(--primary-color); color: var(--primary-color); box-shadow: none; }
+        .btn-primary:active, .btn-success:active, .btn-danger:active, .btn-outline:active { transform: translateY(2px); box-shadow: none; }
+        .btn-primary { background: var(--secondary-color); } 
+        .btn-success { background: var(--success-color); } 
+        .btn-danger { background: var(--error-color); } 
+        .btn-doc { background: #475569; }
 
         .form-group { margin-bottom: 15px; }
-        .form-group label { display: block; margin-bottom: 6px; font-weight: 600; font-size: 0.9em; color: var(--text-light); }
-        input[type="text"], input[type="password"], input[type="number"], input[type="date"], select { width: 100%; padding: 15px; border: 1.5px solid var(--border-color); border-radius: 8px; box-sizing: border-box; background-color: var(--input-bg); color: var(--text-main); font-family: inherit; font-size: 1em; -webkit-appearance: none; margin: 0;}
-        input:focus, select:focus { border-color: var(--primary-color); outline: none; background-color: #f0fdfa; }
-
-        /* GRIGLIE RESPONSIVE PER TELEFONO */
-        .temp-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(130px, 1fr)); gap: 12px; margin-bottom: 20px;}
-        .check-grid { display: grid; grid-template-columns: 1fr; gap: 10px; margin-bottom: 20px; } 
-        .check-item { background: var(--bg-color); border: 1.5px solid var(--border-color); border-radius: 8px; padding: 16px; display: flex; align-items: center; gap: 12px; font-weight: 600; font-size: 1em; transition: 0.2s;}
-        .check-item.active { border-color: var(--primary-color); background: #f0fdfa; color: var(--secondary-color); }
-        .check-item input[type="checkbox"] { transform: scale(1.4); margin-right: 5px; accent-color: var(--primary-color); }
-
-        /* MODALE FIRMA ADATTATO A SCHERMO INTERO MOBILE */
-        #signatureModal { display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(15, 23, 42, 0.9); z-index: 10000; align-items: center; justify-content: center; padding: 15px; box-sizing: border-box; overscroll-behavior: none;}
-        .privacy-container { background: #ffffff; padding: 20px; border-radius: var(--radius); width: 100%; max-width: 400px; display: flex; flex-direction: column; gap: 15px;}
-        #signatureCanvas { border: 2px dashed #cbd5e1; border-radius: 8px; background: #f8fafc; width: 100%; height: 40vh; max-height: 250px; touch-action: none; }
-
-        /* TOAST NOTIFICHE */
-        #toast-container { position: fixed; bottom: 30px; left: 50%; transform: translateX(-50%); z-index: 20000; display: flex; flex-direction: column; gap: 10px; align-items: center; width: 90%; max-width: 400px;}
-        .toast { background: #334155; color: #fff; padding: 14px 20px; border-radius: 30px; font-weight: bold; opacity: 0; transition: opacity 0.3s; box-shadow: 0 4px 10px rgba(0,0,0,0.3); text-align: center; width: 100%; box-sizing: border-box;}
-        .toast.show { opacity: 1; }
+        .form-group label { display: block; margin-bottom: 5px; font-weight: bold; font-size: 0.95em; color: var(--text-light); }
+        input[type="text"], input[type="password"], input[type="number"], input[type="date"], input[type="time"], textarea, select { width: 100%; padding: 10px 12px; border: 1px solid #cbd5e1; border-radius: 6px; box-sizing: border-box; background-color: var(--input-bg); color: var(--text-main); font-family: inherit; font-size: 1rem; transition: 0.2s; }
+        input:focus, select:focus, textarea:focus { border-color: var(--primary-color); outline: none; background-color: #ffffff; box-shadow: 0 0 0 3px rgba(13, 148, 136, 0.15); }
         
-        .error-box { display: none; background: #fef2f2; border: 1.5px solid var(--error-color); padding: 12px; border-radius: 8px; margin-bottom: 15px; }
+        .metrics-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(180px, 1fr)); gap: 15px; margin-bottom: 20px; }
+        .metric-card { background: var(--box-bg); padding: 15px; border-radius: 12px; border: 1px solid var(--border-color); text-align: center; border-left: 5px solid var(--primary-color); box-shadow: 0 2px 5px rgba(0,0,0,0.03); }
+        .metric-card h2 { margin: 0; font-size: 2.2em; color: var(--primary-color); }
+        
+        .data-table { width: 100%; border-collapse: collapse; font-size: 0.95em; background: #ffffff; border-radius: 8px; overflow:hidden; }
+        .data-table th, .data-table td { border: 1px solid var(--border-color); padding: 10px; text-align: left; vertical-align: middle; }
+        .data-table th { background-color: var(--primary-color); color: white; font-weight: bold; text-transform: uppercase; font-size: 0.9em; }
+        .data-table tr:nth-child(even) { background-color: #f1f5f9; }
+        
+        .terapia-table { width: 100%; border-collapse: collapse; font-size: 0.95em; text-align:center; min-width: 900px; background: #ffffff;}
+        .terapia-table th, .terapia-table td { border: 1px solid #cbd5e1; padding: 5px; }
+        .terapia-table th { background: var(--terapia-color); color: white; padding: 10px 5px; font-weight: bold; }
+        .terapia-table tr:nth-child(even) td:not(.farmaco-col) { background-color: #f8fafc; }
+        .terapia-table td.farmaco-col { text-align:left; padding: 10px; min-width: 220px; background: #f0f9ff; position: sticky; left: 0; z-index: 2; border-right: 3px solid var(--terapia-color); }
+        
+        .clinical-header { display: flex; align-items: center; gap: 15px; background: #ffffff; border: 1px solid var(--border-color); border-left: 8px solid var(--primary-color); padding: 15px; margin-bottom: 20px; border-radius:10px; }
+        .clinical-header img { width: 65px; height: 65px; border-radius: 50%; object-fit: cover; border: 2px solid var(--border-color);}
+        .clinical-header h2 { margin: 0; color: var(--text-main); font-size: 1.8em; font-weight: 800; }
+
+        .alert-item { background: #fef2f2; border: 1px solid #fca5a5; border-left: 6px solid #ef4444; padding: 12px; margin-bottom: 10px; border-radius: 8px; color: #991b1b; font-size: 1em; font-weight:bold; display:flex; align-items:center; gap:10px;}
+        .alert-item.warning { background: #fffbeb; border-color: #fcd34d; border-left-color: #f59e0b; color: #b45309; }
+        
+        /* MARKER LESIONE TOUCH */
+        .body-marker { 
+            position: absolute; width: 22px; height: 22px; 
+            background-color: var(--error-color); 
+            border: 2px solid white; border-radius: 50%; 
+            transform: translate(-50%, -50%); cursor: pointer; z-index: 10; 
+            box-shadow: 0 2px 6px rgba(225,29,72,0.6);
+            display: flex; align-items: center; justify-content: center;
+            color: white; font-size: 11px; font-weight: bold;
+            user-select: none;
+        }
+
+        .check-grid { display: grid; grid-template-columns: 1fr; gap: 8px; margin-bottom: 15px; } 
+        .check-item { background: var(--bg-color); border: 1px solid var(--border-color); border-radius: 6px; padding: 12px; display: flex; align-items: center; gap: 10px; font-weight: 600; font-size: 1em; transition: 0.2s;}
+        .check-item.active { border-color: var(--primary-color); background: #f0fdfa; color: var(--secondary-color); }
+        .check-item input[type="checkbox"] { transform: scale(1.3); margin-right: 5px; accent-color: var(--primary-color); }
+
+        #toast-container { position: fixed; bottom: 30px; right: 30px; z-index: 40000; }
+        .toast { background: var(--text-main); color: #fff; padding: 14px 24px; border-radius: 8px; font-weight: bold; margin-top: 10px; opacity: 0; transition: opacity 0.3s; box-shadow: 0 4px 15px rgba(0,0,0,0.2); font-size: 1.1em;}
+        .toast.show { opacity: 1; }
     </style>
 </head>
 <body>
     <div id="toast-container"></div>
 
-    <!-- SCHERMATA LOGIN -->
-    <div id="loginScreen">
-        <div class="login-header-title">
-            <h1>VILLA SILVANA</h1>
-            <h2>HACCP & Sicurezza</h2>
-        </div>
-        <div class="login-box">
-            <h2 id="loginGreeting" style="color:var(--primary-color); margin-top:0; font-size: 1.4em;">Login Operatore</h2>
-            
-            <div id="loginProfilesContainer" class="profiles-grid">
-                <p style="color:var(--text-light); width:100%; grid-column: 1 / -1; font-size:0.9em;">Caricamento operatori in corso...</p>
+    <div id="signature-modal">
+        <div class="signature-box">
+            <h3 id="sig-title" style="margin:0; color:var(--primary-color); font-size:1.4em;">Apponi Firma Digitale</h3>
+            <p style="margin:0; color:var(--text-light); font-size:0.95em;">Azione: <strong id="sig-action-desc"></strong></p>
+            <canvas id="sig-canvas"></canvas>
+            <div class="sig-controls">
+                <button class="btn-doc" style="flex:1;" onclick="window.clearSignature()">🔄 Cancella</button>
+                <button class="btn-danger" style="flex:1;" onclick="window.cancelSignature()">❌ Annulla</button>
+                <button class="btn-success" style="flex:2;" onclick="window.confirmSignature()">✅ Conferma</button>
             </div>
-            
-            <div id="loginPinArea" style="display:none; animation: fadeIn 0.3s ease;">
-                <label id="selectedProfileLabel" style="display:block; text-align:center; font-size:1.1em; margin-bottom:15px; font-weight:bold; color:var(--primary-color);"></label>
-                <input type="password" id="loginPinInput" inputmode="numeric" placeholder="••••" style="text-align: center; font-size: 32px; letter-spacing: 15px; padding: 15px; border-radius: var(--radius);" readonly>
-                
-                <div class="pin-pad">
-                    <button class="pin-btn" onclick="addPin('1')">1</button><button class="pin-btn" onclick="addPin('2')">2</button><button class="pin-btn" onclick="addPin('3')">3</button>
-                    <button class="pin-btn" onclick="addPin('4')">4</button><button class="pin-btn" onclick="addPin('5')">5</button><button class="pin-btn" onclick="addPin('6')">6</button>
-                    <button class="pin-btn" onclick="addPin('7')">7</button><button class="pin-btn" onclick="addPin('8')">8</button><button class="pin-btn" onclick="addPin('9')">9</button>
-                    <button class="pin-btn action-canc" onclick="clearPin()">C</button><button class="pin-btn" onclick="addPin('0')">0</button><button class="pin-btn action-ok" onclick="checkPin()">OK</button>
+        </div>
+    </div>
+
+    <div id="login-screen">
+        <h1 style="font-size: 2.5rem; margin-bottom: 10px; letter-spacing: 2px; text-shadow: 0 2px 4px rgba(0,0,0,0.3);">NVS Mobile Ward</h1>
+        <p style="margin-top: 0; font-size: 1.2rem; color: #ccfbf1; margin-bottom: 30px;">Sistema Operativo Strutture Residenziali</p>
+        <div id="profiles-container" class="profiles-grid"><h2 style="grid-column: 1 / -1; font-weight:normal; font-size:1.2rem;">Caricamento profili in corso...</h2></div>
+        <div id="pin-pad-area">
+            <h2 id="pin-welcome" style="font-size: 1.8rem; margin-bottom: 15px;"></h2>
+            <div id="pin-display" class="pin-display"></div>
+            <div class="numpad">
+                <button class="num-btn" onclick="window.addPin('1')">1</button><button class="num-btn" onclick="window.addPin('2')">2</button><button class="num-btn" onclick="window.addPin('3')">3</button>
+                <button class="num-btn" onclick="window.addPin('4')">4</button><button class="num-btn" onclick="window.addPin('5')">5</button><button class="num-btn" onclick="window.addPin('6')">6</button>
+                <button class="num-btn" onclick="window.addPin('7')">7</button><button class="num-btn" onclick="window.addPin('8')">8</button><button class="num-btn" onclick="window.addPin('9')">9</button>
+                <button class="num-btn" style="background: rgba(225, 29, 72, 0.8);" onclick="window.resetPinLogin()">X</button><button class="num-btn" onclick="window.addPin('0')">0</button><button class="num-btn" style="background: rgba(5, 150, 105, 0.8);" onclick="window.submitPin()">OK</button>
+            </div>
+        </div>
+    </div>
+
+    <div id="tablet-header">
+        <div style="display:flex; align-items:center; gap:15px;">
+            <button id="backToHomeBtn" class="header-btn btn-back" onclick="window.goHome()">⬅️ Menu</button>
+            <div id="header-title" style="font-size:1.5em; font-weight:bold; color:var(--text-main);">Home Menu</div>
+        </div>
+        <div style="display:flex; gap:15px; align-items:center;">
+            <div style="background:#f1f5f9; padding:8px 15px; border-radius:20px; border:1px solid #cbd5e1; display:flex; align-items:center; gap:10px;">
+                <span style="font-size:1.4em;">🧑‍⚕️</span>
+                <div>
+                    <div id="currentOpBadge" style="font-size:1.1em; font-weight:bold; color:var(--primary-color);">Nome</div>
+                    <div id="currentOpRole" style="font-size:0.9em; color:var(--text-light);">Qualifica</div>
                 </div>
-                
-                <button class="btn-outline" style="margin-top: 20px; padding: 14px;" onclick="resetLoginSelection()">← Cambia Operatore</button>
             </div>
+            <button class="header-btn btn-logout" onclick="window.logout()">🚪 Esci</button>
         </div>
     </div>
 
-    <!-- NAVBAR E MENU APP -->
-    <div id="top-nav-container" style="display: none;">
-        <div class="navbar">
-            <div class="navbar-brand">NVS Mobile</div>
-            <div class="navbar-actions">
-                <span class="current-op-badge" id="currentOpBadge">👨‍🍳 Op</span>
-                <button class="nav-btn" onclick="logout()">Esci</button>
-            </div>
-        </div>
-        <!-- Menu scorrevole per mobile -->
-        <div class="app-menu">
-            <button class="menu-tab active" onclick="switchTab('merci', this)" style="color:var(--merci-color);">📦 Merci</button>
-            <button class="menu-tab" onclick="switchTab('tracc', this)" style="color:var(--tracc-color);">🔍 Tracciabilità</button>
-            <button class="menu-tab" onclick="switchTab('temp', this)" style="color:var(--temp-color);">🌡️ Temperature</button>
-            <button class="menu-tab" onclick="switchTab('aree', this)" style="color:var(--aree-color);">✨ Sanificazione</button>
-            <button class="menu-tab" onclick="switchTab('pulizie', this)" style="color:var(--pulizie-color);">🧹 Pulizie</button>
-            <button class="menu-tab" onclick="switchTab('pest', this)" style="color:var(--pest-color);">🪤 Pest Control</button>
-            <button class="menu-tab" onclick="switchTab('sicurezza', this)" style="color:var(--sicurezza-color);">🦺 Sicurezza</button>
-        </div>
+    <div id="home-menu">
+        <button class="module-btn" style="background: linear-gradient(135deg, #0d9488, #0f766e);" onclick="window.switchTab('dashboard', '🏠 Dashboard e Metriche')"><span class="module-icon">🏠</span>Dashboard</button>
+        <button class="module-btn" style="background: linear-gradient(135deg, #f43f5e, #be123c);" onclick="window.switchTab('vitali', '🩺 Parametri Vitali')"><span class="module-icon">🩺</span>Parametri Vitali</button>
+        <button class="module-btn" style="background: linear-gradient(135deg, #0284c7, #0369a1);" onclick="window.switchTab('clinica', '⚕️ Cartella Clinica Ospite')"><span class="module-icon">⚕️</span>Cartella Clinica</button>
+        <button class="module-btn" style="background: linear-gradient(135deg, #8b5cf6, #6d28d9);" onclick="window.switchTab('diari', '📝 Diari Medico e Infermieristico')"><span class="module-icon">📝</span>Diari Med / Inf</button>
+        <button class="module-btn req-haccp" style="background: linear-gradient(135deg, #14b8a6, #0d9488);" onclick="window.switchTab('haccp', '🛡️ HACCP & Sicurezza')"><span class="module-icon">🛡️</span>HACCP & Sicurezza</button>
+        <button class="module-btn restrict-oss" style="background: linear-gradient(135deg, #9f1239, #881337);" onclick="window.switchTab('stupefacenti', '🚨 Gestione Stupefacenti')"><span class="module-icon">🚨</span>Gestione Stupefacenti</button>
+        <button class="module-btn" style="background: linear-gradient(135deg, #2563eb, #1d4ed8);" onclick="window.switchTab('terapia', '💊 Terapia Standard')"><span class="module-icon">💊</span>Terapia Ord.</button>
+        <button class="module-btn" style="background: linear-gradient(135deg, #ea580c, #c2410c);" onclick="window.switchTab('consegne', '📖 Diario e Consegne')"><span class="module-icon">📖</span>Consegne Reparto</button>
+        <button class="module-btn restrict-oss" style="background: linear-gradient(135deg, #e11d48, #be123c);" onclick="window.switchTab('contenzioni', '🔒 Registro Contenzioni')"><span class="module-icon">🔒</span>Contenzioni</button>
+        <button class="module-btn restrict-oss" style="background: linear-gradient(135deg, #ca8a04, #a16207);" onclick="window.switchTab('rischio', '⚠️ Incident Reporting')"><span class="module-icon">⚠️</span>Rischio Clinico</button>
+        <button class="module-btn" style="background: linear-gradient(135deg, #d97706, #b45309);" onclick="window.switchTab('appuntamenti', '📅 Agenda e CUP')"><span class="module-icon">📅</span>Agenda CUP</button>
+        <button class="module-btn" style="background: linear-gradient(135deg, #059669, #047857);" onclick="window.switchTab('magazzino', '📦 Scorte Magazzino')"><span class="module-icon">📦</span>Magazzino</button>
     </div>
 
-    <!-- MAIN CONTENT -->
     <div id="appScreen">
+        <div class="sidebar" id="patientSidebar">
+            <div style="padding: 15px; border-bottom: 2px solid var(--border-color); background: white; position: sticky; top: 0; z-index: 2;">
+                <input type="text" id="sidebarSearch" placeholder="🔍 Cerca Ospite..." onkeyup="window.renderSidebarPatients()" style="width: 100%; border: 2px solid var(--border-color); border-radius: 8px; padding: 10px; font-size:1.05em;">
+            </div>
+            <div id="sidebarPatientList" style="padding: 10px; overflow-y: auto; flex: 1;"></div>
+        </div>
+
         <div class="main-content">
-            
-            <!-- 1. MERCI -->
-            <div id="ws-merci" class="workspace active">
-                <div class="card" style="border-top: 4px solid var(--merci-color);">
-                    <div class="card-header"><h3 style="color: var(--merci-color);">📦 Controllo Merci in Arrivo</h3></div>
-                    <div class="form-group"><label>Data Registrazione</label><input type="date" id="merciData"></div>
-                    <div class="form-group"><label>Fornitore</label><input type="text" id="merciFornitore" placeholder="Es. MARR..."></div>
-                    <div class="form-group"><label>Temperatura (°C) - Se applicabile</label><input type="number" id="merciTemp" step="0.1" inputmode="decimal"></div>
-                    <div class="form-group"><label>Stato Imballaggi</label><select id="merciImballaggi"><option value="Intatti">✅ Intatti</option><option value="Danneggiati">❌ Danneggiati</option></select></div>
-                    <div class="form-group"><label>Esito Controllo</label><select id="merciEsito"><option value="Merce Accettata">✅ Accettata</option><option value="Accettata con Riserva">⚠️ Riserva</option><option value="Merce Respinta">❌ Respinta</option></select></div>
-                    
-                    <div style="margin-top: 20px;"><button class="btn-primary" style="background-color: var(--merci-color);" onclick="requestSignature('merci')">✍️ Firma e Salva</button></div>
+
+            <!-- HACCP -->
+            <div id="ws-haccp" class="workspace">
+                <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); gap: 15px; padding: 5px; margin-bottom: 20px;">
+                    <div class="haccp-card" style="border-bottom-color: #d97706;" onclick="window.openHaccpSub('merci', '📦 Merci in Arrivo')"><span class="haccp-icon">📦</span><span>Merci in Arrivo</span></div>
+                    <div class="haccp-card" style="border-bottom-color: #14b8a6;" onclick="window.openHaccpSub('tracc', '🔍 Tracciabilità Lotti')"><span class="haccp-icon">🔍</span><span>Tracciabilità Lotti</span></div>
+                    <div class="haccp-card" style="border-bottom-color: #65a30d;" onclick="window.openHaccpSub('temp', '🌡️ Temperature')"><span class="haccp-icon">🌡️</span><span>Temperature Impianti</span></div>
+                    <div class="haccp-card" style="border-bottom-color: #0284c7;" onclick="window.openHaccpSub('aree', '✨ Sanificazione Aree')"><span class="haccp-icon">✨</span><span>Sanificazione Aree</span></div>
+                    <div class="haccp-card" style="border-bottom-color: #8b5cf6;" onclick="window.openHaccpSub('pulizie', '🧹 Pulizie Quotidiane')"><span class="haccp-icon">🧹</span><span>Pulizie Quotidiane</span></div>
+                    <div class="haccp-card" style="border-bottom-color: #ea580c;" onclick="window.openHaccpSub('pest', '🪤 Pest Control')"><span class="haccp-icon">🪤</span><span>Pest Control</span></div>
+                    <div class="haccp-card" style="border-bottom-color: #9333ea;" onclick="window.openHaccpSub('sicurezza', '🦺 Sicurezza 81/08')"><span class="haccp-icon">🦺</span><span>Sicurezza 81/08</span></div>
+                </div>
+                <div class="card" style="border-top: 4px solid var(--primary-color);">
+                    <div class="card-header"><h3>Stato Registrazioni HACCP (Oggi)</h3></div>
+                    <div style="display: flex; gap: 15px; flex-wrap: wrap;">
+                        <div style="flex: 1; min-width:120px; border: 1px solid var(--border-color); border-radius: 12px; padding: 15px; text-align: center; background:#f8fafc;"><span style="font-size:1.8em;">🌡️</span><br><strong style="font-size:1.05em; display:block; margin:5px 0;">Temperature</strong><span id="badge-haccp-temp" style="color:var(--error-color); font-weight:bold; font-size:1em;">🔴 Da fare</span></div>
+                        <div style="flex: 1; min-width:120px; border: 1px solid var(--border-color); border-radius: 12px; padding: 15px; text-align: center; background:#f8fafc;"><span style="font-size:1.8em;">✨</span><br><strong style="font-size:1.05em; display:block; margin:5px 0;">Sanificazione</strong><span id="badge-haccp-aree" style="color:var(--error-color); font-weight:bold; font-size:1em;">🔴 Da fare</span></div>
+                        <div style="flex: 1; min-width:120px; border: 1px solid var(--border-color); border-radius: 12px; padding: 15px; text-align: center; background:#f8fafc;"><span style="font-size:1.8em;">🧹</span><br><strong style="font-size:1.05em; display:block; margin:5px 0;">Pulizie</strong><span id="badge-haccp-pulizie" style="color:var(--error-color); font-weight:bold; font-size:1em;">🔴 Da fare</span></div>
+                    </div>
                 </div>
             </div>
 
-            <!-- 2. TRACCIABILITÀ -->
-            <div id="ws-tracc" class="workspace">
-                <div class="card" style="border-top: 4px solid var(--tracc-color);">
-                    <div class="card-header"><h3 style="color: var(--tracc-color);">🔍 Tracciabilità Lotti</h3></div>
-                    <div class="form-group"><label>Data di Utilizzo</label><input type="date" id="traccData"></div>
-                    <div class="form-group">
-                        <label>Categoria Prodotto</label>
-                        <select id="traccCat"><option value="Carne (Fresca/Surgelata)">🥩 Carne (Fresca/Surgelata)</option><option value="Pesce (Fresco/Surgelato)">🐟 Pesce (Fresco/Surgelato)</option><option value="Latticini e Formaggi">🧀 Latticini e Formaggi</option><option value="Altro">📦 Altro...</option></select>
+            <!-- SOTTOMODULI HACCP -->
+            <div id="ws-merci" class="workspace"><div class="card" style="border-top: 4px solid #d97706; max-width: 700px; margin: 0 auto;"><div class="form-group"><label>Data</label><input type="date" id="merciData"></div><div class="form-group"><label>Fornitore</label><input type="text" id="merciFornitore"></div><div class="form-group"><label>Temperatura (°C)</label><input type="number" id="merciTemp" step="0.1"></div><div class="form-group"><label>Imballaggi</label><select id="merciImballaggi"><option value="Intatti">✅ Intatti</option><option value="Danneggiati">❌ Danneggiati</option></select></div><div class="form-group"><label>Esito</label><select id="merciEsito"><option value="Accettata">✅ Accettata</option><option value="Respinta">❌ Respinta</option></select></div><button class="btn-primary" style="background:#d97706; width:100%;" onclick="window.saveHaccpMerci()">✍️ Firma e Salva</button></div></div>
+            <div id="ws-tracc" class="workspace"><div class="card" style="border-top: 4px solid #14b8a6; max-width: 700px; margin: 0 auto;"><div class="form-group"><label>Data</label><input type="date" id="traccData"></div><div class="form-group"><label>Categoria</label><select id="traccCat"><option value="Carne">Carne</option><option value="Pesce">Pesce</option><option value="Latticini">Latticini</option></select></div><div class="form-group" style="text-align:center;"><input type="file" accept="image/*" capture="environment" id="traccFile" style="display:none;" onchange="window.processFileUpload(event, 'haccpTracc')"><button class="btn-outline" style="width:100%;" onclick="document.getElementById('traccFile').click()">📷 Scatta Foto Lotto</button><div id="traccPreviewContainer" style="display:none; margin-top:10px;"><img id="traccImgPreview" style="max-height:150px; border-radius:6px;"></div></div><button class="btn-primary" style="background:#14b8a6; width:100%;" onclick="window.saveHaccpTracc()">✍️ Firma e Salva</button></div></div>
+            <div id="ws-temp" class="workspace"><div class="card" style="border-top: 4px solid #65a30d; max-width: 700px; margin: 0 auto;"><div class="form-group"><label>Data</label><input type="date" id="tempData"></div><div id="dynamic-temp-grid"></div><button class="btn-primary" style="background:#65a30d; width:100%;" onclick="window.saveHaccpTemp()">✍️ Firma e Salva</button></div></div>
+            <div id="ws-aree" class="workspace"><div class="card" style="border-top: 4px solid #0284c7; max-width: 700px; margin: 0 auto;"><div class="form-group"><label>Data</label><input type="date" id="areeData"></div><div class="check-grid" id="dynamic-aree-grid"></div><button class="btn-primary" style="background:#0284c7; width:100%;" onclick="window.saveHaccpAree()">✍️ Firma e Salva</button></div></div>
+            <div id="ws-pulizie" class="workspace"><div class="card" style="border-top: 4px solid #8b5cf6; max-width: 700px; margin: 0 auto;"><div class="form-group"><label>Data</label><input type="date" id="pulizieData"></div><div class="check-grid" id="dynamic-pulizie-grid"></div><button class="btn-primary" style="background:#8b5cf6; width:100%;" onclick="window.saveHaccpPulizie()">✍️ Firma e Salva</button></div></div>
+            <div id="ws-pest" class="workspace"><div class="card" style="border-top: 4px solid #ea580c; max-width: 700px; margin: 0 auto;"><div class="form-group"><label>Data</label><input type="date" id="pestDate"></div><div class="form-group"><label>Postazione</label><input type="text" id="pestName"></div><button class="btn-primary" style="background:#ea580c; width:100%;" onclick="window.saveHaccpPest()">Salva</button></div></div>
+            <div id="ws-sicurezza" class="workspace"><div class="card" style="border-top: 4px solid #9333ea; max-width: 700px; margin: 0 auto;"><div class="form-group"><label>Documento</label><input type="text" id="sicDocName"></div><div class="form-group"><label>Scadenza</label><input type="date" id="sicDocDate"></div><button class="btn-primary" style="background:#9333ea; width:100%;" onclick="window.saveHaccpSicurezza()">Salva</button></div></div>
+
+            <!-- DASHBOARD -->
+            <div id="ws-dashboard" class="workspace active">
+                <div class="metrics-grid">
+                    <div class="metric-card"><h2 id="dash-guests-count" style="margin-bottom:0;">0</h2><span id="dash-guests-detail" style="font-size:1.05em; color:var(--text-light);">0 Presenti | 0 Assenti</span><br><span style="margin-top:6px; display:inline-block; font-weight:bold; text-transform:uppercase;">Posti Letto Occupati</span></div>
+                    <div class="metric-card" style="border-left-color: var(--warning-color);"><h2 id="dash-app-count" style="color: var(--warning-color);">0</h2><span style="font-weight:bold; text-transform:uppercase;">Visite CUP</span></div>
+                    <div class="metric-card" style="border-left-color: var(--error-color);"><h2 id="dash-cont-count" style="color: var(--error-color);">0</h2><span style="font-weight:bold; text-transform:uppercase;">Contenzioni Attive</span></div>
+                </div>
+                <div style="display:flex; gap:20px; flex-wrap:wrap;">
+                    <div class="card" style="flex:2; min-width:300px; border-top:4px solid var(--warning-color);"><div class="card-header"><h3 style="color:var(--warning-color);">Alert Clinici & Scadenze</h3></div><div id="dashboardAlertsList"></div></div>
+                    <div class="card" style="flex:1; min-width:250px;"><div class="card-header"><h3>Agenda CUP</h3></div><div id="dashMiniCalendar"></div></div>
+                </div>
+            </div>
+
+            <!-- VITALI -->
+            <div id="ws-vitali" class="workspace">
+                <div class="card"><div class="form-group"><label>Seleziona Ospite</label><select id="vitaliGuestSelect" onchange="window.handlePatientSelect('vitaliGuestSelect')" style="font-weight:bold; border-color:var(--error-color);"><option value="" disabled selected>Scegli...</option></select></div></div>
+                <div id="vitaliContent" style="display:none;">
+                    <div class="clinical-header" id="vitaliHeader"></div>
+                    <div class="card" style="border-top: 5px solid #e11d48;">
+                        <div class="card-header"><h3 style="color:#e11d48;">🩺 Parametri Vitali</h3></div>
+                        <div class="restrict-oss" style="display:flex; gap:15px; flex-wrap:wrap; background:#fef2f2; padding:20px; border:2px solid #fecaca; border-radius:10px; margin-bottom:20px;">
+                            <div class="form-group" style="flex:1;"><label>P.A.</label><input type="text" id="rap-vitPA" placeholder="120/80"></div>
+                            <div class="form-group" style="flex:1;"><label>FC</label><input type="number" id="rap-vitFC"></div>
+                            <div class="form-group" style="flex:1;"><label>SpO2</label><input type="number" id="rap-vitSPO2"></div>
+                            <div class="form-group" style="flex:1;"><label>TC</label><input type="number" step="0.1" id="rap-vitTC"></div>
+                            <div style="display:flex; align-items:flex-end; width:100%; justify-content:flex-end;"><button class="btn-danger" onclick="window.addRapVitalsWithSignature()">✍️ Registra (Firma)</button></div>
+                        </div>
+                        <table class="data-table" id="rapVitalsTable"><thead><tr><th>Data/Ora</th><th>Op</th><th>P.A.</th><th>FC</th><th>SpO2</th><th>TC</th></tr></thead><tbody></tbody></table>
                     </div>
+                </div>
+            </div>
+
+            <!-- DIARI -->
+            <div id="ws-diari" class="workspace">
+                <div class="card"><div class="form-group"><label>Seleziona Ospite per Diari</label><select id="diariGuestSelect" onchange="window.handlePatientSelect('diariGuestSelect')" style="font-weight:bold; border-color:#8b5cf6;"><option value="" disabled selected>Scegli...</option></select></div></div>
+                <div id="diariContent" style="display:none;">
+                    <div class="clinical-header" id="diariHeader"></div>
+                    <div style="display:flex; gap:20px; flex-wrap:wrap;">
+                        <div style="flex:1; min-width:320px;">
+                            <div class="card req-medico" style="border-top: 5px solid #16a34a; margin-bottom:15px;">
+                                <div class="card-header"><h3 style="color:#16a34a;">👨‍⚕️ Nota Medica</h3></div>
+                                <button class="btn-success" style="width:100%; padding:15px; background:#16a34a;" onclick="window.toggleDiario('medico', true)">➕ Nuova Nota</button>
+                                <div id="box-nota-medica" style="display:none; background:#f0fdf4; padding:20px; border-radius:10px; border:2px solid #bbf7d0; margin-top:15px;">
+                                    <textarea id="notaMedicaText" rows="4" placeholder="Esame obiettivo..." style="width:100%;"></textarea>
+                                    <div style="display:flex; justify-content:flex-end; gap:10px; margin-top:10px;"><button class="btn-doc" onclick="window.toggleDiario('medico')">Annulla</button><button class="btn-success" onclick="window.addDiarioWithSignature('Medico')">✍️ Firma e Salva</button></div>
+                                </div>
+                            </div>
+                            <div class="card"><div class="card-header"><h3 style="color:#15803d;">Storico Medico</h3></div><div id="diariMediciList"></div></div>
+                        </div>
+                        <div style="flex:1; min-width:320px;">
+                            <div class="card req-infermiere" style="border-top: 5px solid #0284c7; margin-bottom:15px;">
+                                <div class="card-header"><h3 style="color:#0284c7;">💉 Nota Infermieristica</h3></div>
+                                <button class="btn-primary" style="width:100%; padding:15px; background:#0284c7;" onclick="window.toggleDiario('infermiere', true)">➕ Nuova Nota</button>
+                                <div id="box-nota-infermiere" style="display:none; background:#f0f9ff; padding:20px; border-radius:10px; border:2px solid #bae6fd; margin-top:15px;">
+                                    <textarea id="notaInfText" rows="4" placeholder="Decorso infermieristico..." style="width:100%;"></textarea>
+                                    <div style="display:flex; justify-content:flex-end; gap:10px; margin-top:10px;"><button class="btn-doc" onclick="window.toggleDiario('infermiere')">Annulla</button><button class="btn-primary" style="background:#0284c7;" onclick="window.addDiarioWithSignature('Infermiere')">✍️ Firma e Salva</button></div>
+                                </div>
+                            </div>
+                            <div class="card"><div class="card-header"><h3 style="color:#0369a1;">Storico Infermieristico</h3></div><div id="diariInfList"></div></div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- CARTELLA CLINICA & BINA & PRIVACY & MAPPATURA LESIONI AVANZATA -->
+            <div id="ws-clinica" class="workspace">
+                <div class="card"><div class="form-group"><label>Seleziona Fascicolo Ospite</label><select id="clinicalGuestSelect" onchange="window.handlePatientSelect('clinicalGuestSelect')" style="font-weight:bold; border-color:var(--primary-color);"><option value="" disabled selected>Scegli...</option></select></div></div>
+                <div id="clinicalContent" style="display:none;">
+                    <div class="clinical-header" id="clinicalHeader"></div>
                     
-                    <div class="form-group" style="background:#f8fafc; padding:15px; border:2px dashed var(--tracc-color); border-radius:var(--radius); text-align:center; margin-top:15px;">
-                        <input type="file" accept="image/*" capture="environment" id="traccFile" style="display:none;" onchange="previewTraccFoto(event)">
-                        <button class="btn-outline" style="border-color: var(--tracc-color); color: var(--tracc-color); background: #f0fdfa;" onclick="document.getElementById('traccFile').click()">📷 Scatta Foto Etichetta</button>
-                        <div id="traccPreviewContainer" style="display:none; margin-top: 15px;">
-                            <img id="traccImgPreview" style="max-width:100%; max-height: 200px; border-radius:8px; border:1px solid #cbd5e1;">
-                            <p style="color:var(--success-color); font-weight:bold; margin-bottom:0; font-size: 0.9em;">✅ Foto acquisita</p>
+                    <!-- BOX PRIVACY E CONSENSO INFORMATO CON FIRMA TOUCH IN LOCO -->
+                    <div class="card" style="border-left: 6px solid var(--success-color); background: #f8fafc;">
+                        <div class="card-header">
+                            <h3 style="color: var(--success-color);">✍️ Privacy & Consenso Informato (L. 219/2017)</h3>
+                        </div>
+                        <div id="privacyStatusVisualContainer" style="display:flex; flex-direction:column; gap:12px;">
+                            <div id="privacyTextStatus" style="font-size: 1.05em; font-weight: bold; color: var(--text-main);">
+                                ⏳ Stato: In attesa di firma in loco.
+                            </div>
+                            <div style="display:flex; gap:15px; flex-wrap:wrap; align-items:center; background:#fff; padding:15px; border:1px solid var(--border-color); border-radius:8px;">
+                                <div style="flex:1; min-width:220px;">
+                                    <p style="margin:0 0 8px 0; font-size:0.95em;"><strong>Firmatario:</strong> <span id="lblFirmatarioNome">-</span></p>
+                                    <p style="margin:0 0 8px 0; font-size:0.95em;"><strong>Data e Ora:</strong> <span id="lblFirmatarioData">-</span></p>
+                                    <ul style="margin:0; padding-left:18px; font-size:0.9em; color:var(--text-light);">
+                                        <li>Trattamento Dati Sanitari (GDPR)</li>
+                                        <li>Consenso Informato alle Prestazioni</li>
+                                        <li>Utilizzo Immagini interne</li>
+                                    </ul>
+                                </div>
+                                <div style="text-align:center; min-width:180px;">
+                                    <div style="font-size:0.85em; font-weight:bold; color:var(--text-light); margin-bottom:4px;">Anteprima Firma Acquisita:</div>
+                                    <div id="signaturePreviewBox" style="height:80px; width:160px; background:#f1f5f9; border:1px dashed #94a3b8; border-radius:6px; display:flex; align-items:center; justify-content:center; overflow:hidden; margin:0 auto;">
+                                        <span style="color:#94a3b8; font-size:0.8em;">Nessuna firma</span>
+                                    </div>
+                                </div>
+                            </div>
+                            <!-- TASTO FIRMA TOUCH: DISABILITATO AUTOMATICAMENTE SE GIÀ FIRMATO -->
+                            <button id="btnAvviaFirmaPrivacy" class="btn-success" style="width:100%; font-size:1.1em; padding:14px; margin-top:5px;" onclick="window.avviaFirmaPrivacyTablet()">
+                                ✍️ Avvia Acquisizione Firma (Touchscreen)
+                            </button>
                         </div>
                     </div>
 
-                    <div style="margin-top: 20px;"><button class="btn-primary" style="background-color: var(--tracc-color);" onclick="requestSignature('tracc')">✍️ Firma e Archivia</button></div>
-                </div>
-            </div>
+                    <details class="card restrict-oss" style="border-left: 5px solid var(--primary-color);">
+                        <summary style="font-size: 1.1em; font-weight: bold; color: var(--primary-color); cursor: pointer; outline: none; padding-bottom:10px;">📋 Dati Anagrafici Rapidi e Documenti</summary>
+                        <div style="margin-top: 15px; border-top: 2px solid var(--border-color); padding-top: 15px;">
+                            <div style="display:flex; gap:15px; flex-wrap:wrap;"><div class="form-group" style="flex:2;"><label>Nome</label><input type="text" id="editGuestName" readonly style="background:#f1f5f9;"></div><div class="form-group" style="flex:1;"><label>CF</label><input type="text" id="editGuestCF"></div><div class="form-group" style="flex:1;"><label>Stanza</label><input type="text" id="editGuestRoom"></div></div>
+                            <div style="display:flex; gap:15px; flex-wrap:wrap; background:#f8fafc; padding:15px; border:1px solid #cbd5e1; margin-bottom:20px; border-radius:10px;"><div class="form-group" style="flex:2;"><label>Ref</label><input type="text" id="editGuestRef"></div><div class="form-group" style="flex:1;"><label>Tel Ref</label><input type="text" id="editGuestRefTel"></div><div class="form-group" style="flex:2;"><label>MMG</label><input type="text" id="editGuestMMG"></div><div class="form-group" style="flex:1;"><label>Scadenza AdS/Tutore</label><input type="date" id="editGuestTutoreScadenza"></div></div>
+                            <button class="btn-primary" style="width:100%;" onclick="window.updateGuestData()">💾 Salva Modifiche Anagrafiche</button>
+                        </div>
+                    </details>
+                    
+                    <!-- SEZIONE CHECK-IN & MAPPATURA LESIONI DA DECUBITO AVANZATA -->
+                    <div class="card" style="border-top: 5px solid var(--error-color);">
+                        <div class="card-header">
+                            <h3 style="color:var(--error-color);">🩺 Check-in e Mappatura Lesioni da Decubito</h3>
+                        </div>
 
-            <!-- 3. TEMPERATURE -->
-            <div id="ws-temp" class="workspace">
-                <div class="card" style="border-top: 4px solid var(--temp-color);">
-                    <div class="card-header">
-                        <h3 style="color: var(--temp-color);">🌡️ Temperature Impianti</h3>
+                        <div class="form-group">
+                            <label>Condizioni Generali all'Ingresso / Visita</label>
+                            <textarea id="chkGen" class="restrict-oss-input" rows="2" placeholder="Stato nutrizionale, idratazione, cute, reattività..."></textarea>
+                        </div>
+
+                        <div class="form-group">
+                            <label>Descrizione Clinica Piaghe / Lesioni</label>
+                            <textarea id="chkPiaghe" class="restrict-oss-input" rows="2" placeholder="Specificare medicazioni in corso, stadio, essudato..."></textarea>
+                        </div>
+
+                        <!-- MODELLINO ANATOMICO UMANO TOUCH (FRONTE E RETRO) -->
+                        <div class="form-group restrict-oss" style="background:#f8fafc; border:1px solid var(--border-color); padding:15px; border-radius:10px;">
+                            <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:8px;">
+                                <label style="font-weight:bold; color:var(--text-main); margin:0;">
+                                    📍 Modellino Anatomico (Tocca per puntare le lesioni da decubito):
+                                </label>
+                                <button type="button" class="btn-doc" style="padding:4px 12px; font-size:0.85em;" onclick="window.clearBodyMarkers()">🗑️ Cancella Punti</button>
+                            </div>
+                            <small style="color:var(--text-light); display:block; margin-bottom:12px;">
+                                I cerchietti tratteggiati indicano le zone ad alto rischio decubito (Occipite, Scapole, Gomiti, Sacro, Trocantere, Ischio, Malleoli, Talloni). Tocca un punto rosso per rimuoverlo.
+                            </small>
+                            
+                            <div id="bodyMapWrapper" style="position:relative; width: 100%; max-width: 440px; margin: 0 auto; border: 2px solid #cbd5e1; background: #ffffff; border-radius:10px; overflow:hidden; box-shadow: 0 2px 8px rgba(0,0,0,0.05);" onclick="window.handleBodyMapClick(event)">
+                                <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 400 300" id="bodyMapSvg" style="width:100%; height:auto; display:block; cursor:crosshair; pointer-events:none;">
+                                    <!-- SAGOMA FRONTE -->
+                                    <g id="figura-fronte">
+                                        <text x="100" y="24" text-anchor="middle" font-size="13" font-weight="bold" fill="#0d9488">FRONTE</text>
+                                        <ellipse cx="100" cy="50" rx="20" ry="24" fill="#f1f5f9" stroke="#64748b" stroke-width="2"/>
+                                        <rect x="94" y="73" width="12" height="12" fill="#f1f5f9" stroke="#64748b" stroke-width="2"/>
+                                        <path d="M 68 85 Q 100 80 132 85 L 126 160 Q 100 165 74 160 Z" fill="#f1f5f9" stroke="#64748b" stroke-width="2"/>
+                                        <path d="M 68 85 L 50 145 L 44 195 L 36 195 L 42 142 L 64 88 Z" fill="#f1f5f9" stroke="#64748b" stroke-width="2"/>
+                                        <path d="M 132 85 L 150 145 L 156 195 L 164 195 L 158 142 L 136 88 Z" fill="#f1f5f9" stroke="#64748b" stroke-width="2"/>
+                                        <path d="M 74 160 L 70 230 L 68 280 L 82 280 L 88 230 L 96 163 Z" fill="#f1f5f9" stroke="#64748b" stroke-width="2"/>
+                                        <path d="M 126 160 L 130 230 L 132 280 L 118 280 L 112 230 L 104 163 Z" fill="#f1f5f9" stroke="#64748b" stroke-width="2"/>
+                                        
+                                        <!-- Punti caldi FRONTE -->
+                                        <circle cx="100" cy="98" r="8" fill="none" stroke="#f43f5e" stroke-dasharray="2,2" stroke-width="1.5" />
+                                        <circle cx="50" cy="145" r="7" fill="none" stroke="#f43f5e" stroke-dasharray="2,2" stroke-width="1.5" />
+                                        <circle cx="150" cy="145" r="7" fill="none" stroke="#f43f5e" stroke-dasharray="2,2" stroke-width="1.5" />
+                                        <circle cx="79" cy="225" r="9" fill="none" stroke="#f43f5e" stroke-dasharray="2,2" stroke-width="1.5" />
+                                        <circle cx="121" cy="225" r="9" fill="none" stroke="#f43f5e" stroke-dasharray="2,2" stroke-width="1.5" />
+                                        <circle cx="75" cy="275" r="7" fill="none" stroke="#f43f5e" stroke-dasharray="2,2" stroke-width="1.5" />
+                                        <circle cx="125" cy="275" r="7" fill="none" stroke="#f43f5e" stroke-dasharray="2,2" stroke-width="1.5" />
+                                    </g>
+
+                                    <!-- SAGOMA RETRO -->
+                                    <g id="figura-retro" transform="translate(195, 0)">
+                                        <text x="100" y="24" text-anchor="middle" font-size="13" font-weight="bold" fill="#0d9488">RETRO</text>
+                                        <ellipse cx="100" cy="50" rx="20" ry="24" fill="#e2e8f0" stroke="#64748b" stroke-width="2"/>
+                                        <rect x="94" y="73" width="12" height="12" fill="#e2e8f0" stroke="#64748b" stroke-width="2"/>
+                                        <path d="M 68 85 Q 100 80 132 85 L 126 160 Q 100 168 74 160 Z" fill="#e2e8f0" stroke="#64748b" stroke-width="2"/>
+                                        <line x1="100" y1="85" x2="100" y2="155" stroke="#94a3b8" stroke-width="1.5" stroke-dasharray="3,3"/>
+                                        <path d="M 68 85 L 50 145 L 44 195 L 36 195 L 42 142 L 64 88 Z" fill="#e2e8f0" stroke="#64748b" stroke-width="2"/>
+                                        <path d="M 132 85 L 150 145 L 156 195 L 164 195 L 158 142 L 136 88 Z" fill="#e2e8f0" stroke="#64748b" stroke-width="2"/>
+                                        <path d="M 74 160 L 70 230 L 68 280 L 82 280 L 88 230 L 96 163 Z" fill="#e2e8f0" stroke="#64748b" stroke-width="2"/>
+                                        <path d="M 126 160 L 130 230 L 132 280 L 118 280 L 112 230 L 104 163 Z" fill="#e2e8f0" stroke="#64748b" stroke-width="2"/>
+                                        
+                                        <!-- Punti caldi RETRO -->
+                                        <circle cx="100" cy="52" r="9" fill="none" stroke="#e11d48" stroke-dasharray="2,2" stroke-width="1.5" />
+                                        <circle cx="82" cy="100" r="8" fill="none" stroke="#e11d48" stroke-dasharray="2,2" stroke-width="1.5" />
+                                        <circle cx="118" cy="100" r="8" fill="none" stroke="#e11d48" stroke-dasharray="2,2" stroke-width="1.5" />
+                                        <circle cx="48" cy="144" r="8" fill="none" stroke="#e11d48" stroke-dasharray="2,2" stroke-width="1.5" />
+                                        <circle cx="152" cy="144" r="8" fill="none" stroke="#e11d48" stroke-dasharray="2,2" stroke-width="1.5" />
+                                        <circle cx="100" cy="148" r="10" fill="none" stroke="#e11d48" stroke-dasharray="2,2" stroke-width="2" />
+                                        <circle cx="68" cy="158" r="8" fill="none" stroke="#e11d48" stroke-dasharray="2,2" stroke-width="1.5" />
+                                        <circle cx="132" cy="158" r="8" fill="none" stroke="#e11d48" stroke-dasharray="2,2" stroke-width="1.5" />
+                                        <circle cx="85" cy="162" r="8" fill="none" stroke="#e11d48" stroke-dasharray="2,2" stroke-width="1.5" />
+                                        <circle cx="115" cy="162" r="8" fill="none" stroke="#e11d48" stroke-dasharray="2,2" stroke-width="1.5" />
+                                        <circle cx="75" cy="278" r="8" fill="none" stroke="#e11d48" stroke-dasharray="2,2" stroke-width="2" />
+                                        <circle cx="125" cy="278" r="8" fill="none" stroke="#e11d48" stroke-dasharray="2,2" stroke-width="2" />
+                                    </g>
+                                </svg>
+                                <div id="bodyMarkersLayer" style="position:absolute; top:0; left:0; width:100%; height:100%;"></div>
+                            </div>
+                        </div>
+
+                        <!-- FOTOCAMERA E GALLERIA FOTOGRAFICA LESIONI -->
+                        <div class="form-group restrict-oss" style="background:#fff; border:1px solid #cbd5e1; border-radius:10px; padding:15px; margin-top:15px;">
+                            <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:10px; flex-wrap:wrap; gap:8px;">
+                                <strong style="color:var(--primary-color); font-size:1.05em;">📸 Documentazione Fotografica Lesioni con Anteprime</strong>
+                                <span style="font-size:0.85em; color:var(--text-light);">Acquisisci con fotocamera touch</span>
+                            </div>
+
+                            <div style="display:flex; gap:10px; flex-wrap:wrap; align-items:flex-end; background:#f8fafc; padding:12px; border-radius:8px; border:1px dashed #cbd5e1;">
+                                <div style="flex:2; min-width:200px;">
+                                    <label style="font-size:0.85em; font-weight:bold;">Sede / Stadio Lesione (opzionale):</label>
+                                    <input type="text" id="lesioneDescInput" placeholder="Es. Sacro - Stadio II, medicazione idrocolloide" style="background:#fff;">
+                                </div>
+                                <div style="display:flex; gap:8px; flex:1; min-width:200px;">
+                                    <label class="btn-danger" style="flex:1; cursor:pointer; margin:0; text-align:center; padding:10px;">
+                                        📷 Scatta Foto
+                                        <input type="file" accept="image/*" capture="environment" id="cameraLesioneInput" style="display:none;" onchange="window.handleLesionePhotoUpload(event)">
+                                    </label>
+                                    <label class="btn-doc" style="flex:1; cursor:pointer; margin:0; text-align:center; padding:10px;">
+                                        📁 Sfoglia
+                                        <input type="file" accept="image/*" style="display:none;" onchange="window.handleLesionePhotoUpload(event)">
+                                    </label>
+                                </div>
+                            </div>
+
+                            <!-- ANTEPRIME FOTO LESIONI -->
+                            <div id="lesioniPhotoGrid" style="display:grid; grid-template-columns:repeat(auto-fill, minmax(130px, 1fr)); gap:12px; margin-top:15px;"></div>
+                        </div>
+
+                        <button class="btn-success" style="width:100%; font-size:1.1em; padding:14px; margin-top:10px;" onclick="window.saveClinicalDataWithSignature('Check-in e Lesioni')">
+                            ✍️ Salva Check-in, Mappa e Foto Lesioni (Firma)
+                        </button>
                     </div>
-                    <div class="form-group"><label>Data Registrazione</label><input type="date" id="tempData"></div>
                     
-                    <button class="btn-outline" onclick="autoFillTemp()" style="margin-bottom: 15px; border-color: var(--text-light); color: var(--text-main);">✨ Compila a Norma (Auto)</button>
-
-                    <div class="temp-grid" id="dynamic-temp-grid"></div>
-                    
-                    <div id="tempAlert" class="error-box">
-                        <label style="color:var(--error-color); margin-bottom: 5px;">⚠️ Azione Correttiva (obbligatoria):</label>
-                        <input type="text" id="tAction" placeholder="Es. Chiamata tecnico...">
+                    <div class="card" style="border-top: 4px solid var(--primary-color);">
+                        <div class="card-header"><h3 style="color:var(--primary-color);">🏛️ Scheda B.I.N.A.</h3><button class="btn-primary" onclick="window.calcolaBINA()">📊 Calcola</button></div>
+                        <div style="display:grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap:15px; background:#f8fafc; padding:15px; border:1px solid var(--border-color); border-radius:10px; margin-bottom:15px;">
+                            <div class="form-group"><label>1. Non Autosufficienza (0-10)</label><input type="number" id="binaAuto" min="0" max="10" step="0.5" class="restrict-oss-input"></div>
+                            <div class="form-group"><label>2. Stato Sanitario (0-10)</label><input type="number" id="binaSanita" min="0" max="10" step="0.5" class="restrict-oss-input"></div>
+                            <div class="form-group"><label>3. Stato Psichico (0-10)</label><input type="number" id="binaPsiche" min="0" max="10" step="0.5" class="restrict-oss-input"></div>
+                            <div class="form-group"><label>4. Socio-Relazionale (0-10)</label><input type="number" id="binaSociale" min="0" max="10" step="0.5" class="restrict-oss-input"></div>
+                        </div>
+                        <div style="display:flex; justify-content:space-between; align-items:center; background:#e0f2fe; padding:15px; border-radius:10px;">
+                            <div><strong>Punteggio:</strong> <span id="binaScoreBadge" style="font-size:1.5em; font-weight:bold; color:var(--primary-color);">- / 40</span><div id="binaClasseBadge" style="font-size:1em; color:#0369a1;">Classe: Da calcolare</div></div>
+                            <button class="btn-success restrict-oss" onclick="window.saveClinicalDataWithSignature('Scheda BINA')">✍️ Salva BINA (Firma)</button>
+                        </div>
                     </div>
-                    
-                    <div style="margin-top: 20px;"><button class="btn-primary" style="background-color: var(--temp-color);" onclick="requestSignature('temp')">✍️ Firma e Salva</button></div>
                 </div>
             </div>
 
-            <!-- 4. SANIFICAZIONE AREE -->
-            <div id="ws-aree" class="workspace">
-                <div class="card" style="border-top: 4px solid var(--aree-color);">
-                    <div class="card-header"><h3 style="color: var(--aree-color);">✨ Sanificazione Aree</h3></div>
-                    <div class="form-group"><label>Data Intervento</label><input type="date" id="areeData"></div>
-                    
-                    <label style="display:block; margin-bottom:10px; font-weight:bold; color:var(--text-light);">Aree Sanificate:</label>
-                    <div class="check-grid" id="dynamic-aree-grid"></div>
-                    
-                    <div class="form-group"><label>Note Aggiuntive</label><input type="text" id="areeNote" placeholder="Eventuali anomalie..."></div>
-                    
-                    <div style="margin-top: 20px;"><button class="btn-primary" style="background-color: var(--aree-color);" onclick="requestSignature('aree')">✍️ Firma e Salva</button></div>
-                </div>
-            </div>
-
-            <!-- 5. PULIZIE -->
-            <div id="ws-pulizie" class="workspace">
-                <div class="card" style="border-top: 4px solid var(--pulizie-color);">
-                    <div class="card-header">
-                        <h3 style="color: var(--pulizie-color);">🧹 Pulizie (Mod. 05)</h3>
+            <!-- TERAPIA -->
+            <div id="ws-terapia" class="workspace">
+                <div class="card"><div class="form-group"><label>Seleziona Ospite</label><select id="terapiaGuestSelect" onchange="window.handlePatientSelect('terapiaGuestSelect')" style="font-weight:bold; border-color:var(--terapia-color);"><option value="" disabled selected>Scegli...</option></select></div></div>
+                <div id="terapiaContent" style="display:none;">
+                    <div class="clinical-header" id="terapiaHeader"></div>
+                    <div class="card" style="padding: 20px;">
+                        <div class="card-header"><h3 style="color:var(--terapia-color);">Prospetto Terapia Ordinaria</h3></div>
+                        <div class="only-medico" style="display:flex; gap:15px; margin:20px 0; flex-wrap:wrap; background:#f0f9ff; padding:20px; border:1px solid #bae6fd; border-radius:10px;">
+                            <div style="flex:2; min-width:200px;"><label>Farmaco</label><input type="text" id="terapiaFarmaco" list="listaFarmaciAifa"><datalist id="listaFarmaciAifa"></datalist></div>
+                            <div style="flex:1; min-width:140px;"><label>Posologia</label><input type="text" id="terapiaPosologia"></div>
+                            <div style="flex:1.5; min-width:150px;"><label>Orario</label><select id="terapiaOrario" style="width:100%;"><option value="08:00">08:00 (Mattina)</option><option value="12:00">12:00 (Pranzo)</option><option value="18:00">18:00 (Sera)</option><option value="20:00">20:00 (Cena)</option></select></div>
+                            <div style="display:flex; align-items:flex-end; width:100%; justify-content:flex-end;"><button class="btn-primary" style="background:var(--terapia-color);" onclick="window.addTerapiaItemWithSignature()">✍️ Prescrivi (Firma)</button></div>
+                        </div>
+                        <div style="overflow-x:auto;"><table class="terapia-table" id="terapiaGridTable"><thead><tr id="terapiaGridHead"></tr></thead><tbody></tbody></table></div>
                     </div>
-                    <div class="form-group"><label>Data Esecuzione</label><input type="date" id="pulizieData"></div>
-                    
-                    <button class="btn-outline" onclick="selectAllTasks()" style="margin-bottom: 15px; border-color: var(--pulizie-color); color: var(--pulizie-color);">✅ Seleziona Tutte</button>
-
-                    <label style="display:block; margin-bottom:10px; font-weight:bold; color:var(--text-light);">Operazioni Eseguite:</label>
-                    <div class="check-grid" id="dynamic-pulizie-grid"></div>
-                    
-                    <div class="form-group"><label>Note / Anomalie</label><input type="text" id="pulizieNote" placeholder="Inserisci dettagli se necessario..."></div>
-                    
-                    <div style="margin-top: 20px;"><button class="btn-primary" style="background-color: var(--pulizie-color);" onclick="requestSignature('pulizie')">✍️ Firma e Salva</button></div>
                 </div>
             </div>
 
-            <!-- 6. PEST CONTROL -->
-            <div id="ws-pest" class="workspace">
-                <div class="card" style="border-top: 4px solid var(--pest-color);">
-                    <div class="card-header"><h3 style="color: var(--pest-color);">🪤 Pest Control</h3></div>
-                    <div class="form-group"><label>Data Controllo</label><input type="date" id="pestDate"></div>
-                    <div class="form-group"><label>Postazione (Es. Esterno 1)</label><input type="text" id="pestName" placeholder="Nome postazione"></div>
-                    <div class="form-group"><label>Target</label><select id="pestType"><option value="Roditori">🐀 Roditori</option><option value="Insetti Striscianti">🪳 Insetti Striscianti</option><option value="Insetti Volanti">🪰 Insetti Volanti</option></select></div>
-                    <div class="form-group"><label>Esito</label><select id="pestResult"><option value="Regolare (Intatta)">✅ Regolare</option><option value="Esca Consumata">⚠️ Esca Consumata</option><option value="Cattura">❌ Cattura Rilevata</option><option value="Danneggiata">❌ Danneggiata</option></select></div>
-                    
-                    <div style="margin-top: 20px;"><button class="btn-primary" style="background-color: var(--pest-color);" onclick="savePestControl()">💾 Salva Controllo</button></div>
+            <!-- STUPEFACENTI -->
+            <div id="ws-stupefacenti" class="workspace">
+                <div class="card" style="border-top: 5px solid #ef4444;"><div class="card-header"><h3 style="color:#ef4444;">Armadio Stupefacenti (DPR 309/90)</h3></div><table class="data-table" id="narcoticInvTable"><thead><tr><th>Farmaco</th><th>Stato</th><th>Qta</th><th>Barcode</th></tr></thead><tbody></tbody></table></div>
+            </div>
+
+            <!-- CONTENZIONI -->
+            <div id="ws-contenzioni" class="workspace">
+                <div class="card restrict-oss" style="border-left: 8px solid var(--error-color);">
+                    <div class="card-header"><h3 style="color:var(--error-color);">🔒 Prescrizione Contenzioni</h3></div>
+                    <div style="display:flex; gap:20px; flex-wrap:wrap; background:#fef2f2; border:2px solid #fca5a5; padding:25px; border-radius:12px; margin-bottom:25px;">
+                        <div class="form-group" style="flex:1.5;"><label>Ospite</label><select id="contOspite"><option value="" disabled selected>Scegli...</option></select></div>
+                        <div class="form-group" style="flex:1;"><label>Presidio</label><select id="contTipo"><option value="Spondine letto">Spondine a letto</option><option value="Cintura pelvica">Cintura pelvica</option></select></div>
+                        <div class="form-group" style="flex:3;"><label>Motivazione</label><input type="text" id="contMotivo" placeholder="Rischio caduta grave"></div>
+                        <div style="display:flex; align-items:flex-end; width:100%; justify-content:flex-end;"><button class="btn-danger" onclick="window.addContenzioneWithSignature()">✍️ Prescrivi (Firma)</button></div>
+                    </div>
+                </div>
+                <div class="card"><div class="card-header"><h3>Registro Contenzioni</h3></div><table class="data-table" id="contenzioniTable"><thead><tr><th>Ospite</th><th>Tipo</th><th>Inizio</th><th>Motivo</th><th>Firme</th><th>Stato</th></tr></thead><tbody></tbody></table></div>
+            </div>
+
+            <!-- CONSEGNE -->
+            <div id="ws-consegne" class="workspace">
+                <div class="card" style="border-top: 6px solid #4f46e5;">
+                    <div class="card-header"><h3 style="color:#4f46e5;">📖 Consegne Reparto</h3></div>
+                    <div style="display:flex; gap:20px; flex-wrap:wrap; margin-bottom:20px;">
+                        <button class="btn-primary inf-edit-area" style="flex:1;" onclick="window.toggleConsegna('inf')">💉 Nuova Consegna Inf.</button>
+                        <button class="btn-success oss-edit-area" style="flex:1;" onclick="window.toggleConsegna('oss')">🦺 Nuova Consegna OSS</button>
+                    </div>
+                    <div id="box-consegna-inf" style="display:none; background:#f0f9ff; padding:20px; border-radius:10px; margin-bottom:20px;"><textarea id="newConsegnaInfText" rows="4" style="width:100%;"></textarea><button class="btn-primary" style="margin-top:10px;" onclick="window.addConsegnaWithSignature('inf')">✍️ Pubblica (Firma)</button></div>
+                    <div id="box-consegna-oss" style="display:none; background:#fffbeb; padding:20px; border-radius:10px; margin-bottom:20px;"><textarea id="newConsegnaOssText" rows="4" style="width:100%;"></textarea><button class="btn-success" style="margin-top:10px;" onclick="window.addConsegnaWithSignature('oss')">✍️ Pubblica (Firma)</button></div>
+                    <div style="display:flex; gap:25px; flex-wrap:wrap;"><div style="flex:1;"><h3>Bacheca Infermieri</h3><div id="consegneInfList"></div></div><div style="flex:1;"><h3>Bacheca OSS</h3><div id="consegneOssList"></div></div></div>
                 </div>
             </div>
 
-            <!-- 7. SICUREZZA 81/08 -->
-            <div id="ws-sicurezza" class="workspace">
-                <div class="card" style="border-top: 4px solid var(--sicurezza-color);">
-                    <div class="card-header"><h3 style="color: var(--sicurezza-color);">🦺 Sicurezza (81/08)</h3></div>
-                    <div class="form-group"><label>Nome Documento / Intervento</label><input type="text" id="sicDocName" placeholder="Es. Estintori..."></div>
-                    <div class="form-group"><label>Categoria</label><select id="sicDocCat"><option value="Documentale Base">📄 Documentale Base</option><option value="Formazione Personale">👥 Formazione</option><option value="Impianti e Struttura">🏢 Impianti</option><option value="Sanitario">⚕️ Sanitario</option></select></div>
-                    <div class="form-group"><label>Data Scadenza</label><input type="date" id="sicDocDate"></div>
-                    
-                    <div style="margin-top: 20px;"><button class="btn-primary" style="background-color: var(--sicurezza-color);" onclick="saveSicurezza()">💾 Registra Scadenza</button></div>
+            <!-- RISCHIO CLINICO -->
+            <div id="ws-rischio" class="workspace">
+                <div class="card restrict-oss" style="border-left: 8px solid var(--error-color);">
+                    <div class="card-header"><h3 style="color:var(--error-color);">⚠️ Incident Reporting</h3></div>
+                    <div style="display:flex; gap:15px; flex-wrap:wrap; background:#fef2f2; padding:20px; border-radius:10px; margin-bottom:20px;">
+                        <div class="form-group" style="flex:1.5;"><label>Ospite</label><select id="newRischioOspite"><option value="" disabled selected>Scegli...</option></select></div>
+                        <div class="form-group" style="flex:1;"><label>Data</label><input type="date" id="newRischioData"></div>
+                        <div class="form-group" style="flex:1.5;"><label>Tipo</label><select id="newRischioTipo"><option value="Caduta">Caduta</option><option value="Lesione">Lesione</option><option value="Altro">Altro</option></select></div>
+                        <div class="form-group" style="flex:3;"><label>Dinamica</label><input type="text" id="newRischioDinamica"></div>
+                        <div style="display:flex; align-items:flex-end; width:100%; justify-content:flex-end;"><button class="btn-danger" onclick="window.addEventoRischioWithSignature()">✍️ Segnala (Firma)</button></div>
+                    </div>
+                </div>
+                <div class="card"><div class="card-header"><h3>Archivio Eventi</h3></div><table class="data-table" id="rischioTable"><thead><tr><th>Data</th><th>Ospite</th><th>Tipo</th><th>Dinamica</th></tr></thead><tbody></tbody></table></div>
+            </div>
+
+            <!-- CUP -->
+            <div id="ws-appuntamenti" class="workspace">
+                <div class="card restrict-oss"><div class="card-header"><h3>📅 Agenda CUP</h3></div><div style="display:flex; gap:15px; flex-wrap:wrap; margin-bottom:20px;"><div class="form-group" style="flex:1.5;"><label>Ospite</label><select id="appGuestSelect"><option value="" disabled selected>Scegli...</option></select></div><div class="form-group" style="flex:1;"><label>Data</label><input type="date" id="appDate"></div><div class="form-group" style="flex:1;"><label>Ora</label><input type="time" id="appTime"></div><div class="form-group" style="flex:2;"><label>Esame</label><input type="text" id="appType"></div><div style="display:flex; align-items:flex-end;"><button class="btn-primary" onclick="window.addAppointment()">Prenota</button></div></div></div>
+                <div class="card"><div class="card-header"><h3>Appuntamenti</h3></div><table class="data-table" id="appointmentsTable"><thead><tr><th>Data/Ora</th><th>Ospite</th><th>Esame</th><th>Trasp.</th><th>Op</th><th>Az</th></tr></thead><tbody></tbody></table></div>
+            </div>
+
+            <!-- MAGAZZINO -->
+            <div id="ws-magazzino" class="workspace">
+                <div class="card" style="border-top: 5px solid var(--primary-color);">
+                    <div class="card-header"><h3>📦 Scorte e Magazzino Medico</h3></div>
+                    <div style="display:flex; gap:15px; margin-bottom:20px; background:#f8fafc; padding:15px; border-radius:8px;"><div class="form-group" style="flex:1;"><label>Articolo</label><input type="text" id="newInvItem"></div><div style="display:flex; align-items:flex-end;"><button class="btn-primary" onclick="window.addInvItem()">Aggiungi</button></div></div>
+                    <div class="inventory-grid" id="invGrid" style="display:grid; grid-template-columns:repeat(auto-fill, minmax(280px, 1fr)); gap:15px;"></div>
                 </div>
             </div>
 
         </div>
     </div>
 
-    <!-- MODALE FIRMA MOBILE -->
-    <div id="signatureModal">
-        <div class="privacy-container">
-            <h2 style="margin:0 0 5px 0; text-align:center; color:var(--text-main); font-size: 1.3em;">Firma O.S.A.</h2>
-            <p style="text-align:center; font-size:0.85em; color:var(--text-light); margin-top:0; margin-bottom: 15px;">Firma con il dito per validare.</p>
-            
-            <canvas id="signatureCanvas"></canvas>
-            
-            <button class="btn-outline" onclick="clearSignature()" style="padding: 12px; margin: 10px 0; border-color: var(--text-light); color: var(--text-light);">🗑️ Pulisci Riquadro</button>
-            <div style="display:flex; gap:10px;">
-                <button class="btn-outline" style="flex:1;" onclick="closeSignature()">Annulla</button>
-                <button class="btn-success" style="flex:1.5;" onclick="confirmSignature()">✅ Conferma</button>
-            </div>
-        </div>
-    </div>
-
+    <!-- SCRIPT E LOGICA FIREBASE + FIRMA TOUCHSCREEN -->
     <script type="module">
-        import { initializeApp } from "https://www.gstatic.com/firebasejs/10.4.0/firebase-app.js";
-        import { getFirestore, collection, addDoc, serverTimestamp, onSnapshot, doc } from "https://www.gstatic.com/firebasejs/10.4.0/firebase-firestore.js";
+        import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-app.js";
+        import { initializeAppCheck, ReCaptchaEnterpriseProvider } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-app-check.js";
+        import { getFirestore, collection, addDoc, onSnapshot, deleteDoc, doc, updateDoc, setDoc, serverTimestamp } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js";
 
-        // CREDENZIALI FIREBASE
-        const app = initializeApp({ 
-            apiKey: "AIzaSyAACj8J2iOSAwS_DJaJQGvwB8-klMZ_NgE", 
-            authDomain: "hccp-nvs.firebaseapp.com", 
-            projectId: "hccp-nvs", 
-            storageBucket: "hccp-nvs.firebasestorage.app", 
-            messagingSenderId: "426557690382", 
-            appId: "1:426557690382:web:9c45087394117f8953a25f" 
-        });
+        const firebaseConfig = { 
+            apiKey: "AIzaSyAc0fIlfds4Gne5m3qpH25uacK4NeR6TzM", authDomain: "gestione-visite-b445b.firebaseapp.com", projectId: "gestione-visite-b445b", 
+            storageBucket: "gestione-visite-b445b.firebasestorage.app", messagingSenderId: "720937824810", appId: "1:720937824810:web:b04b60d1d66bb8f4040953" 
+        };
+        
+        const app = initializeApp(firebaseConfig);
+
+        /* App Check protetto */
+        self.FIREBASE_APPCHECK_DEBUG_TOKEN = true;
+        let appCheck = null;
+        if (window.location.protocol !== 'file:') {
+            try {
+                appCheck = initializeAppCheck(app, { 
+                    provider: new ReCaptchaEnterpriseProvider('6LdSQ5wtAAAAAKxlPkk0UBsfJK5gzJdn_NLJm6U3'), 
+                    isTokenAutoRefreshEnabled: true 
+                });
+            } catch (err) {
+                console.warn("App Check bypass:", err);
+            }
+        }
+
         const db = getFirestore(app);
 
-        window.activeOp = null; 
-        window.activeOpPin = null;
-        window.currentTarget = null; 
-        let appConfig = { frigoriferi: [], aree: [], pulizie: [] }; 
-        let dbOperatori = [];
+        window.dbOperatori = []; 
+        window.dbOspiti = []; 
+        window.dbRischio = []; 
+        window.dbCup = []; 
+        window.dbMagazzino = []; 
+        window.dbStupefacentiInv = []; 
+        window.dbStupefacentiLog = []; 
+        window.dbConsegne = []; 
+        window.dbClinica = {}; 
+        window.dbContenzioni = [];
+        
+        let curTerDate = new Date(); let curTerMonth = curTerDate.getMonth(); let curTerYear = curTerDate.getFullYear();
+        const monthNames = ["Gen", "Feb", "Mar", "Apr", "Mag", "Giu", "Lug", "Ago", "Set", "Ott", "Nov", "Dic"];
+        window.currentBodyMarkers = []; 
+        window.currentLesioniPhotos = []; 
+        window.activeOperator = ""; window.activeOperatorRole = "user"; window.activeOperatorQualifica = ""; window.selectedLoginUser = null; window.currentPin = ""; window.globalSelectedPatient = "";
+        window.editGuestPhotoBase64 = ""; window.editGuestDocIdBase64 = ""; window.editGuestDocCfBase64 = ""; window.haccpTraccBase64 = "";
 
-        // UI Toast Helper
-        window.showToast = (msg) => { 
-            const c=document.getElementById('toast-container'); const t=document.createElement('div'); 
-            t.className='toast'; t.innerText=msg; c.appendChild(t); 
-            setTimeout(()=>t.classList.add('show'),10); 
-            setTimeout(()=>{t.classList.remove('show'); setTimeout(()=>t.remove(),300);},3000); 
+        window.haccpConfig = { 
+            frigoriferi: ["Cella Frigo 1", "Cella Frigo 2", "Congelatore Carne", "Congelatore Pesce", "Frigo Latticini"], 
+            aree: ["Cucina Principale", "Dispensa", "Cella Lavaggio", "Spogliatoi", "Sala Mensa"], 
+            pulizie: ["Piani di lavoro", "Pavimenti", "Attrezzature di cottura", "Affettatrici", "Cappe Aspiranti", "Lavelli"] 
+        };
+        const prontuario = ["Abilify", "Amiodarone", "Amoxicillina", "Cardicor", "Cardioaspirin", "Coumadin", "Eparina", "Furosemide", "Lasix", "Metformina", "Paracetamolo", "Tachipirina"];
+
+        window.formatDateSafe = (d) => { if (!d) return '-'; if (typeof d === 'string' && d.includes('-')) return d.split('-').reverse().join('/'); return d; };
+        window.getInitials = (n) => { if(!n) return ""; return n.replace(/Inf\.|Dr\.|OSS/gi,'').trim().split(' ').map(x=>x[0].toUpperCase()).join('.')+'.'; };
+        window.getTimestamp = () => { const n=new Date(); return `${n.toLocaleDateString('it-IT')} alle ${n.toLocaleTimeString('it-IT', {hour:'2-digit',minute:'2-digit'})}`; };
+        window.getTodayString = () => { const n=new Date(); return `${n.getFullYear()}-${String(n.getMonth()+1).padStart(2,'0')}-${String(n.getDate()).padStart(2,'0')}`; };
+        window.showToast = (m) => { const c=document.getElementById('toast-container'); const t=document.createElement('div'); t.className='toast'; t.innerText=m; c.appendChild(t); setTimeout(()=>t.classList.add('show'),10); setTimeout(()=>{t.classList.remove('show'); setTimeout(()=>t.remove(),300);},3000); };
+
+        /* FUNZIONE LOADALERTS */
+        window.loadAlerts = () => {
+            const container = document.getElementById('dashboardAlertsList');
+            if (!container) return;
+            container.innerHTML = '';
+            let count = 0;
+
+            (window.dbOspiti || []).forEach(g => {
+                const d = (window.dbClinica && window.dbClinica[g.name]) ? window.dbClinica[g.name] : {};
+                if (d.paiDataRevisione) {
+                    const rDate = new Date(d.paiDataRevisione);
+                    const diff = Math.ceil((rDate - new Date()) / (1000 * 60 * 60 * 24));
+                    if (diff < 0) {
+                        container.innerHTML += `<div class="alert-item">🚨 P.A.I. Scaduto: <strong>${g.name}</strong></div>`;
+                        count++;
+                    } else if (diff <= 15) {
+                        container.innerHTML += `<div class="alert-item warning">⚠️ P.A.I. in scadenza (${diff} gg): <strong>${g.name}</strong></div>`;
+                        count++;
+                    }
+                }
+            });
+
+            if (count === 0) {
+                container.innerHTML = '<div style="padding:15px; color:var(--success-color); font-weight:bold;">✅ Nessun alert clinico attivo.</div>';
+            }
         };
 
-        // Snapshot Operatori
-        onSnapshot(collection(db, "operatori"), (snapshot) => {
-            dbOperatori = [];
-            snapshot.forEach((docSnap) => { dbOperatori.push(docSnap.data()); });
-            renderLoginProfiles();
-        });
+        /* SIGNATURE PAD TOUCH */
+        let sigCanvas = document.getElementById('sig-canvas'); let ctx = sigCanvas.getContext('2d'); let isDrawing = false; let signatureCallback = null;
+        const resizeCanvas = () => { sigCanvas.width = sigCanvas.offsetWidth; sigCanvas.height = sigCanvas.offsetHeight; ctx.lineWidth = 3; ctx.lineCap = "round"; ctx.strokeStyle = "#0f172a"; };
+        const getPos = (e) => { let rect = sigCanvas.getBoundingClientRect(); if (e.touches && e.touches.length > 0) return { x: e.touches[0].clientX - rect.left, y: e.touches[0].clientY - rect.top }; return { x: e.clientX - rect.left, y: e.clientY - rect.top }; };
+        const startDrawing = (e) => { e.preventDefault(); isDrawing = true; let pos = getPos(e); ctx.beginPath(); ctx.moveTo(pos.x, pos.y); };
+        const draw = (e) => { e.preventDefault(); if (!isDrawing) return; let pos = getPos(e); ctx.lineTo(pos.x, pos.y); ctx.stroke(); };
+        const stopDrawing = (e) => { e.preventDefault(); isDrawing = false; };
+        sigCanvas.addEventListener("touchstart", startDrawing, {passive: false}); sigCanvas.addEventListener("touchmove", draw, {passive: false}); sigCanvas.addEventListener("touchend", stopDrawing); sigCanvas.addEventListener("mousedown", startDrawing); sigCanvas.addEventListener("mousemove", draw); sigCanvas.addEventListener("mouseup", stopDrawing); sigCanvas.addEventListener("mouseout", stopDrawing);
+        
+        window.requestSignature = (actionDesc, callback) => { signatureCallback = callback; document.getElementById('sig-action-desc').innerText = actionDesc; document.getElementById('signature-modal').style.display = 'flex'; setTimeout(resizeCanvas, 50); };
+        window.clearSignature = () => { ctx.clearRect(0, 0, sigCanvas.width, sigCanvas.height); };
+        window.cancelSignature = () => { document.getElementById('signature-modal').style.display = 'none'; signatureCallback = null; window.clearSignature(); };
+        window.confirmSignature = async () => {
+            const blank = document.createElement('canvas'); blank.width = sigCanvas.width; blank.height = sigCanvas.height;
+            if (sigCanvas.toDataURL() === blank.toDataURL()) return alert("⚠️ Firma obbligatoria.");
+            let sigImg = sigCanvas.toDataURL("image/png"); document.getElementById('signature-modal').style.display = 'none';
+            if(signatureCallback) signatureCallback(sigImg); window.clearSignature(); signatureCallback = null;
+        };
 
-        // Snapshot Configurazioni
-        onSnapshot(doc(db, "configurazioni", "liste"), (docSnap) => { 
-            if (docSnap.exists()) { 
-                appConfig = docSnap.data(); 
-                renderDynamicUI(); 
+        /* ACQUISIZIONE PRIVACY E CONSENSO TOUCH */
+        window.avviaFirmaPrivacyTablet = () => {
+            let n = document.getElementById('clinicalGuestSelect').value;
+            if(!n) return window.showToast("⚠️ Seleziona prima un ospite.");
+
+            let g = window.dbOspiti.find(x => x.name === n);
+            if(g && g.consensi && g.consensi.firmatoDa) {
+                return window.showToast("🔒 La firma per questo ospite è già stata acquisita.");
+            }
+            
+            let nomeFamiliare = prompt("Inserisci Nome e Cognome del Familiare / AdS che firma:");
+            if(!nomeFamiliare || nomeFamiliare.trim() === "") return;
+
+            window.requestSignature(`Informativa Privacy e Consenso (${nomeFamiliare.trim()})`, async (sigBase64) => {
+                if(!g) return;
+
+                let cons = {
+                    privacy: true,
+                    consensoInformato: true,
+                    foto: true,
+                    regolamento: true,
+                    firmatoDa: nomeFamiliare.trim(),
+                    dataFirma: window.getTimestamp(),
+                    firmaImmagine: sigBase64
+                };
+
+                await updateDoc(doc(db, "ospiti", g.id), { consensi: cons });
+                window.renderTabletPrivacyUI(cons);
+                window.showToast("✅ Consenso e Privacy registrati con successo!");
+            });
+        };
+
+        /* AGGIORNAMENTO UI PRIVACY CON DISABILITAZIONE TASTO */
+        window.renderTabletPrivacyUI = (cons) => {
+            const textStatus = document.getElementById('privacyTextStatus');
+            const lblNome = document.getElementById('lblFirmatarioNome');
+            const lblData = document.getElementById('lblFirmatarioData');
+            const previewBox = document.getElementById('signaturePreviewBox');
+            const btnFirma = document.getElementById('btnAvviaFirmaPrivacy');
+
+            if(cons && cons.firmatoDa) {
+                if(textStatus) textStatus.innerHTML = `✅ <span style="color:var(--success-color);">Privacy e Consenso Regolarmente Acquisiti</span>`;
+                if(lblNome) lblNome.innerText = cons.firmatoDa;
+                if(lblData) lblData.innerText = cons.dataFirma || '-';
+                
+                if(previewBox) {
+                    if(cons.firmaImmagine) {
+                        previewBox.innerHTML = `<img src="${cons.firmaImmagine}" style="max-width:100%; max-height:100%; object-fit:contain;">`;
+                    } else {
+                        previewBox.innerHTML = `<span style="color:var(--success-color); font-size:0.8em; font-weight:bold;">Firmato</span>`;
+                    }
+                }
+
+                /* DISABILITAZIONE DEL TASTO FIRMA DOPO L'ACQUISIZIONE */
+                if(btnFirma) {
+                    btnFirma.disabled = true;
+                    btnFirma.style.opacity = '0.55';
+                    btnFirma.style.cursor = 'not-allowed';
+                    btnFirma.style.backgroundColor = '#94a3b8';
+                    btnFirma.style.boxShadow = 'none';
+                    btnFirma.innerHTML = '🔒 Firma e Consenso già Acquisiti';
+                }
+            } else {
+                if(textStatus) textStatus.innerHTML = `⏳ Stato: In attesa di firma in loco.`;
+                if(lblNome) lblNome.innerText = '-';
+                if(lblData) lblData.innerText = '-';
+                if(previewBox) previewBox.innerHTML = `<span style="color:#94a3b8; font-size:0.8em;">Nessuna firma</span>`;
+
+                /* TASTO ABILITATO SE NON ANCORA FIRMATO */
+                if(btnFirma) {
+                    btnFirma.disabled = false;
+                    btnFirma.style.opacity = '1';
+                    btnFirma.style.cursor = 'pointer';
+                    btnFirma.style.backgroundColor = 'var(--success-color)';
+                    btnFirma.style.boxShadow = '0 2px 4px rgba(0,0,0,0.05)';
+                    btnFirma.innerHTML = '✍️ Avvia Acquisizione Firma (Touchscreen)';
+                }
+            }
+        };
+
+        /* GESTIONE AVANZATA MAPPATURA LESIONI (PUNTI ANATOMICI + FOTO TOUCH) */
+        window.handleBodyMapClick = (e) => { 
+            if(window.checkOssRestriction()) return; 
+            const w = document.getElementById('bodyMapWrapper'); 
+            if(!w) return; 
+            const r = w.getBoundingClientRect(); 
+            const x = ((e.clientX - r.left) / r.width) * 100;
+            const y = ((e.clientY - r.top) / r.height) * 100;
+            
+            window.currentBodyMarkers.push({ x: x, y: y }); 
+            window.renderBodyMarkers(); 
+            window.showToast("📍 Lesione posizionata sul modellino.");
+        };
+
+        window.renderBodyMarkers = () => { 
+            const l = document.getElementById('bodyMarkersLayer'); 
+            if(!l) return; 
+            l.innerHTML = ''; 
+            window.currentBodyMarkers.forEach((m, i) => { 
+                const d = document.createElement('div'); 
+                d.className = 'body-marker'; 
+                d.style.left = m.x + '%'; 
+                d.style.top = m.y + '%'; 
+                d.innerText = (i + 1);
+                d.title = `Lesione #${i + 1} (Tocca per rimuovere)`;
+                d.onclick = (ev) => { 
+                    ev.stopPropagation(); 
+                    if(confirm(`Rimuovere il punto di lesione #${i + 1}?`)) {
+                        window.currentBodyMarkers.splice(i, 1); 
+                        window.renderBodyMarkers(); 
+                    }
+                }; 
+                l.appendChild(d); 
+            }); 
+        };
+
+        window.clearBodyMarkers = () => { 
+            if(window.checkOssRestriction()) return; 
+            if(window.currentBodyMarkers.length === 0) return window.showToast("Nessun punto presente.");
+            if(confirm('Rimuovere tutti i punti dal modellino anatomico?')) { 
+                window.currentBodyMarkers = []; 
+                window.renderBodyMarkers(); 
+                window.showToast("Modellino anatomico azzerato.");
             } 
-        });
+        };
 
-        function renderLoginProfiles() {
-            const lc = document.getElementById('loginProfilesContainer');
-            lc.innerHTML = '';
-            if (dbOperatori.length === 0) {
-                lc.innerHTML = '<p style="grid-column: 1 / -1;">Nessun operatore configurato.</p>';
+        window.handleLesionePhotoUpload = (e) => {
+            if(window.checkOssRestriction()) return;
+            const file = e.target.files[0];
+            if (!file) return;
+
+            const n = document.getElementById('clinicalGuestSelect').value;
+            if(!n) return window.showToast("⚠️ Seleziona prima un ospite.");
+
+            const descInput = document.getElementById('lesioneDescInput');
+            const desc = descInput ? descInput.value.trim() : '';
+
+            window.showToast("⏳ Compressione foto lesione...");
+            const reader = new FileReader();
+            reader.onload = (ev) => {
+                const img = new Image();
+                img.onload = () => {
+                    const cv = document.createElement('canvas');
+                    const MAX = 700;
+                    let w = img.width, h = img.height;
+                    if(w > MAX || h > MAX) {
+                        if(w > h) { h *= MAX/w; w = MAX; }
+                        else { w *= MAX/h; h = MAX; }
+                    }
+                    cv.width = w; cv.height = h;
+                    cv.getContext('2d').drawImage(img, 0, 0, w, h);
+                    const b64 = cv.toDataURL('image/jpeg', 0.6);
+
+                    window.currentLesioniPhotos.unshift({
+                        id: Date.now(),
+                        b64: b64,
+                        desc: desc || 'Lesione da decubito',
+                        data: window.getTimestamp(),
+                        op: window.activeOperator
+                    });
+
+                    window.renderLesioniPhotos();
+                    if(descInput) descInput.value = '';
+                    e.target.value = '';
+                    window.showToast("📸 Foto lesione acquisita! Clicca su 'Salva' per registrare.");
+                };
+                img.src = ev.target.result;
+            };
+            reader.readAsDataURL(file);
+        };
+
+        window.renderLesioniPhotos = () => {
+            const grid = document.getElementById('lesioniPhotoGrid');
+            if(!grid) return;
+            grid.innerHTML = '';
+
+            if(!window.currentLesioniPhotos || window.currentLesioniPhotos.length === 0) {
+                grid.innerHTML = '<div style="grid-column:1/-1; color:var(--text-light); text-align:center; padding:15px; font-size:0.9em;">Nessuna foto acquisita per questo paziente.</div>';
                 return;
             }
-            dbOperatori.forEach(op => {
-                let initial = op.nome ? op.nome.charAt(0).toUpperCase() : '👨‍🍳';
-                let b = document.createElement('div');
-                b.className = 'profile-btn';
-                b.innerHTML = `<div class="profile-avatar">${initial}</div><span style="font-weight:bold; font-size:1em; margin-bottom:2px; text-align:center;">${op.nome}</span><span style="font-size:0.8em; color:var(--text-light); text-align:center;">${op.qualifica||'O.S.A.'}</span>`;
-                b.onclick = () => selectLoginProfile(op);
-                lc.appendChild(b);
+
+            window.currentLesioniPhotos.forEach((item, idx) => {
+                const card = document.createElement('div');
+                card.style.cssText = 'background:#f1f5f9; border:1px solid #cbd5e1; border-radius:6px; padding:6px; display:flex; flex-direction:column; gap:4px; text-align:center; box-shadow:0 1px 3px rgba(0,0,0,0.05);';
+                card.innerHTML = `
+                    <a href="${item.b64}" target="_blank">
+                        <img src="${item.b64}" style="width:100%; height:95px; object-fit:cover; border-radius:4px; border:1px solid #cbd5e1;">
+                    </a>
+                    <div style="font-size:0.8em; font-weight:bold; overflow:hidden; text-overflow:ellipsis; white-space:nowrap;" title="${item.desc}">${item.desc}</div>
+                    <div style="font-size:0.7em; color:var(--text-light);">${item.data.split(' alle ')[0]} (${window.getInitials(item.op)})</div>
+                    <button type="button" class="btn-danger restrict-oss" style="padding:4px; font-size:0.75em; margin-top:2px;" onclick="window.deleteLesionePhoto(${idx})">🗑️ Rimuovi</button>
+                `;
+                grid.appendChild(card);
             });
-        }
-
-        window.selectLoginProfile = (op) => {
-            window.activeOp = op.nome;
-            window.activeOpPin = op.pin;
-            document.getElementById('loginProfilesContainer').style.display = 'none';
-            document.getElementById('loginPinArea').style.display = 'block';
-            document.getElementById('selectedProfileLabel').innerText = `Inserisci PIN per ${op.nome}:`;
-            document.getElementById('loginPinInput').value = '';
         };
 
-        window.resetLoginSelection = () => {
-            window.activeOp = null;
-            window.activeOpPin = null;
-            document.getElementById('loginPinArea').style.display = 'none';
-            document.getElementById('loginProfilesContainer').style.display = 'grid';
-            document.getElementById('loginPinInput').value = '';
-        };
-
-        // Pin Pad
-        window.addPin = (num) => { 
-            const p = document.getElementById('loginPinInput'); 
-            if(p.value.length < 4) p.value += num; 
-            if(p.value.length === 4) setTimeout(checkPin, 100);
-        };
-        window.clearPin = () => { document.getElementById('loginPinInput').value = ""; };
-        window.checkPin = () => {
-            const pin = document.getElementById('loginPinInput').value;
-            if (!pin || pin.length < 4) return window.showToast("⚠️ PIN incompleto");
-            
-            if (pin === window.activeOpPin) { 
-                document.getElementById('currentOpBadge').innerText = `👨‍🍳 ${window.activeOp.split(' ')[0]}`; 
-                document.getElementById('loginScreen').style.display = 'none';
-                document.getElementById('top-nav-container').style.display = 'flex';
-                document.getElementById('appScreen').style.display = 'flex';
-                window.resetLoginSelection();
-                window.onload(); 
-            } else { 
-                window.showToast("❌ PIN Errato"); 
-                window.clearPin(); 
+        window.deleteLesionePhoto = (idx) => {
+            if(window.checkOssRestriction()) return;
+            if(confirm("Eliminare questa fotografia di lesione?")) {
+                window.currentLesioniPhotos.splice(idx, 1);
+                window.renderLesioniPhotos();
+                window.showToast("Fotografia rimossa. Salva le modifiche.");
             }
         };
 
-        window.logout = () => { 
-            window.activeOp = null; 
-            document.getElementById('top-nav-container').style.display = 'none';
-            document.getElementById('appScreen').style.display = 'none';
-            document.getElementById('loginScreen').style.display = 'flex';
-            window.switchTab('merci', document.querySelector('.menu-tab'));
+        /* LOGIN E PROFILI CON FALLBACK */
+        window.renderLoginProfiles = () => { 
+            const c = document.getElementById('profiles-container'); 
+            if(!c) return;
+            c.innerHTML = ''; 
+            
+            let vOps = (window.dbOperatori && window.dbOperatori.length > 0) 
+                ? window.dbOperatori 
+                : [{id: "admin-fallback", name: "Admin", pin: "12345", role: "admin", qualifica: "Direttore Sanitario"}];
+            
+            vOps.forEach(op => { 
+                let div = document.createElement('div'); 
+                div.className = 'profile-card'; 
+                div.innerHTML = `<div class="profile-avatar">🧑‍⚕️</div><div class="profile-name">${op.name.split(' ')[0]}</div><div class="profile-role">${op.qualifica||''}</div>`; 
+                div.onclick = () => window.showPinPad(op); 
+                c.appendChild(div); 
+            }); 
         };
 
-        // Switch Tab e scroll-snap behavior
-        window.switchTab = (ws, btn) => { 
-            document.querySelectorAll('.workspace, .menu-tab').forEach(e => e.classList.remove('active')); 
-            document.getElementById('ws-' + ws).classList.add('active'); 
-            btn.classList.add('active');
-            
-            // Centra il tab attivo nello scroll menu (UX Mobile)
-            btn.scrollIntoView({ behavior: "smooth", block: "nearest", inline: "center" });
-            window.onload(); 
+        window.showPinPad = (op) => { 
+            window.selectedLoginUser = op; 
+            window.currentPin = ""; 
+            document.getElementById('profiles-container').style.display = 'none'; 
+            document.getElementById('pin-pad-area').style.display = 'flex'; 
+            document.getElementById('pin-welcome').innerText = "Ciao " + op.name.split(' ')[0]; 
+            window.updatePinDisplay(); 
         };
 
-        function renderDynamicUI() {
-            document.getElementById('dynamic-temp-grid').innerHTML = (appConfig.frigoriferi || []).map(f => `<div class="form-group"><label>${f}</label><input type="number" step="0.1" inputmode="decimal" class="dyn-temp-input" data-name="${f}" oninput="checkTemp()"></div>`).join('');
-            document.getElementById('dynamic-aree-grid').innerHTML = (appConfig.aree || []).map(a => `<label class="check-item"><input type="checkbox" value="${a}"> <span>${a}</span></label>`).join('');
-            document.getElementById('dynamic-pulizie-grid').innerHTML = (appConfig.pulizie || []).map(p => `<label class="check-item"><input type="checkbox" value="${p}"> <span>${p}</span></label>`).join('');
-            
-            document.querySelectorAll('.check-grid input[type="checkbox"]').forEach(cb => { 
-                cb.addEventListener('change', function() { 
-                    this.checked ? this.parentElement.classList.add('active') : this.parentElement.classList.remove('active'); 
-                }); 
-            });
-        }
+        window.addPin = (num) => { 
+            if(window.currentPin.length < 5) window.currentPin += num; 
+            window.updatePinDisplay(); 
+        };
 
-        window.getToday = () => { const n=new Date(); return `${n.getFullYear()}-${String(n.getMonth()+1).padStart(2,'0')}-${String(n.getDate()).padStart(2,'0')}`; };
+        window.updatePinDisplay = () => { 
+            document.getElementById('pin-display').innerText = '*'.repeat(window.currentPin.length); 
+        };
+
+        window.resetPinLogin = () => { 
+            document.getElementById('pin-pad-area').style.display = 'none'; 
+            document.getElementById('profiles-container').style.display = 'grid'; 
+            window.selectedLoginUser = null; 
+            window.currentPin = ""; 
+        };
+
+        window.submitPin = () => { 
+            let op = window.selectedLoginUser; 
+            if((op && String(op.pin) === window.currentPin) || (op && op.name === 'Admin' && window.currentPin === '12345')) { 
+                window.activeOperator = op.name; 
+                window.activeOperatorRole = op.role; 
+                window.activeOperatorQualifica = op.qualifica; 
+                document.getElementById('currentOpBadge').innerText = `${op.name}`; 
+                document.getElementById('currentOpRole').innerText = op.qualifica; 
+                document.getElementById('login-screen').style.display = 'none'; 
+                document.getElementById('tablet-header').style.display = 'flex'; 
+                window.applyRolePermissions(); 
+                window.loadGuests(); 
+                window.renderSidebarPatients(); 
+                window.goHome(); 
+            } else { 
+                window.showToast("❌ PIN Errato"); 
+                window.currentPin = ""; 
+                window.updatePinDisplay(); 
+            } 
+        };
+
+        window.isMedicoOrAdmin = () => ['Medico','Direttore Sanitario'].includes(window.activeOperatorQualifica) || window.activeOperatorRole==='admin';
+        window.checkOssRestriction = () => { if(window.activeOperatorQualifica==='OSS'){ window.showToast("⚠️ Sola Lettura: Area Riservata"); return true; } return false; };
+        window.applyRolePermissions = () => { 
+            document.body.setAttribute('data-qualifica', window.activeOperatorQualifica); 
+            if(window.isMedicoOrAdmin()) document.body.setAttribute('data-med-access','true'); 
+            else document.body.removeAttribute('data-med-access'); 
+            if(window.activeOperatorRole==='admin') document.body.setAttribute('data-role', 'admin'); 
+            else document.body.removeAttribute('data-role'); 
+        };
         
-        window.onload = () => { 
-            const t = window.getToday(); 
+        window.goHome = () => { 
+            document.querySelectorAll('.workspace').forEach(e => e.classList.remove('active')); 
+            document.getElementById('appScreen').style.display = 'none'; 
+            document.getElementById('home-menu').style.display = 'grid'; 
+            document.getElementById('backToHomeBtn').style.display = 'none'; 
+            document.getElementById('header-title').innerText = 'Home Menu'; 
+        };
+
+        window.switchTab = (ws, title) => { 
+            document.getElementById('home-menu').style.display = 'none'; 
+            document.getElementById('appScreen').style.display = 'flex'; 
+            document.querySelectorAll('.workspace').forEach(e=>e.classList.remove('active')); 
+            document.getElementById('ws-'+ws).classList.add('active'); 
+            document.getElementById('backToHomeBtn').style.display = 'flex'; 
+            document.getElementById('header-title').innerText = title; 
+            document.getElementById('backToHomeBtn').onclick = window.goHome; 
+            document.getElementById('patientSidebar').style.display = ['haccp', 'merci', 'tracc', 'temp', 'aree', 'pulizie', 'pest', 'sicurezza', 'magazzino'].includes(ws) ? 'none' : 'flex'; 
+            if(ws === 'haccp') window.renderHaccpUI(); 
+        };
+
+        window.openHaccpSub = (ws, title) => { 
+            document.querySelectorAll('.workspace').forEach(e=>e.classList.remove('active')); 
+            document.getElementById('ws-'+ws).classList.add('active'); 
+            document.getElementById('header-title').innerText = title; 
+            document.getElementById('backToHomeBtn').onclick = () => window.switchTab('haccp', '🛡️ HACCP & Sicurezza'); 
+            document.getElementById('patientSidebar').style.display = 'none'; 
+            const t = window.getTodayString(); 
             ['tempData', 'areeData', 'pulizieData', 'merciData', 'traccData', 'pestDate', 'sicDocDate'].forEach(id => { 
                 if(document.getElementById(id)) document.getElementById(id).value = t; 
             }); 
         };
 
-        window.selectAllTasks = () => { 
-            document.querySelectorAll('#dynamic-pulizie-grid .check-item').forEach(item => { 
-                item.querySelector('input').checked = true; 
-                item.classList.add('active'); 
-            }); 
-        };
-        
-        window.checkTemp = () => { 
-            let err = false; 
-            document.querySelectorAll('.dyn-temp-input').forEach(inp => { 
-                const val = parseFloat(inp.value); 
-                if (!isNaN(val)) { 
-                    const name = inp.getAttribute('data-name').toLowerCase(); 
-                    const limit = (name.includes('cong') || name.includes('cella')) ? -18 : 4; 
-                    if (val > limit) err = true; 
-                }
-            }); 
-            document.getElementById('tempAlert').style.display = err ? 'block' : 'none'; 
-        };
-        
-        window.autoFillTemp = () => { 
-            document.querySelectorAll('.dyn-temp-input').forEach(inp => { 
-                const name = inp.getAttribute('data-name').toLowerCase(); 
-                inp.value = (name.includes('cong') || name.includes('cella')) ? (Math.random() * (-19.0 - -19.9) + -19.9).toFixed(1) : (Math.random() * (3.8 - 2.5) + 2.5).toFixed(1); 
-            }); 
-            window.checkTemp(); 
+        window.logout = () => { 
+            window.activeOperator = ""; 
+            window.selectedLoginUser = null; 
+            window.resetPinLogin(); 
+            document.getElementById('tablet-header').style.display = 'none'; 
+            document.getElementById('home-menu').style.display = 'none'; 
+            document.getElementById('appScreen').style.display = 'none'; 
+            document.getElementById('login-screen').style.display = 'flex'; 
         };
 
-        window.traccBase64 = "";
-        window.previewTraccFoto = (event) => {
-            const file = event.target.files[0]; if(!file) return;
-            const reader = new FileReader();
-            reader.onload = (e) => {
-                const img = new Image();
-                img.onload = () => {
-                    const canvas = document.createElement('canvas'); const MAX_WIDTH = 800; let scaleSize = 1;
-                    if(img.width > MAX_WIDTH) { scaleSize = MAX_WIDTH / img.width; }
-                    canvas.width = img.width * scaleSize; canvas.height = img.height * scaleSize;
-                    canvas.getContext('2d').drawImage(img, 0, 0, canvas.width, canvas.height);
-                    window.traccBase64 = canvas.toDataURL('image/jpeg', 0.6);
-                    document.getElementById('traccImgPreview').src = window.traccBase64; 
-                    document.getElementById('traccPreviewContainer').style.display = 'block';
-                };
-                img.src = e.target.result;
-            }; reader.readAsDataURL(file);
-        };
-
-        // Salvataggi Moduli Nuovi
-        window.savePestControl = async () => {
-            const d = document.getElementById('pestDate').value;
-            const n = document.getElementById('pestName').value.trim();
-            const t = document.getElementById('pestType').value;
-            const r = document.getElementById('pestResult').value;
-            
-            if(!d || !n) return window.showToast("⚠️ Inserisci Data e Nome.");
-            
-            try {
-                await addDoc(collection(db, "haccp_pest_control"), { 
-                    data_controllo: d, 
-                    postazione: n, 
-                    tipo: t.replace(/🐀 |🪳 |🪰 /g, ''), 
-                    esito: r.replace(/✅ |⚠️ |❌ /g, '')
-                });
-                window.showToast("✅ Controllo registrato!");
-                document.getElementById('pestName').value = '';
-            } catch(e) { window.showToast("🚨 ERRORE: " + e.message); }
-        };
-
-        window.saveSicurezza = async () => {
-            const n = document.getElementById('sicDocName').value.trim(); 
-            const c = document.getElementById('sicDocCat').value; 
-            const d = document.getElementById('sicDocDate').value;
-            
-            if(!n || !d) return window.showToast("⚠️ Nome e Data obbligatori.");
-            
-            try {
-                await addDoc(collection(db, "sicurezza_scadenze"), { 
-                    nome: n, 
-                    categoria: c.replace(/📄 |👥 |🏢 |⚕️ /g, ''),
-                    data_scadenza: d 
-                });
-                window.showToast("✅ Scadenza salvata!");
-                document.getElementById('sicDocName').value = ''; 
-            } catch(e) { window.showToast("🚨 ERRORE: " + e.message); }
-        };
-
-        // GESTIONE FIRMA TOUCH
-        const canvas = document.getElementById('signatureCanvas'); 
-        let ctx = canvas.getContext('2d'); window.isDrawing = false;
-        
-        const resizeCanvas = () => { 
-            const ratio = Math.max(window.devicePixelRatio || 1, 1); 
-            canvas.width = canvas.offsetWidth * ratio; 
-            canvas.height = canvas.offsetHeight * ratio; 
-            ctx.scale(ratio, ratio); 
-            ctx.lineWidth = 3; 
-            ctx.lineCap = 'round'; 
-            ctx.strokeStyle = '#0f172a'; 
-        };
-        
-        const getPos = (e) => { 
-            const rect = canvas.getBoundingClientRect(); 
-            const clientX = e.touches ? e.touches[0].clientX : e.clientX; 
-            const clientY = e.touches ? e.touches[0].clientY : e.clientY; 
-            return { x: clientX - rect.left, y: clientY - rect.top }; 
-        };
-        
-        const startDraw = (e) => { window.isDrawing = true; window.draw(e); }; 
-        const endDraw = () => { window.isDrawing = false; ctx.beginPath(); };
-        
-        window.draw = (e) => { 
-            if (!window.isDrawing) return; 
-            e.preventDefault(); 
-            const pos = getPos(e); 
-            ctx.lineTo(pos.x, pos.y); 
-            ctx.stroke(); 
-            ctx.beginPath(); 
-            ctx.moveTo(pos.x, pos.y); 
-        };
-        
-        canvas.addEventListener('mousedown', startDraw); 
-        canvas.addEventListener('mouseup', endDraw); 
-        canvas.addEventListener('mousemove', window.draw); 
-        canvas.addEventListener('touchstart', startDraw, {passive:false}); 
-        canvas.addEventListener('touchend', endDraw); 
-        canvas.addEventListener('touchmove', window.draw, {passive:false});
-
-        window.requestSignature = (target) => {
-            if(target === 'temp') { 
-                let hasOne = false; 
-                document.querySelectorAll('.dyn-temp-input').forEach(i => { if(i.value) hasOne = true; }); 
-                if(!hasOne) return window.showToast("⚠️ Inserisci le temperature!"); 
-            }
-            if(target === 'aree' && document.querySelectorAll('#dynamic-aree-grid input:checked').length === 0) 
-                return window.showToast("⚠️ Seleziona le aree!");
-            if(target === 'pulizie' && document.querySelectorAll('#dynamic-pulizie-grid input:checked').length === 0) 
-                return window.showToast("⚠️ Seleziona le operazioni!");
-            if(target === 'tracc' && !window.traccBase64) 
-                return window.showToast("📸 Scatta la foto!");
-            if(target === 'merci' && !document.getElementById('merciFornitore').value)
-                return window.showToast("⚠️ Inserisci il Fornitore");
-
-            window.currentTarget = target; 
-            document.getElementById('signatureModal').style.display = 'flex'; 
-            setTimeout(resizeCanvas, 100); 
-        };
-
-        window.closeSignature = () => { 
-            document.getElementById('signatureModal').style.display = 'none'; 
-            window.currentTarget = null; 
-        };
-        
-        window.clearSignature = () => { 
-            ctx.clearRect(0, 0, canvas.width, canvas.height); 
-            ctx.beginPath(); 
-        };
-
-        window.confirmSignature = async () => {
-            if(document.createElement('canvas').toDataURL() === canvas.toDataURL()) 
-                return window.showToast("⚠️ Devi firmare.");
-            
-            const sigBase64 = canvas.toDataURL('image/png'); 
-            const currentTarget = window.currentTarget; // Salvataggio sicuro del target prima di chiudere
-            window.closeSignature();
-            
-            if (currentTarget === 'tracc') {
-                try { 
-                    await addDoc(collection(db, "haccp_tracciabilita"), { 
-                        data_dichiarata: document.getElementById('traccData').value, 
-                        timestamp_server: serverTimestamp(), 
-                        operatore: window.activeOp, 
-                        categoria_prodotto: document.getElementById('traccCat').value.replace(/🥩 |🐟 |🧀 |📦 /g, ''), 
-                        foto_base64: window.traccBase64, 
-                        firma_base64: sigBase64 
-                    }); 
-                    window.showToast("✅ Lotto archiviato!");
-                    window.traccBase64 = ""; 
-                    document.getElementById('traccPreviewContainer').style.display = 'none'; 
-                } catch(e) { window.showToast("❌ Errore: " + e.message); } 
-                return;
-            }
-
-            if (currentTarget === 'merci') {
-                try { 
-                    await addDoc(collection(db, "haccp_merci"), { 
-                        data_dichiarata: document.getElementById('merciData').value, 
-                        timestamp_server: serverTimestamp(), 
-                        operatore: window.activeOp, 
-                        fornitore: document.getElementById('merciFornitore').value.trim(), 
-                        temperatura: document.getElementById('merciTemp').value, 
-                        imballaggi: document.getElementById('merciImballaggi').value, 
-                        esito: document.getElementById('merciEsito').value, 
-                        firma_base64: sigBase64 
-                    }); 
-                    window.showToast("✅ Merce registrata!");
-                    document.getElementById('merciFornitore').value = '';
-                    document.getElementById('merciTemp').value = '';
-                } catch(e) { window.showToast("❌ Errore: " + e.message); } 
-                return;
-            }
-
-            let data_dichiarata = "", pulizie = null, temperature = null, note = "", tipo = currentTarget;
-            
-            if(tipo === 'temp') { 
-                tipo = "temperature";
-                data_dichiarata = document.getElementById('tempData').value; 
-                temperature = {};
-                document.querySelectorAll('.dyn-temp-input').forEach(inp => { temperature[inp.getAttribute('data-name')] = inp.value; inp.value = ''; }); 
-                note = document.getElementById('tAction').value.trim(); 
-                document.getElementById('tAction').value = '';
-                document.getElementById('tempAlert').style.display = 'none';
-            } 
-            else if (tipo === 'aree') { 
-                data_dichiarata = document.getElementById('areeData').value; 
-                pulizie = [];
-                document.querySelectorAll('#dynamic-aree-grid input:checked').forEach(cb => { 
-                    pulizie.push(`S. Area: ${cb.value}`); 
-                    cb.checked = false; 
-                    cb.parentElement.classList.remove('active'); 
+        /* HACCP UI */
+        window.renderHaccpUI = () => {
+            document.getElementById('dynamic-temp-grid').innerHTML = window.haccpConfig.frigoriferi.map(f => `<div class="form-group"><label>${f}</label><input type="number" step="0.1" class="dyn-temp-input" data-name="${f}"></div>`).join('');
+            document.getElementById('dynamic-aree-grid').innerHTML = window.haccpConfig.aree.map(a => `<label class="check-item"><input type="checkbox" value="${a}"> <span>${a}</span></label>`).join('');
+            document.getElementById('dynamic-pulizie-grid').innerHTML = window.haccpConfig.pulizie.map(p => `<label class="check-item"><input type="checkbox" value="${p}"> <span>${p}</span></label>`).join('');
+            document.querySelectorAll('.check-grid input[type="checkbox"]').forEach(cb => { 
+                cb.addEventListener('change', function() { 
+                    this.checked ? this.parentElement.classList.add('active') : this.parentElement.classList.remove('active'); 
                 }); 
-                note = document.getElementById('areeNote').value.trim();
-                document.getElementById('areeNote').value = ''; 
-            } 
-            else if (tipo === 'pulizie') { 
-                data_dichiarata = document.getElementById('pulizieData').value; 
-                pulizie = [];
-                document.querySelectorAll('#dynamic-pulizie-grid input:checked').forEach(cb => {
-                    pulizie.push(cb.value);
-                    cb.checked = false;
-                    cb.parentElement.classList.remove('active');
-                }); 
-                note = document.getElementById('pulizieNote').value.trim(); 
-                document.getElementById('pulizieNote').value = '';
-            }
+            });
+        };
+        window.saveHaccpMerci = () => { window.requestSignature("Accettazione Merci", async (sig) => { await addDoc(collection(db, "haccp_merci"), { data: document.getElementById('merciData').value, fornitore: document.getElementById('merciFornitore').value, firma: sig }); window.showToast("✅ Salvato!"); window.switchTab('haccp', '🛡️ HACCP'); }); };
+        window.saveHaccpTracc = () => { window.requestSignature("Tracciabilità Lotto", async (sig) => { await addDoc(collection(db, "haccp_tracciabilita"), { data: document.getElementById('traccData').value, foto: window.haccpTraccBase64, firma: sig }); window.showToast("✅ Salvato!"); window.switchTab('haccp', '🛡️ HACCP'); }); };
+        window.saveHaccpTemp = () => { window.requestSignature("Reg. Temperature", async (sig) => { let obj = {}; document.querySelectorAll('.dyn-temp-input').forEach(i => obj[i.dataset.name] = i.value); await addDoc(collection(db, "haccp_registri"), { tipo: "temperature", data: document.getElementById('tempData').value, temperature: obj, firma: sig }); window.showToast("✅ Salvato!"); window.switchTab('haccp', '🛡️ HACCP'); }); };
+        window.saveHaccpAree = () => { window.requestSignature("Sanificazione Aree", async (sig) => { let arr=[]; document.querySelectorAll('#dynamic-aree-grid input:checked').forEach(c=>arr.push(c.value)); await addDoc(collection(db, "haccp_registri"), { tipo: "aree", data: document.getElementById('areeData').value, aree: arr, firma: sig }); window.showToast("✅ Salvato!"); window.switchTab('haccp', '🛡️ HACCP'); }); };
+        window.saveHaccpPulizie = () => { window.requestSignature("Pulizie Quotidiane", async (sig) => { let arr=[]; document.querySelectorAll('#dynamic-pulizie-grid input:checked').forEach(c=>arr.push(c.value)); await addDoc(collection(db, "haccp_registri"), { tipo: "pulizie", data: document.getElementById('pulizieData').value, pulizie: arr, firma: sig }); window.showToast("✅ Salvato!"); window.switchTab('haccp', '🛡️ HACCP'); }); };
+        window.saveHaccpPest = async () => { await addDoc(collection(db, "haccp_pest_control"), { data: document.getElementById('pestDate').value, postazione: document.getElementById('pestName').value }); window.showToast("✅ Salvato!"); window.switchTab('haccp', '🛡️ HACCP'); };
+        window.saveHaccpSicurezza = async () => { await addDoc(collection(db, "sicurezza_scadenze"), { nome: document.getElementById('sicDocName').value, data: document.getElementById('sicDocDate').value }); window.showToast("✅ Salvato!"); window.switchTab('haccp', '🛡️ HACCP'); };
 
-            try {
-                await addDoc(collection(db, "haccp_registri"), { 
-                    tipo_registro: tipo, 
-                    data_dichiarata: data_dichiarata, 
-                    timestamp_server: serverTimestamp(), 
-                    operatore: window.activeOp, 
-                    temperature: temperature, 
-                    pulizie_eseguite: pulizie, 
-                    note: note, 
-                    firma_base64: sigBase64 
-                });
-                window.showToast(`✅ ${tipo.toUpperCase()} SALVATO!`);
-            } catch(e) { window.showToast("🚨 ERRORE: " + e.message); }
+        /* GESTIONE CLINICA E PAZIENTI */
+        window.renderSidebarPatients = () => { 
+            const l = document.getElementById('sidebarPatientList'); 
+            const s = document.getElementById('sidebarSearch')?.value.toLowerCase()||''; 
+            if(!l) return; 
+            l.innerHTML=''; 
+            window.dbOspiti.forEach(g => { 
+                if(s && !g.name.toLowerCase().includes(s)) return; 
+                let av = g.photo ? `<img src="${g.photo}" class="sidebar-avatar">` : `<div class="sidebar-avatar">👤</div>`; 
+                l.innerHTML += `<div class="sidebar-item ${g.name===window.globalSelectedPatient?'active':''}" onclick="window.selectPatientGlobal('${g.name}')">${av}<div style="font-weight:bold; overflow:hidden; text-overflow:ellipsis;">${g.name}</div></div>`; 
+            }); 
+        };
+
+        window.selectPatientGlobal = (n) => { 
+            window.globalSelectedPatient = n; 
+            ['clinicalGuestSelect', 'diariGuestSelect', 'terapiaGuestSelect', 'vitaliGuestSelect', 'appGuestSelect', 'newRischioOspite', 'contOspite'].forEach(id => { 
+                const s=document.getElementById(id); 
+                if(s && [...s.options].some(o=>o.value===n)) s.value=n; 
+            }); 
+            window.handlePatientSelect('clinicalGuestSelect'); 
+            window.renderSidebarPatients(); 
+        };
+
+        window.loadGuests = () => { 
+            let att = window.dbOspiti; 
+            ['clinicalGuestSelect','diariGuestSelect','terapiaGuestSelect','vitaliGuestSelect','appGuestSelect','newRischioOspite','contOspite'].forEach(id=>{ 
+                const s=document.getElementById(id); 
+                if(s){ 
+                    s.innerHTML = '<option value="" disabled selected>Scegli...</option>'; 
+                    att.forEach(g=>s.innerHTML+=`<option value="${g.name}">${g.name}</option>`); 
+                } 
+            }); 
+            if(document.getElementById('dash-guests-count')){ 
+                document.getElementById('dash-guests-count').innerText=att.length; 
+                document.getElementById('dash-guests-detail').innerText=`${att.length} Presenti | 0 Assenti`; 
+            } 
+            window.renderSidebarPatients(); 
+        };
+
+        window.updateGuestData = async () => { 
+            if(window.checkOssRestriction()) return; 
+            const n=document.getElementById('editGuestName').value; 
+            let g=window.dbOspiti.find(x=>x.name===n); 
+            if(g){ 
+                await updateDoc(doc(db,"ospiti",g.id), { 
+                    room:document.getElementById('editGuestRoom').value, 
+                    cf:document.getElementById('editGuestCF').value.toUpperCase(), 
+                    tutoreScadenza: document.getElementById('editGuestTutoreScadenza').value 
+                }); 
+                window.showToast("✅ Anagrafica Aggiornata"); 
+            } 
+        };
+
+        window.handlePatientSelect = (id) => { 
+            const n=document.getElementById(id).value; 
+            if(!n) return; 
+            window.globalSelectedPatient=n; 
+            ['clinicalGuestSelect','diariGuestSelect','terapiaGuestSelect','vitaliGuestSelect'].forEach(i=>{if(document.getElementById(i))document.getElementById(i).value=n;}); 
+            ['clinicalContent','diariContent','terapiaContent','vitaliContent'].forEach(i=>{if(document.getElementById(i))document.getElementById(i).style.display='block';}); 
+            
+            let d = window.dbClinica[n] || {terapiaList:[], vitals:[], chkMarkers:[], lesioniPhotos:[], diarioClinico:[], docs:[]}; 
+            const g = window.dbOspiti.find(x=>x.name===n)||{}; 
+            let av = g.photo ? `<img src="${g.photo}" style="width:100%;height:100%;object-fit:cover;">` : `👤`;
+            let h = `<div style="width:65px;height:65px;border-radius:50%;overflow:hidden;font-size:2em;display:flex;align-items:center;justify-content:center;background:#e2e8f0;">${av}</div><h2>${n}</h2>`; 
+            
+            if(document.getElementById('clinicalHeader')) document.getElementById('clinicalHeader').innerHTML=h; 
+            if(document.getElementById('terapiaHeader')) document.getElementById('terapiaHeader').innerHTML=h; 
+            if(document.getElementById('vitaliHeader')) document.getElementById('vitaliHeader').innerHTML=h; 
+            if(document.getElementById('diariHeader')) document.getElementById('diariHeader').innerHTML=h;
+            
+            if(document.getElementById('editGuestName')){ 
+                document.getElementById('editGuestName').value=n; 
+                document.getElementById('editGuestCF').value=g.cf||''; 
+                document.getElementById('editGuestRoom').value=g.room||''; 
+                document.getElementById('editGuestRef').value=g.ref||''; 
+                document.getElementById('editGuestTutoreScadenza').value=g.tutoreScadenza||''; 
+            } 
+            ['chkGen','chkPiaghe','binaAuto','binaSanita','binaPsiche','binaSociale','paiDataStesura','paiDataRevisione','paiMedico','paiInfermieristico','paiAssistenziale'].forEach(fid=>{if(document.getElementById(fid)) document.getElementById(fid).value=d[fid]||"";}); 
+            
+            /* AGGIORNA STATO E ANTEPRIMA FIRMA PRIVACY A SCHERMO */
+            window.renderTabletPrivacyUI(g.consensi);
+
+            /* CARICAMENTO MARKER E FOTO LESIONI */
+            window.currentBodyMarkers = d.chkMarkers ? [...d.chkMarkers] : []; 
+            window.renderBodyMarkers(); 
+
+            window.currentLesioniPhotos = d.lesioniPhotos ? [...d.lesioniPhotos] : [];
+            window.renderLesioniPhotos();
+
+            window.calcolaBINA(); 
+            window.renderTerapiaTable(n,d); 
+            window.renderVitals(n,d); 
+            window.renderDiario(n,d); 
+            window.renderSidebarPatients(); 
+        };
+
+        window.calcolaBINA = () => { 
+            const getVal = (id) => parseFloat(document.getElementById(id)?.value) || 0; 
+            const tot = getVal('binaAuto') + getVal('binaSanita') + getVal('binaPsiche') + getVal('binaSociale'); 
+            document.getElementById('binaScoreBadge').innerText = `${tot} / 40`; 
+            let cls = "Bassa Non Autosufficienza"; 
+            if (tot >= 25) cls = "🔴 Alta Intensità (R1)"; 
+            else if (tot >= 15) cls = "🟡 Media Intensità (R2)"; 
+            else cls = "🟢 Bassa Intensità (R3)"; 
+            document.getElementById('binaClasseBadge').innerText = `Classe: ${cls}`; 
+        };
+
+        window.saveClinicalData = async () => { 
+            let n=document.getElementById('clinicalGuestSelect').value; 
+            if(!n) return; 
+            let d = window.dbClinica[n]||{}; 
+            ['chkGen','chkPiaghe','binaAuto','binaSanita','binaPsiche','binaSociale','paiDataStesura','paiDataRevisione','paiMedico','paiInfermieristico','paiAssistenziale'].forEach(id=>{if(document.getElementById(id)) d[id]=document.getElementById(id).value;}); 
+            
+            /* SALVATAGGIO DEI PUNTI DEL MODELLINO E DELLE FOTO DELLE LESIONI */
+            d.chkMarkers = window.currentBodyMarkers ? [...window.currentBodyMarkers] : []; 
+            d.lesioniPhotos = window.currentLesioniPhotos ? [...window.currentLesioniPhotos] : [];
+
+            await setDoc(doc(db, "cartelle_cliniche", n), d); 
+            window.showToast("💾 Mappatura Lesioni e Dati Salvati"); 
+        };
+
+        window.saveClinicalDataWithSignature = (sezione) => { 
+            if(window.checkOssRestriction()) return; 
+            window.requestSignature("Salvataggio Dati: " + sezione, async (sig) => { 
+                await window.saveClinicalData(); 
+            }); 
+        };
+
+        /* DIARI CLINICI */
+        window.toggleDiario = (tipo, forceOpen = false) => { 
+            const boxMed = document.getElementById('box-nota-medica'); 
+            const boxInf = document.getElementById('box-nota-infermiere'); 
+            if(tipo === 'medico') boxMed.style.display = (forceOpen || boxMed.style.display === 'none') ? 'block' : 'none'; 
+            else boxInf.style.display = (forceOpen || boxInf.style.display === 'none') ? 'block' : 'none'; 
+        };
+        window.addDiarioWithSignature = (tipo) => { 
+            const n = document.getElementById('diariGuestSelect').value; 
+            if(!n) return window.showToast("⚠️ Seleziona Ospite"); 
+            let txtId = tipo === 'Medico' ? 'notaMedicaText' : 'notaInfText'; 
+            let testo = document.getElementById(txtId).value.trim(); 
+            if(!testo) return window.showToast("⚠️ Scrivi il testo"); 
+            window.requestSignature(`Nota ${tipo}`, async (sig) => { 
+                let d = window.dbClinica[n] || {}; 
+                if(!d.diarioClinico) d.diarioClinico = []; 
+                d.diarioClinico.unshift({ data: window.getTimestamp(), op: window.activeOperator, tipo: `Nota ${tipo}`, testo: testo }); 
+                await setDoc(doc(db,"cartelle_cliniche",n), d); 
+                document.getElementById(txtId).value = ''; 
+                window.renderDiario(n, d); 
+                window.showToast("✅ Nota Salvata"); 
+            }); 
+        };
+        window.renderDiario = (n, d) => { 
+            const listMed = document.getElementById('diariMediciList'); 
+            const listInf = document.getElementById('diariInfList'); 
+            if(listMed) listMed.innerHTML = ''; 
+            if(listInf) listInf.innerHTML = ''; 
+            if(d.diarioClinico) d.diarioClinico.forEach(n => { 
+                let box = `<div style="background:#f8fafc; border:1px solid #cbd5e1; padding:10px; border-radius:6px; margin-bottom:8px;"><small><strong>${n.op}</strong> - ${n.data}</small><div>${n.testo}</div></div>`; 
+                if(n.tipo === 'Nota Medico') listMed.innerHTML += box; 
+                else listInf.innerHTML += box; 
+            }); 
+        };
+
+        /* VITALI E TERAPIE */
+        window.addRapVitalsWithSignature = () => { 
+            if(window.checkOssRestriction()) return; 
+            const n=document.getElementById('vitaliGuestSelect').value; 
+            if(!n) return window.showToast("⚠️ Seleziona Ospite"); 
+            window.requestSignature("Parametri Vitali", async (sig) => { 
+                let d=window.dbClinica[n]||{}; 
+                if(!d.vitals) d.vitals=[]; 
+                d.vitals.unshift({date:window.getTimestamp(), op:window.activeOperator, pa:document.getElementById('rap-vitPA').value, fc:document.getElementById('rap-vitFC').value, spo2:document.getElementById('rap-vitSPO2').value, tc:document.getElementById('rap-vitTC').value}); 
+                await setDoc(doc(db,"cartelle_cliniche",n),d); 
+                window.renderVitals(n,d); 
+                window.showToast("✅ Registrati"); 
+            }); 
+        };
+        window.renderVitals = (n,d) => { 
+            const tb=document.querySelector('#rapVitalsTable tbody'); 
+            if(tb){ 
+                tb.innerHTML=''; 
+                if(d.vitals) d.vitals.forEach(v=>tb.innerHTML+=`<tr><td>${v.date}</td><td>${window.getInitials(v.op)}</td><td>${v.pa}</td><td>${v.fc}</td><td>${v.spo2}</td><td>${v.tc}</td></tr>`); 
+            } 
+        };
+
+        window.addTerapiaItemWithSignature = () => { 
+            if(window.checkOssRestriction()) return; 
+            const n=document.getElementById('terapiaGuestSelect').value; 
+            if(!n) return window.showToast("⚠️ Seleziona ospite"); 
+            window.requestSignature("Prescrizione Terapia", async (sig) => { 
+                let d=window.dbClinica[n]||{}; 
+                if(!d.terapiaList) d.terapiaList=[]; 
+                d.terapiaList.push({farmaco:document.getElementById('terapiaFarmaco').value, posologia:document.getElementById('terapiaPosologia').value, orario:document.getElementById('terapiaOrario').value, signatures:{}}); 
+                await setDoc(doc(db,"cartelle_cliniche",n),d); 
+                window.renderTerapiaTable(n,d); 
+                window.showToast("✅ Prescritto"); 
+            }); 
+        };
+        window.renderTerapiaTable = (n,d) => { 
+            const th=document.getElementById('terapiaGridHead'); 
+            const tb=document.querySelector('#terapiaGridTable tbody'); 
+            if(!th||!tb) return; 
+            th.innerHTML=`<th>Farmaco</th><th>Posologia</th><th>Orario</th>`; 
+            tb.innerHTML=''; 
+            if(d.terapiaList) d.terapiaList.forEach(t=>tb.innerHTML+=`<tr><td>${t.farmaco}</td><td>${t.posologia}</td><td>${t.orario}</td></tr>`); 
+        };
+
+        /* ALTRI MODULI */
+        window.addContenzioneWithSignature = () => { window.requestSignature("Contenzione", async (sig) => { await addDoc(collection(db, "contenzioni"), { ospite: document.getElementById('contOspite').value, tipo: document.getElementById('contTipo').value, motivo: document.getElementById('contMotivo').value, stato: "ATTIVA", firma: sig }); window.showToast("🔒 Salvata"); }); };
+        window.loadContenzioni = () => { const tb = document.querySelector('#contenzioniTable tbody'); if(!tb) return; tb.innerHTML = ''; window.dbContenzioni.forEach(c => tb.innerHTML+=`<tr><td>${c.ospite}</td><td>${c.tipo}</td><td>-</td><td>${c.motivo}</td><td>Firmato</td><td>${c.stato}</td></tr>`); };
+        window.addConsegnaWithSignature = (t) => { window.requestSignature("Consegna", async (sig) => { await addDoc(collection(db,"consegne"), {text:document.getElementById(t==='inf'?'newConsegnaInfText':'newConsegnaOssText').value, type:t, op:window.activeOperator, date:window.getTimestamp()}); window.showToast("✅ Salvata"); }); };
+        window.loadConsegne = () => { ['inf','oss'].forEach(t => { const l = document.getElementById(`consegne${t.charAt(0).toUpperCase()+t.slice(1)}List`); if(l){ l.innerHTML=''; window.dbConsegne.filter(c=>c.type===t).forEach(c=>l.innerHTML+=`<div style="border:1px solid #ccc; padding:8px; margin-bottom:5px; border-radius:6px;"><small>${c.date}</small><div>${c.text}</div></div>`); } }); };
+        window.addEventoRischioWithSignature = () => { window.requestSignature("Incident", async (sig) => { await addDoc(collection(db,"rischio"), {ospite:document.getElementById('newRischioOspite').value, tipo:document.getElementById('newRischioTipo').value, din:document.getElementById('newRischioDinamica').value, data:document.getElementById('newRischioData').value}); window.showToast("Segnalato"); }); };
+        window.loadRischio = () => { const tb=document.querySelector('#rischioTable tbody'); if(tb){ tb.innerHTML=''; window.dbRischio.forEach(r=>tb.innerHTML+=`<tr><td>${window.formatDateSafe(r.data)}</td><td>${r.ospite}</td><td>${r.tipo}</td><td>${r.din}</td></tr>`); } };
+        window.addAppointment = async () => { await addDoc(collection(db,"cup"),{guest:document.getElementById('appGuestSelect').value, type:document.getElementById('appType').value, data:document.getElementById('appDate').value, time:document.getElementById('appTime').value}); window.showToast("CUP OK"); };
+        window.loadAppointments = () => { const tb=document.querySelector('#appointmentsTable tbody'); if(tb){ tb.innerHTML=''; window.dbCup.forEach(c=>tb.innerHTML+=`<tr><td>${window.formatDateSafe(c.data)} ${c.time}</td><td>${c.guest}</td><td>${c.type}</td><td>-</td><td>-</td><td>-</td></tr>`); } };
+        window.addInvItem = async () => { let n = document.getElementById('newInvItem').value.trim(); if(n) await addDoc(collection(db,'magazzino'), {name:n, qty:0}); document.getElementById('newInvItem').value=''; };
+        window.updateInvQty = async (id, chg) => { let itm=window.dbMagazzino.find(i=>i.id===id); if(itm) await updateDoc(doc(db,'magazzino',id), {qty:Math.max(0,itm.qty+chg)}); };
+        window.loadInventory = () => { const gr=document.getElementById('invGrid'); if(!gr) return; gr.innerHTML=''; window.dbMagazzino.forEach(i=>gr.innerHTML+=`<div style="border:1px solid #ccc; padding:10px; display:flex; justify-content:space-between; align-items:center; border-radius:6px;"><strong>${i.name}</strong><div><button class="btn-primary" onclick="window.updateInvQty('${i.id}',-1)">-</button><span style="margin:0 10px;font-weight:bold;">${i.qty}</span><button class="btn-primary" onclick="window.updateInvQty('${i.id}',1)">+</button></div></div>`); };
+
+        /* SNAPSHOTS ROBUSTI CON FALLBACK PROFILI */
+        onSnapshot(collection(db, "operatori"), snap => { 
+            let ops = snap.docs.map(d => ({id: d.id, ...d.data()})); 
+            ops = ops.filter(o => o && o.name && o.name.trim() !== ""); 
+            
+            if(!ops.some(o => o.name === "Admin")) { 
+                ops.push({id:"admin-fallback", name:"Admin", pin:"12345", role:"admin", qualifica:"Direttore Sanitario"}); 
+            } 
+            
+            window.dbOperatori = ops.sort((a,b) => a.name.localeCompare(b.name)); 
+            window.renderLoginProfiles(); 
+        }, err => {
+            console.error("Errore operatori:", err);
+            window.dbOperatori = [{id:"admin-fallback", name:"Admin", pin:"12345", role:"admin", qualifica:"Direttore Sanitario"}];
+            window.renderLoginProfiles();
+        });
+
+        onSnapshot(collection(db, "ospiti"), snap => { 
+            window.dbOspiti = snap.docs.map(d=>({id:d.id, ...d.data()})); 
+            window.loadGuests(); 
+        });
+
+        onSnapshot(collection(db, "cartelle_cliniche"), snap => { 
+            window.dbClinica = {}; 
+            snap.forEach(d => { window.dbClinica[d.id] = d.data(); }); 
+            if(window.dbOspiti.length > 0) window.loadAlerts(); 
+        });
+
+        onSnapshot(collection(db, "rischio"), snap => { 
+            window.dbRischio = snap.docs.map(d=>({id:d.id, ...d.data()})); 
+            window.loadRischio(); 
+        });
+
+        onSnapshot(collection(db, "cup"), snap => { 
+            window.dbCup = snap.docs.map(d=>({id:d.id, ...d.data()})); 
+            window.loadAppointments(); 
+        });
+
+        onSnapshot(collection(db, "stupefacenti_inv"), snap => { 
+            window.dbStupefacentiInv = snap.docs.map(d=>({id:d.id, ...d.data()})); 
+        });
+
+        onSnapshot(collection(db, "consegne"), snap => { 
+            window.dbConsegne = snap.docs.map(d=>({id:d.id, ...d.data()})); 
+            window.loadConsegne(); 
+        });
+
+        onSnapshot(collection(db, "contenzioni"), snap => { 
+            window.dbContenzioni = snap.docs.map(d=>({id:d.id, ...d.data()})); 
+            window.loadContenzioni(); 
+        });
+
+        onSnapshot(collection(db, "magazzino"), snap => { 
+            window.dbMagazzino = snap.docs.map(d=>({id:d.id, ...d.data()})); 
+            window.loadInventory(); 
+        });
+
+        window.onload = () => { 
+            const dl = document.getElementById('listaFarmaciAifa'); 
+            if(dl) prontuario.forEach(f => { let opt = document.createElement('option'); opt.value = f; dl.appendChild(opt); }); 
+            window.renderLoginProfiles();
         };
     </script>
 </body>
