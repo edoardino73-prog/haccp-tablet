@@ -34,6 +34,7 @@
         @keyframes slideUp { from { opacity: 0; transform: translateY(20px); } to { opacity: 1; transform: translateY(0); } }
         @keyframes fadeIn { from { opacity: 0; transform: translateY(-10px); } to { opacity: 1; transform: translateY(0); } }
 
+        /* PERMESSI E QUALIFICHE */
         body[data-qualifica="OSS"] .restrict-oss { display: none !important; }
         body[data-qualifica="OSS"] textarea.restrict-oss-input, 
         body[data-qualifica="OSS"] input.restrict-oss-input, 
@@ -58,6 +59,7 @@
         body[data-qualifica="Amministrazione"] .req-haccp, 
         body[data-role="admin"] .req-haccp { display: flex !important; }
 
+        /* MODALI E LOGIN */
         #signature-modal { display: none; position: fixed; top: 0; left: 0; width: 100vw; height: 100vh; background: rgba(15, 23, 42, 0.85); z-index: 30000; flex-direction: column; align-items: center; justify-content: center; backdrop-filter: blur(4px); }
         .signature-box { background: white; padding: 20px; border-radius: 12px; width: 90%; max-width: 500px; box-shadow: 0 10px 30px rgba(0,0,0,0.3); text-align: center; display:flex; flex-direction:column; gap: 15px;}
         #sig-canvas { border: 2px dashed var(--primary-color); border-radius: 6px; width: 100%; height: 220px; background: #f8fafc; cursor: crosshair; touch-action: none; }
@@ -129,11 +131,10 @@
         .data-table th { background-color: var(--primary-color); color: white; font-weight: bold; text-transform: uppercase; font-size: 0.9em; }
         .data-table tr:nth-child(even) { background-color: #f1f5f9; }
         
-        .terapia-table { width: 100%; border-collapse: collapse; font-size: 0.95em; text-align:center; min-width: 900px; background: #ffffff;}
-        .terapia-table th, .terapia-table td { border: 1px solid #cbd5e1; padding: 5px; }
+        .terapia-table { width: 100%; border-collapse: collapse; font-size: 0.95em; text-align:center; min-width: 600px; background: #ffffff;}
+        .terapia-table th, .terapia-table td { border: 1px solid #cbd5e1; padding: 8px; }
         .terapia-table th { background: var(--terapia-color); color: white; padding: 10px 5px; font-weight: bold; }
-        .terapia-table tr:nth-child(even) td:not(.farmaco-col) { background-color: #f8fafc; }
-        .terapia-table td.farmaco-col { text-align:left; padding: 10px; min-width: 220px; background: #f0f9ff; position: sticky; left: 0; z-index: 2; border-right: 3px solid var(--terapia-color); }
+        .terapia-table tr:nth-child(even) { background-color: #f8fafc; }
         
         .clinical-header { display: flex; align-items: center; gap: 15px; background: #ffffff; border: 1px solid var(--border-color); border-left: 8px solid var(--primary-color); padding: 15px; margin-bottom: 20px; border-radius:10px; }
         .clinical-header img { width: 65px; height: 65px; border-radius: 50%; object-fit: cover; border: 2px solid var(--border-color);}
@@ -249,7 +250,6 @@
                 </div>
             </div>
 
-            <!-- SOTTOMODULI HACCP -->
             <div id="ws-merci" class="workspace"><div class="card" style="border-top: 4px solid #d97706; max-width: 700px; margin: 0 auto;"><div class="form-group"><label>Data</label><input type="date" id="merciData"></div><div class="form-group"><label>Fornitore</label><input type="text" id="merciFornitore"></div><div class="form-group"><label>Temperatura (°C)</label><input type="number" id="merciTemp" step="0.1"></div><div class="form-group"><label>Imballaggi</label><select id="merciImballaggi"><option value="Intatti">✅ Intatti</option><option value="Danneggiati">❌ Danneggiati</option></select></div><div class="form-group"><label>Esito</label><select id="merciEsito"><option value="Accettata">✅ Accettata</option><option value="Respinta">❌ Respinta</option></select></div><button class="btn-primary" style="background:#d97706; width:100%;" onclick="window.saveHaccpMerci()">✍️ Firma e Salva</button></div></div>
             <div id="ws-tracc" class="workspace"><div class="card" style="border-top: 4px solid #14b8a6; max-width: 700px; margin: 0 auto;"><div class="form-group"><label>Data</label><input type="date" id="traccData"></div><div class="form-group"><label>Categoria</label><select id="traccCat"><option value="Carne">Carne</option><option value="Pesce">Pesce</option><option value="Latticini">Latticini</option></select></div><div class="form-group" style="text-align:center;"><input type="file" accept="image/*" capture="environment" id="traccFile" style="display:none;" onchange="window.processFileUpload(event, 'haccpTracc')"><button class="btn-outline" style="width:100%;" onclick="document.getElementById('traccFile').click()">📷 Scatta Foto Lotto</button><div id="traccPreviewContainer" style="display:none; margin-top:10px;"><img id="traccImgPreview" style="max-height:150px; border-radius:6px;"></div></div><button class="btn-primary" style="background:#14b8a6; width:100%;" onclick="window.saveHaccpTracc()">✍️ Firma e Salva</button></div></div>
             <div id="ws-temp" class="workspace"><div class="card" style="border-top: 4px solid #65a30d; max-width: 700px; margin: 0 auto;"><div class="form-group"><label>Data</label><input type="date" id="tempData"></div><div id="dynamic-temp-grid"></div><button class="btn-primary" style="background:#65a30d; width:100%;" onclick="window.saveHaccpTemp()">✍️ Firma e Salva</button></div></div>
@@ -505,14 +505,20 @@
                 <div id="terapiaContent" style="display:none;">
                     <div class="clinical-header" id="terapiaHeader"></div>
                     <div class="card" style="padding: 20px;">
-                        <div class="card-header"><h3 style="color:var(--terapia-color);">Prospetto Terapia Ordinaria</h3></div>
+                        <div class="card-header"><h3 style="color:var(--terapia-color);">Somministrazione e Prescrizione Terapia</h3></div>
                         <div class="only-medico" style="display:flex; gap:15px; margin:20px 0; flex-wrap:wrap; background:#f0f9ff; padding:20px; border:1px solid #bae6fd; border-radius:10px;">
                             <div style="flex:2; min-width:200px;"><label>Farmaco</label><input type="text" id="terapiaFarmaco" list="listaFarmaciAifa"><datalist id="listaFarmaciAifa"></datalist></div>
                             <div style="flex:1; min-width:140px;"><label>Posologia</label><input type="text" id="terapiaPosologia"></div>
-                            <div style="flex:1.5; min-width:150px;"><label>Orario</label><select id="terapiaOrario" style="width:100%;"><option value="08:00">08:00 (Mattina)</option><option value="12:00">12:00 (Pranzo)</option><option value="18:00">18:00 (Sera)</option><option value="20:00">20:00 (Cena)</option></select></div>
-                            <div style="display:flex; align-items:flex-end; width:100%; justify-content:flex-end;"><button class="btn-primary" style="background:var(--terapia-color);" onclick="window.addTerapiaItemWithSignature()">✍️ Prescrivi (Firma)</button></div>
+                            <div style="flex:1.5; min-width:150px;"><label>Orario</label><select id="terapiaOrario" style="width:100%;"><option value="08:00">08:00 (Mattina)</option><option value="12:00">12:00 (Pranzo)</option><option value="18:00">18:00 (Sera)</option><option value="20:00">20:00 (Cena)</option><option value="08:00 - 20:00">08:00 - 20:00</option><option value="08:00 - 12:00 - 18:00">08:00 - 12:00 - 18:00</option><option value="Al bisogno">Al bisogno</option><option value="Firma">Solo Firma</option></select></div>
+                            <div style="display:flex; align-items:flex-end; width:100%; justify-content:flex-end;"><button class="btn-primary" style="background:var(--terapia-color);" onclick="window.addTerapiaItemWithSignature()">✍️ Prescrivi Farmaco</button></div>
                         </div>
-                        <div style="overflow-x:auto;"><table class="terapia-table" id="terapiaGridTable"><thead><tr id="terapiaGridHead"></tr></thead><tbody></tbody></table></div>
+                        <div style="overflow-x:auto;">
+                            <!-- TABELLA TERAPIA AGGIORNATA PER LA FIRMA GIORNALIERA EMAR -->
+                            <table class="terapia-table" id="terapiaGridTable">
+                                <thead><tr id="terapiaGridHead"></tr></thead>
+                                <tbody></tbody>
+                            </table>
+                        </div>
                     </div>
                 </div>
             </div>
@@ -586,6 +592,7 @@
         </div>
     </div>
 
+    <!-- SCRIPT E LOGICA FIREBASE + FIRMA TOUCHSCREEN -->
     <script type="module">
         import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-app.js";
         import { initializeAppCheck, ReCaptchaEnterpriseProvider } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-app-check.js";
@@ -673,7 +680,7 @@
                         await uploadString(storageRef, b64, 'data_url');
                         finalUrl = await getDownloadURL(storageRef);
                     } catch (err) {
-                        console.warn("Storage non configurato o bloccato, uso fallback Base64", err);
+                        console.warn("Storage non configurato o bloccato, uso fallback Base64 ad altissima compressione", err);
                         finalUrl = cv.toDataURL('image/jpeg', 0.4); 
                     }
                     window.currentLesioniPhotos.unshift({ id: Date.now(), url: finalUrl, desc: desc || 'Lesione', data: window.getTimestamp(), op: window.activeOperator });
@@ -687,6 +694,7 @@
         window.renderLesioniPhotos = () => { const grid = document.getElementById('lesioniPhotoGrid'); if(!grid) return; grid.innerHTML = ''; if(!window.currentLesioniPhotos || window.currentLesioniPhotos.length === 0) { grid.innerHTML = '<div style="grid-column:1/-1; color:var(--text-light); text-align:center; padding:15px; font-size:0.9em;">Nessuna foto acquisita per questo paziente.</div>'; return; } window.currentLesioniPhotos.forEach((item, idx) => { const card = document.createElement('div'); card.style.cssText = 'background:#f1f5f9; border:1px solid #cbd5e1; border-radius:6px; padding:6px; display:flex; flex-direction:column; gap:4px; text-align:center; box-shadow:0 1px 3px rgba(0,0,0,0.05);'; let imgSrc = item.url || item.b64; card.innerHTML = `<a href="${imgSrc}" target="_blank"><img src="${imgSrc}" style="width:100%; height:95px; object-fit:cover; border-radius:4px; border:1px solid #cbd5e1;"></a><div style="font-size:0.8em; font-weight:bold; overflow:hidden; text-overflow:ellipsis; white-space:nowrap;" title="${item.desc}">${item.desc}</div><div style="font-size:0.7em; color:var(--text-light);">${item.data.split(' alle ')[0]} (${window.getInitials(item.op)})</div><button type="button" class="btn-danger restrict-oss" style="padding:4px; font-size:0.75em; margin-top:2px;" onclick="window.deleteLesionePhoto(${idx})">🗑️ Rimuovi</button>`; grid.appendChild(card); }); };
         window.deleteLesionePhoto = (idx) => { if(window.checkOssRestriction()) return; if(confirm("Eliminare questa fotografia di lesione?")) { window.currentLesioniPhotos.splice(idx, 1); window.renderLesioniPhotos(); window.showToast("Fotografia rimossa. Salva le modifiche."); } };
 
+        /* LOGIN E PROFILI */
         window.renderLoginProfiles = () => { const c = document.getElementById('profiles-container'); if(!c) return; c.innerHTML = ''; let vOps = (window.dbOperatori && window.dbOperatori.length > 0) ? window.dbOperatori : [{id: "admin-fallback", name: "Admin", pin: "12345", role: "admin", qualifica: "Direttore Sanitario"}]; vOps.forEach(op => { let div = document.createElement('div'); div.className = 'profile-card'; div.innerHTML = `<div class="profile-avatar">🧑‍⚕️</div><div class="profile-name">${op.name.split(' ')[0]}</div><div class="profile-role">${op.qualifica||''}</div>`; div.onclick = () => window.showPinPad(op); c.appendChild(div); }); };
         window.showPinPad = (op) => { window.selectedLoginUser = op; window.currentPin = ""; document.getElementById('profiles-container').style.display = 'none'; document.getElementById('pin-pad-area').style.display = 'flex'; document.getElementById('pin-welcome').innerText = "Ciao " + op.name.split(' ')[0]; window.updatePinDisplay(); };
         window.addPin = (num) => { if(window.currentPin.length < 5) window.currentPin += num; window.updatePinDisplay(); };
@@ -712,6 +720,7 @@
         window.saveHaccpPest = async () => { await addDoc(collection(db, "haccp_pest_control"), { data: document.getElementById('pestDate').value, postazione: document.getElementById('pestName').value }); window.showToast("✅ Salvato!"); window.switchTab('haccp', '🛡️ HACCP'); };
         window.saveHaccpSicurezza = async () => { await addDoc(collection(db, "sicurezza_scadenze"), { nome: document.getElementById('sicDocName').value, data: document.getElementById('sicDocDate').value }); window.showToast("✅ Salvato!"); window.switchTab('haccp', '🛡️ HACCP'); };
 
+        /* GESTIONE CLINICA E PAZIENTI */
         window.renderSidebarPatients = () => { const l = document.getElementById('sidebarPatientList'); const s = document.getElementById('sidebarSearch')?.value.toLowerCase()||''; if(!l) return; l.innerHTML=''; window.dbOspiti.forEach(g => { if(s && !g.name.toLowerCase().includes(s)) return; let av = g.photo ? `<img src="${g.photo}" class="sidebar-avatar">` : `<div class="sidebar-avatar">👤</div>`; l.innerHTML += `<div class="sidebar-item ${g.name===window.globalSelectedPatient?'active':''}" onclick="window.selectPatientGlobal('${g.name}')">${av}<div style="font-weight:bold; overflow:hidden; text-overflow:ellipsis;">${g.name}</div></div>`; }); };
         window.selectPatientGlobal = (n) => { window.globalSelectedPatient = n; ['clinicalGuestSelect', 'diariGuestSelect', 'terapiaGuestSelect', 'vitaliGuestSelect', 'appGuestSelect', 'newRischioOspite', 'contOspite'].forEach(id => { const s=document.getElementById(id); if(s && [...s.options].some(o=>o.value===n)) s.value=n; }); window.handlePatientSelect('clinicalGuestSelect'); window.renderSidebarPatients(); };
         window.loadGuests = () => { let att = window.dbOspiti; ['clinicalGuestSelect','diariGuestSelect','terapiaGuestSelect','vitaliGuestSelect','appGuestSelect','newRischioOspite','contOspite'].forEach(id=>{ const s=document.getElementById(id); if(s){ s.innerHTML = '<option value="" disabled selected>Scegli...</option>'; att.forEach(g=>s.innerHTML+=`<option value="${g.name}">${g.name}</option>`); } }); if(document.getElementById('dash-guests-count')){ document.getElementById('dash-guests-count').innerText=att.length; document.getElementById('dash-guests-detail').innerText=`${att.length} Presenti | 0 Assenti`; } window.renderSidebarPatients(); };
@@ -739,7 +748,7 @@
 
         window.calcolaBINA = () => { const getVal = (id) => parseFloat(document.getElementById(id)?.value) || 0; const tot = getVal('binaAuto') + getVal('binaSanita') + getVal('binaPsiche') + getVal('binaSociale'); document.getElementById('binaScoreBadge').innerText = `${tot} / 40`; let cls = "Bassa Non Autosufficienza"; if (tot >= 25) cls = "🔴 Alta Intensità (R1)"; else if (tot >= 15) cls = "🟡 Media Intensità (R2)"; else cls = "🟢 Bassa Intensità (R3)"; document.getElementById('binaClasseBadge').innerText = `Classe: ${cls}`; };
 
-        // SALVATAGGIO CLINICO CON { merge: true } APPLICATO CHIRURGICAMENTE
+        // SALVATAGGIO CLINICO CON { merge: true } APPLICATO
         window.saveClinicalData = async () => { 
             let n = document.getElementById('clinicalGuestSelect').value; 
             if(!n) return; 
@@ -829,7 +838,7 @@
         };
         window.renderVitals = (n,d) => { const tb=document.querySelector('#rapVitalsTable tbody'); if(tb){ tb.innerHTML=''; if(d.vitals) d.vitals.forEach(v=>tb.innerHTML+=`<tr><td>${v.date}</td><td>${window.getInitials(v.op)}</td><td>${v.pa}</td><td>${v.fc}</td><td>${v.spo2}</td><td>${v.tc}</td></tr>`); } };
         
-        // TERAPIA CON { merge: true } APPLICATO
+        // TERAPIA CON FIRMA GIORNALIERA EMAR + { merge: true }
         window.addTerapiaItemWithSignature = () => { 
             if(window.checkOssRestriction()) return; 
             const n = document.getElementById('terapiaGuestSelect').value; 
@@ -848,7 +857,89 @@
                 window.showToast("✅ Prescritto"); 
             }); 
         };
-        window.renderTerapiaTable = (n,d) => { const th=document.getElementById('terapiaGridHead'); const tb=document.querySelector('#terapiaGridTable tbody'); if(!th||!tb) return; th.innerHTML=`<th>Farmaco</th><th>Posologia</th><th>Orario</th>`; tb.innerHTML=''; if(d.terapiaList) d.terapiaList.forEach(t=>tb.innerHTML+=`<tr><td>${t.farmaco}</td><td>${t.posologia}</td><td>${t.orario}</td></tr>`); };
+
+        window.signTerapia = async (i, dStr, slot) => { 
+            const n = document.getElementById('terapiaGuestSelect').value; 
+            let d = window.dbClinica[n]; 
+            if(!d || !d.terapiaList) return;
+            let item = d.terapiaList[i]; 
+            if(!item.signatures) item.signatures = {}; 
+            let sk = `${dStr}_${slot}`; 
+            
+            if((item.signatures[sk] && item.signatures[sk].op) || (item.signatures[dStr] && item.signatures[dStr].op)){ 
+                if(window.isMedicoOrAdmin() || window.activeOperatorQualifica === 'Infermiere'){ 
+                    if(confirm("REVOCARE la somministrazione?")){ 
+                        if(item.signatures[sk]) delete item.signatures[sk]; 
+                        if(item.signatures[dStr]) delete item.signatures[dStr]; 
+                        await setDoc(doc(db,"cartelle_cliniche",n), d, { merge: true }); 
+                        window.renderTerapiaTable(n,d); 
+                        window.showToast("Revocata");
+                    } 
+                } else { 
+                    window.showToast("🔒 Solo Medico/Inf. può revocare"); 
+                } 
+                return; 
+            } 
+            
+            if(window.activeOperatorQualifica !== 'Direttore Sanitario' && window.activeOperatorQualifica !== 'Infermiere' && window.activeOperatorQualifica !== 'Medico' && window.activeOperatorRole !== 'admin') {
+                return window.showToast("🚫 Solo Inf/Med"); 
+            }
+            if(dStr !== window.getTodayString()) return window.showToast("⚠️ Solo oggi"); 
+            
+            item.signatures[sk] = {op: window.activeOperator, time: new Date().toLocaleTimeString('it-IT')}; 
+            await setDoc(doc(db,"cartelle_cliniche",n), d, { merge: true }); 
+            window.renderTerapiaTable(n,d); 
+            window.showToast("✅ Somministrata");
+        };
+
+        window.deleteTerapiaItem = async (i) => { 
+            if(!window.isMedicoOrAdmin()) return window.showToast("⚠️ Solo Medico"); 
+            if(!confirm("Cancellare prescrizione?")) return; 
+            const n = document.getElementById('terapiaGuestSelect').value; 
+            let d = window.dbClinica[n]; 
+            d.terapiaList.splice(i,1); 
+            await setDoc(doc(db,"cartelle_cliniche",n), d, { merge: true }); 
+            window.renderTerapiaTable(n,d); 
+        };
+
+        window.renderTerapiaTable = (n, d) => { 
+            const th = document.getElementById('terapiaGridHead'); 
+            const tb = document.querySelector('#terapiaGridTable tbody'); 
+            if(!th || !tb) return; 
+            
+            let tS = window.getTodayString();
+            let [y, m, day] = tS.split('-');
+            let todayLabel = `${day}/${m}/${y}`;
+            
+            th.innerHTML = `<th>Farmaco</th><th>Posologia</th><th style="text-align:center;">Oggi (${todayLabel})</th><th class="restrict-oss">Del</th>`; 
+            tb.innerHTML = ''; 
+            
+            if(!d.terapiaList || d.terapiaList.length === 0){ 
+                tb.innerHTML = `<tr><td colspan="4" style="text-align:center;">Nessuna terapia in atto.</td></tr>`; 
+                return; 
+            } 
+            
+            let rows = ""; 
+            d.terapiaList.forEach((t, i) => { 
+                let fC = `<strong>${t.farmaco}</strong>`; 
+                let pO = `<span style="color:var(--terapia-color); font-weight:bold;">${t.posologia||'-'}</span><br><small>🕒 ${t.orario||''}</small>`; 
+                
+                let oA = (t.orario && t.orario !== 'Firma') ? t.orario.split('-').map(s=>s.trim()) : ["Firma"]; 
+                let cC = ""; 
+                
+                oA.forEach(sl => { 
+                    let sig = t.signatures ? (t.signatures[`${tS}_${sl}`] || t.signatures[tS]) : null; 
+                    if(sig) {
+                        cC += `<div style="background:#d1fae5; border:1px solid #34d399; border-radius:4px; padding:6px; margin:4px 0; font-size:0.9em; font-weight:bold; color:#065f46; text-align:center; cursor:pointer;" onclick="window.signTerapia(${i},'${tS}','${sl}')">✅ ${sl}: ${window.getInitials(sig.op)}</div>`; 
+                    } else {
+                        cC += `<button class="btn-outline" style="padding:6px; font-size:0.9em; margin:4px 0; width:100%; display:block;" onclick="window.signTerapia(${i},'${tS}','${sl}')">✍️ ${sl}</button>`; 
+                    }
+                }); 
+                
+                rows += `<tr><td>${fC}</td><td>${pO}</td><td style="vertical-align:middle; padding:5px;">${cC}</td><td class="restrict-oss"><button class="btn-danger" style="padding:8px;" onclick="window.deleteTerapiaItem(${i})">X</button></td></tr>`; 
+            }); 
+            tb.innerHTML = rows; 
+        };
 
         window.addContenzioneWithSignature = () => { 
             window.requestSignature("Prescrizione Contenzione", async (sig) => { 
