@@ -119,7 +119,8 @@
 
         .form-group { margin-bottom: 15px; }
         .form-group label { display: block; margin-bottom: 5px; font-weight: bold; font-size: 0.95em; color: var(--text-light); }
-        input[type="text"], input[type="password"], input[type="number"], input[type="date"], input[type="time"], textarea, select { width: 100%; padding: 10px 12px; border: 1px solid #cbd5e1; border-radius: 6px; box-sizing: border-box; background-color: var(--input-bg); color: var(--text-main); font-family: inherit; font-size: 1rem; transition: 0.2s; }
+        input[type="text"], input[type="password"], input[type="number"], input[type="date"], input[type="time"], textarea, select, input[type="checkbox"] { width: 100%; padding: 10px 12px; border: 1px solid #cbd5e1; border-radius: 6px; box-sizing: border-box; background-color: var(--input-bg); color: var(--text-main); font-family: inherit; font-size: 1rem; transition: 0.2s; }
+        input[type="checkbox"] { width: auto; }
         input:focus, select:focus, textarea:focus { border-color: var(--primary-color); outline: none; background-color: #ffffff; box-shadow: 0 0 0 3px rgba(13, 148, 136, 0.15); }
         
         .metrics-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(180px, 1fr)); gap: 15px; margin-bottom: 20px; }
@@ -214,9 +215,13 @@
         <button class="module-btn" style="background: linear-gradient(135deg, #2563eb, #1d4ed8);" onclick="window.switchTab('terapia', '💊 Terapia Standard')"><span class="module-icon">💊</span>Terapia Ord.</button>
         <button class="module-btn" style="background: linear-gradient(135deg, #ea580c, #c2410c);" onclick="window.switchTab('consegne', '📖 Diario e Consegne')"><span class="module-icon">📖</span>Consegne Reparto</button>
         <button class="module-btn restrict-oss" style="background: linear-gradient(135deg, #e11d48, #be123c);" onclick="window.switchTab('contenzioni', '🔒 Registro Contenzioni')"><span class="module-icon">🔒</span>Contenzioni</button>
-        <button class="module-btn restrict-oss" style="background: linear-gradient(135deg, #ca8a04, #a16207);" onclick="window.switchTab('rischio', '⚠️ Incident Reporting')"><span class="module-icon">⚠️</span>Rischio Clinico</button>
+        <button class="module-btn restrict-oss" style="background: linear-gradient(135deg, #ca8a04, #a16207);" onclick="window.switchTab('rischio', '⚠️ Incident Reporting')"><span class="module-icon">⚠️</span>Rischio & 81/08</button>
         <button class="module-btn" style="background: linear-gradient(135deg, #d97706, #b45309);" onclick="window.switchTab('appuntamenti', '📅 Agenda e CUP')"><span class="module-icon">📅</span>Agenda CUP</button>
         <button class="module-btn" style="background: linear-gradient(135deg, #059669, #047857);" onclick="window.switchTab('magazzino', '📦 Scorte Magazzino')"><span class="module-icon">📦</span>Magazzino</button>
+        
+        <!-- COLLEGAMENTI CROSS-FILE PER NAVIGAZIONE ECOSISTEMA -->
+        <button class="module-btn req-haccp" style="background: linear-gradient(135deg, #334155, #0f172a); border: 2px solid #94a3b8;" onclick="window.location.href='haccp_sicurezza_dash.html'"><span class="module-icon">📊</span>Cruscotto HACCP</button>
+        <button class="module-btn req-medico" style="background: linear-gradient(135deg, #7c3aed, #5b21b6); border: 2px solid #a78bfa;" onclick="window.location.href='iso_9001_accreditamento.html'"><span class="module-icon">🏆</span>Qualità & ISO</button>
     </div>
 
     <div id="appScreen">
@@ -229,11 +234,12 @@
 
         <div class="main-content">
 
-            <!-- HACCP -->
+            <!-- HACCP MENU -->
             <div id="ws-haccp" class="workspace">
                 <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); gap: 15px; padding: 5px; margin-bottom: 20px;">
                     <div class="haccp-card" style="border-bottom-color: #d97706;" onclick="window.openHaccpSub('merci', '📦 Merci in Arrivo')"><span class="haccp-icon">📦</span><span>Merci in Arrivo</span></div>
                     <div class="haccp-card" style="border-bottom-color: #14b8a6;" onclick="window.openHaccpSub('tracc', '🔍 Tracciabilità Lotti')"><span class="haccp-icon">🔍</span><span>Tracciabilità Lotti</span></div>
+                    <div class="haccp-card" style="border-bottom-color: #059669;" onclick="window.openHaccpSub('ciclo-cucina', '🍳 Ciclo Cucina Integrato')"><span class="haccp-icon">🍳</span><span>Ciclo Cucina (Prep-Cott)</span></div>
                     <div class="haccp-card" style="border-bottom-color: #65a30d;" onclick="window.openHaccpSub('temp', '🌡️ Temperature')"><span class="haccp-icon">🌡️</span><span>Temperature Impianti</span></div>
                     <div class="haccp-card" style="border-bottom-color: #0284c7;" onclick="window.openHaccpSub('aree', '✨ Sanificazione Aree')"><span class="haccp-icon">✨</span><span>Sanificazione Aree</span></div>
                     <div class="haccp-card" style="border-bottom-color: #8b5cf6;" onclick="window.openHaccpSub('pulizie', '🧹 Pulizie Quotidiane')"><span class="haccp-icon">🧹</span><span>Pulizie Quotidiane</span></div>
@@ -250,13 +256,108 @@
                 </div>
             </div>
 
-            <div id="ws-merci" class="workspace"><div class="card" style="border-top: 4px solid #d97706; max-width: 700px; margin: 0 auto;"><div class="form-group"><label>Data</label><input type="date" id="merciData"></div><div class="form-group"><label>Fornitore</label><input type="text" id="merciFornitore"></div><div class="form-group"><label>Temperatura (°C)</label><input type="number" id="merciTemp" step="0.1"></div><div class="form-group"><label>Imballaggi</label><select id="merciImballaggi"><option value="Intatti">✅ Intatti</option><option value="Danneggiati">❌ Danneggiati</option></select></div><div class="form-group"><label>Esito</label><select id="merciEsito"><option value="Accettata">✅ Accettata</option><option value="Respinta">❌ Respinta</option></select></div><button class="btn-primary" style="background:#d97706; width:100%;" onclick="window.saveHaccpMerci()">✍️ Firma e Salva</button></div></div>
-            <div id="ws-tracc" class="workspace"><div class="card" style="border-top: 4px solid #14b8a6; max-width: 700px; margin: 0 auto;"><div class="form-group"><label>Data</label><input type="date" id="traccData"></div><div class="form-group"><label>Categoria</label><select id="traccCat"><option value="Carne">Carne</option><option value="Pesce">Pesce</option><option value="Latticini">Latticini</option></select></div><div class="form-group" style="text-align:center;"><input type="file" accept="image/*" capture="environment" id="traccFile" style="display:none;" onchange="window.processFileUpload(event, 'haccpTracc')"><button class="btn-outline" style="width:100%;" onclick="document.getElementById('traccFile').click()">📷 Scatta Foto Lotto</button><div id="traccPreviewContainer" style="display:none; margin-top:10px;"><img id="traccImgPreview" style="max-height:150px; border-radius:6px;"></div></div><button class="btn-primary" style="background:#14b8a6; width:100%;" onclick="window.saveHaccpTracc()">✍️ Firma e Salva</button></div></div>
-            <div id="ws-temp" class="workspace"><div class="card" style="border-top: 4px solid #65a30d; max-width: 700px; margin: 0 auto;"><div class="form-group"><label>Data</label><input type="date" id="tempData"></div><div id="dynamic-temp-grid"></div><button class="btn-primary" style="background:#65a30d; width:100%;" onclick="window.saveHaccpTemp()">✍️ Firma e Salva</button></div></div>
-            <div id="ws-aree" class="workspace"><div class="card" style="border-top: 4px solid #0284c7; max-width: 700px; margin: 0 auto;"><div class="form-group"><label>Data</label><input type="date" id="areeData"></div><div class="check-grid" id="dynamic-aree-grid"></div><button class="btn-primary" style="background:#0284c7; width:100%;" onclick="window.saveHaccpAree()">✍️ Firma e Salva</button></div></div>
-            <div id="ws-pulizie" class="workspace"><div class="card" style="border-top: 4px solid #8b5cf6; max-width: 700px; margin: 0 auto;"><div class="form-group"><label>Data</label><input type="date" id="pulizieData"></div><div class="check-grid" id="dynamic-pulizie-grid"></div><button class="btn-primary" style="background:#8b5cf6; width:100%;" onclick="window.saveHaccpPulizie()">✍️ Firma e Salva</button></div></div>
-            <div id="ws-pest" class="workspace"><div class="card" style="border-top: 4px solid #ea580c; max-width: 700px; margin: 0 auto;"><div class="form-group"><label>Data</label><input type="date" id="pestDate"></div><div class="form-group"><label>Postazione</label><input type="text" id="pestName"></div><button class="btn-primary" style="background:#ea580c; width:100%;" onclick="window.saveHaccpPest()">Salva</button></div></div>
-            <div id="ws-sicurezza" class="workspace"><div class="card" style="border-top: 4px solid #9333ea; max-width: 700px; margin: 0 auto;"><div class="form-group"><label>Documento</label><input type="text" id="sicDocName"></div><div class="form-group"><label>Scadenza</label><input type="date" id="sicDocDate"></div><button class="btn-primary" style="background:#9333ea; width:100%;" onclick="window.saveHaccpSicurezza()">Salva</button></div></div>
+            <!-- HACCP FORMS AGGIORNATI CON AZIONI CORRETTIVE -->
+            <div id="ws-merci" class="workspace">
+                <div class="card" style="border-top: 4px solid #d97706; max-width: 700px; margin: 0 auto;">
+                    <div class="form-group"><label>Data</label><input type="date" id="merciData"></div>
+                    <div class="form-group"><label>Fornitore</label><input type="text" id="merciFornitore" placeholder="Es. Rossi Carni SpA"></div>
+                    <div class="form-group"><label>Prodotto</label><input type="text" id="merciProdotto" placeholder="Descrizione sommaria"></div>
+                    <div class="form-group"><label>Temperatura (°C)</label><input type="number" id="merciTemp" step="0.1" placeholder="Opzionale"></div>
+                    <div class="form-group"><label>Stato Imballaggi</label><select id="merciImballaggi"><option value="Intatti">✅ Intatti</option><option value="Danneggiati">❌ Danneggiati</option></select></div>
+                    <div class="form-group"><label>Esito Controllo</label><select id="merciEsito"><option value="Merce Accettata">✅ Accettata</option><option value="Accettata con Riserva">⚠️ Accettata con Riserva</option><option value="Respinta">❌ Respinta</option></select></div>
+                    <div class="form-group"><label>Azione Correttiva (se riserva/respinta)</label><input type="text" id="merciAzione" placeholder="Es. Reso immediato..."></div>
+                    <button class="btn-primary" style="background:#d97706; width:100%;" onclick="window.saveHaccpMerci()">✍️ Firma e Salva</button>
+                </div>
+            </div>
+            
+            <div id="ws-tracc" class="workspace">
+                <div class="card" style="border-top: 4px solid #14b8a6; max-width: 700px; margin: 0 auto;">
+                    <div class="form-group"><label>Data</label><input type="date" id="traccData"></div>
+                    <div class="form-group"><label>Categoria</label><select id="traccCat"><option value="Carni fresche">Carni fresche</option><option value="Ittico">Ittico</option><option value="Latticini e Formaggi">Latticini e Formaggi</option><option value="Prodotti Secchi">Prodotti Secchi</option><option value="Altro (Generico)">Altro (Generico)</option></select></div>
+                    <div class="form-group" style="text-align:center;"><input type="file" accept="image/*" capture="environment" id="traccFile" style="display:none;" onchange="window.processFileUpload(event, 'haccpTracc')"><button class="btn-outline" style="width:100%;" onclick="document.getElementById('traccFile').click()">📷 Scatta Foto Lotto</button><div id="traccPreviewContainer" style="display:none; margin-top:10px;"><img id="traccImgPreview" style="max-height:150px; border-radius:6px;"></div></div>
+                    <button class="btn-primary" style="background:#14b8a6; width:100%;" onclick="window.saveHaccpTracc()">✍️ Firma e Salva</button>
+                </div>
+            </div>
+
+            <!-- TAB: CICLO CUCINA INTEGRATO (TABLET) -->
+            <div id="ws-ciclo-cucina" class="workspace">
+                <div class="card" style="border-top: 4px solid #059669; max-width: 700px; margin: 0 auto;">
+                    <h3 style="color:#059669; margin-top:0; margin-bottom:15px; border-bottom:2px solid #059669; padding-bottom:8px;">🍳 Ciclo Cucina (Prep - Cottura - Abbattimento)</h3>
+                    <div class="form-group"><label>Data Processo</label><input type="date" id="cicloDate"></div>
+                    <div class="form-group"><label>Denominazione Pietanza *</label><input type="text" id="cicloAlimento" placeholder="Es. Spezzatino con patate..."></div>
+                    <div class="form-group"><label>Lotto Materia Prima</label><input type="text" id="cicloLotto" placeholder="Es. L-9921"></div>
+                    <div class="form-group"><label>Temperatura Cuore (°C) [Min 75°]</label><input type="number" step="0.1" id="cicloTempCottura" placeholder="79.0"></div>
+                    <div class="form-group"><label>Ora Fine Cottura</label><input type="time" id="cicloOraCottura"></div>
+                    <div class="form-group"><label>Allergeni Presenti (Reg. UE 1169/11)</label><input type="text" id="cicloAllergeni" placeholder="Es. Glutine, Soia..."></div>
+                    <div class="form-group"><label>Ora Inizio Abbattimento</label><input type="time" id="cicloOraInizioAbb"></div>
+                    <div class="form-group"><label>Ora Fine Abbattimento (&le; 90m)</label><input type="time" id="cicloOraFineAbb"></div>
+                    <div class="form-group"><label>Temp. al Cuore Finale (°C)</label><input type="number" step="0.1" id="cicloTempAbb" placeholder="+3.0"></div>
+                    <div class="form-group"><label>Destinazione / Mantenimento</label><select id="cicloDestinazione"><option value="Frigorifero (0°C ÷ +4°C)">Frigorifero (0°C ÷ +4°C)</option><option value="Congelatore (<= -18°C)">Congelatore (&le; -18°C)</option><option value="Consumo Caldo Diretto">Consumo Caldo Diretto (&ge; 65°C)</option></select></div>
+                    <div class="form-group"><label>Azione Correttiva (in caso di anomalie)</label><input type="text" id="cicloAzione" placeholder="Eventuali scostamenti o azioni..."></div>
+                    <button class="btn-primary" style="background:#059669; width:100%;" onclick="window.saveHaccpCiclo()">✍️ Firma e Registra Ciclo</button>
+                </div>
+            </div>
+
+            <!-- TAB: TEMPERATURE -->
+            <div id="ws-temp" class="workspace">
+                <div class="card" style="border-top: 4px solid #65a30d; max-width: 700px; margin: 0 auto;">
+                    <div style="display:flex; justify-content:space-between; align-items:flex-end; margin-bottom:15px; flex-wrap:wrap; gap:10px;">
+                        <div class="form-group" style="margin:0; flex:1; min-width:150px;"><label>Data</label><input type="date" id="tempDate"></div>
+                        <button class="btn-outline" style="font-size:0.85em; padding:8px 12px; border-color:#65a30d; color:#65a30d;" onclick="window.autoFillTemp()">⚡ Compila Valori Conformi</button>
+                    </div>
+                    <div id="dynamic-temp-grid" style="display:grid; grid-template-columns: repeat(auto-fit, minmax(130px, 1fr)); gap: 10px; margin-bottom:15px;"></div>
+                    <div class="form-group"><label>Note</label><input type="text" id="tempNote" placeholder="Tutto regolare..."></div>
+                    <div class="form-group"><label>Azione Correttiva (se fuori norma)</label><input type="text" id="tempAzione" placeholder="Es. Chiamato tecnico..."></div>
+                    <button class="btn-primary" style="background:#65a30d; width:100%;" onclick="window.saveHaccpTemp()">✍️ Firma e Salva</button>
+                </div>
+            </div>
+            
+            <!-- TAB: AREE -->
+            <div id="ws-aree" class="workspace">
+                <div class="card" style="border-top: 4px solid #0284c7; max-width: 700px; margin: 0 auto;">
+                    <div style="display:flex; justify-content:space-between; align-items:flex-end; margin-bottom:15px; flex-wrap:wrap; gap:10px;">
+                        <div class="form-group" style="margin:0; flex:1; min-width:150px;"><label>Data</label><input type="date" id="areeData"></div>
+                        <button class="btn-outline" style="font-size:0.85em; padding:8px 12px; border-color:#0284c7; color:#0284c7;" onclick="window.selectAllAree()">✅ Spunta Tutte</button>
+                    </div>
+                    <div class="check-grid" id="dynamic-aree-grid"></div>
+                    <div class="form-group"><label>Note</label><input type="text" id="areeNote" placeholder="Note aggiuntive..."></div>
+                    <div class="form-group"><label>Azione Correttiva</label><input type="text" id="areeAzione" placeholder="Eventuali azioni..."></div>
+                    <button class="btn-primary" style="background:#0284c7; width:100%;" onclick="window.saveHaccpAree()">✍️ Firma e Salva</button>
+                </div>
+            </div>
+            
+            <!-- TAB: PULIZIE -->
+            <div id="ws-pulizie" class="workspace">
+                <div class="card" style="border-top: 4px solid #8b5cf6; max-width: 700px; margin: 0 auto;">
+                    <div style="display:flex; justify-content:space-between; align-items:flex-end; margin-bottom:15px; flex-wrap:wrap; gap:10px;">
+                        <div class="form-group" style="margin:0; flex:1; min-width:150px;"><label>Data</label><input type="date" id="pulizieData"></div>
+                        <button class="btn-outline" style="font-size:0.85em; padding:8px 12px; border-color:#8b5cf6; color:#8b5cf6;" onclick="window.selectAllPulizie()">✅ Spunta Tutte</button>
+                    </div>
+                    <div class="check-grid" id="dynamic-pulizie-grid"></div>
+                    <div class="form-group"><label>Note</label><input type="text" id="pulizieNote" placeholder="Note aggiuntive..."></div>
+                    <div class="form-group"><label>Azione Correttiva</label><input type="text" id="pulizieAzione" placeholder="..."></div>
+                    <button class="btn-primary" style="background:#8b5cf6; width:100%;" onclick="window.saveHaccpPulizie()">✍️ Firma e Salva</button>
+                </div>
+            </div>
+
+            <div id="ws-pest" class="workspace">
+                <div class="card" style="border-top: 4px solid #ea580c; max-width: 700px; margin: 0 auto;">
+                    <div class="form-group"><label>Data</label><input type="date" id="pestDate"></div>
+                    <div class="form-group"><label>Postazione</label><input type="text" id="pestName"></div>
+                    <div class="form-group"><label>Infestante Target</label><select id="pestType"><option>Roditori</option><option>Insetti Striscianti</option><option>Insetti Volanti</option></select></div>
+                    <div class="form-group"><label>Esito</label><select id="pestResult"><option>Regolare (Intatta)</option><option>Esca Consumata</option><option>Cattura Rilevata</option><option>Danneggiata</option></select></div>
+                    <button class="btn-primary" style="background:#ea580c; width:100%;" onclick="window.saveHaccpPest()">Salva Controllo</button>
+                </div>
+            </div>
+
+            <div id="ws-sicurezza" class="workspace">
+                <div class="card" style="border-top: 4px solid #9333ea; max-width: 700px; margin: 0 auto;">
+                    <div class="form-group"><label>Documento / Manutenzione</label><input type="text" id="sicDocName"></div>
+                    <div class="form-group"><label>Categoria</label><select id="sicDocCat"><option>Documentale Base</option><option>Formazione Personale</option><option>Impianti e Struttura</option><option>Rischio Sanitario</option></select></div>
+                    <div class="form-group"><label>Scadenza</label><input type="date" id="sicDocDate"></div>
+                    <button class="btn-primary" style="background:#9333ea; width:100%;" onclick="window.saveHaccpSicurezza()">Registra Scadenza</button>
+                </div>
+            </div>
 
             <!-- DASHBOARD -->
             <div id="ws-dashboard" class="workspace active">
@@ -322,165 +423,78 @@
                 </div>
             </div>
 
-            <!-- CARTELLA CLINICA & BINA & PRIVACY & MAPPATURA LESIONI AVANZATA -->
+            <!-- CARTELLA CLINICA & BINA & PRIVACY (L. 219/17) -->
             <div id="ws-clinica" class="workspace">
                 <div class="card"><div class="form-group"><label>Seleziona Fascicolo Ospite</label><select id="clinicalGuestSelect" onchange="window.handlePatientSelect('clinicalGuestSelect')" style="font-weight:bold; border-color:var(--primary-color);"><option value="" disabled selected>Scegli...</option></select></div></div>
                 <div id="clinicalContent" style="display:none;">
                     <div class="clinical-header" id="clinicalHeader"></div>
                     
                     <div class="card" style="border-left: 6px solid var(--success-color); background: #f8fafc;">
-                        <div class="card-header">
-                            <h3 style="color: var(--success-color);">✍️ Privacy & Consenso Informato (L. 219/2017)</h3>
-                        </div>
+                        <div class="card-header"><h3 style="color: var(--success-color);">✍️ Privacy & Consenso Informato (L. 219/2017)</h3></div>
                         <div id="privacyStatusVisualContainer" style="display:flex; flex-direction:column; gap:12px;">
-                            <div id="privacyTextStatus" style="font-size: 1.05em; font-weight: bold; color: var(--text-main);">
-                                ⏳ Stato: In attesa di firma in loco.
-                            </div>
+                            <div id="privacyTextStatus" style="font-size: 1.05em; font-weight: bold; color: var(--text-main);">⏳ Stato: In attesa di firma in loco.</div>
                             <div style="display:flex; gap:15px; flex-wrap:wrap; align-items:center; background:#fff; padding:15px; border:1px solid var(--border-color); border-radius:8px;">
                                 <div style="flex:1; min-width:220px;">
                                     <p style="margin:0 0 8px 0; font-size:0.95em;"><strong>Firmatario:</strong> <span id="lblFirmatarioNome">-</span></p>
                                     <p style="margin:0 0 8px 0; font-size:0.95em;"><strong>Data e Ora:</strong> <span id="lblFirmatarioData">-</span></p>
-                                    <ul style="margin:0; padding-left:18px; font-size:0.9em; color:var(--text-light);">
-                                        <li>Trattamento Dati Sanitari (GDPR)</li>
-                                        <li>Consenso Informato alle Prestazioni</li>
-                                        <li>Utilizzo Immagini interne</li>
-                                    </ul>
                                 </div>
                                 <div style="text-align:center; min-width:180px;">
                                     <div style="font-size:0.85em; font-weight:bold; color:var(--text-light); margin-bottom:4px;">Anteprima Firma Acquisita:</div>
-                                    <div id="signaturePreviewBox" style="height:80px; width:160px; background:#f1f5f9; border:1px dashed #94a3b8; border-radius:6px; display:flex; align-items:center; justify-content:center; overflow:hidden; margin:0 auto;">
-                                        <span style="color:#94a3b8; font-size:0.8em;">Nessuna firma</span>
-                                    </div>
+                                    <div id="signaturePreviewBox" style="height:80px; width:160px; background:#f1f5f9; border:1px dashed #94a3b8; border-radius:6px; display:flex; align-items:center; justify-content:center; overflow:hidden; margin:0 auto;"><span style="color:#94a3b8; font-size:0.8em;">Nessuna firma</span></div>
                                 </div>
                             </div>
-                            <button id="btnAvviaFirmaPrivacy" class="btn-success" style="width:100%; font-size:1.1em; padding:14px; margin-top:5px;" onclick="window.avviaFirmaPrivacyTablet()">
-                                ✍️ Avvia Acquisizione Firma (Touchscreen)
-                            </button>
+                            <button id="btnAvviaFirmaPrivacy" class="btn-success" style="width:100%; font-size:1.1em; padding:14px; margin-top:5px;" onclick="window.avviaFirmaPrivacyTablet()">✍️ Avvia Acquisizione Firma (Touchscreen)</button>
                         </div>
                     </div>
 
                     <details class="card restrict-oss" style="border-left: 5px solid var(--primary-color);">
-                        <summary style="font-size: 1.1em; font-weight: bold; color: var(--primary-color); cursor: pointer; outline: none; padding-bottom:10px;">📋 Dati Anagrafici Rapidi e Documenti</summary>
+                        <summary style="font-size: 1.1em; font-weight: bold; color: var(--primary-color); cursor: pointer; outline: none; padding-bottom:10px;">📋 Dati Anagrafici Rapidi, Fiduciario e D.A.T. (L. 219/17)</summary>
                         <div style="margin-top: 15px; border-top: 2px solid var(--border-color); padding-top: 15px;">
                             <div style="display:flex; gap:15px; flex-wrap:wrap;"><div class="form-group" style="flex:2;"><label>Nome</label><input type="text" id="editGuestName" readonly style="background:#f1f5f9;"></div><div class="form-group" style="flex:1;"><label>CF</label><input type="text" id="editGuestCF"></div><div class="form-group" style="flex:1;"><label>Stanza</label><input type="text" id="editGuestRoom"></div></div>
                             <div style="display:flex; gap:15px; flex-wrap:wrap; background:#f8fafc; padding:15px; border:1px solid #cbd5e1; margin-bottom:10px; border-radius:10px;">
-                                <div class="form-group" style="flex:2;"><label>Ref</label><input type="text" id="editGuestRef"></div>
+                                <div class="form-group" style="flex:1;"><label>Ref</label><input type="text" id="editGuestRef"></div>
                                 <div class="form-group" style="flex:1;"><label>Tel Ref</label><input type="text" id="editGuestRefTel"></div>
-                                <div class="form-group" style="flex:2;"><label>MMG</label><input type="text" id="editGuestMMG"></div>
+                                <div class="form-group" style="flex:1;"><label>Fiduciario (L. 219/17)</label><input type="text" id="editGuestFiduciario" placeholder="Nome Fiduciario"></div>
                                 <div class="form-group" style="flex:1;"><label>Scadenza AdS/Tutore</label><input type="date" id="editGuestTutoreScadenza"></div>
+                                <div class="form-group" style="flex:1; display:flex; align-items:center; gap:10px; justify-content:center;"><input type="checkbox" id="editGuestDAT" style="width:20px;height:20px; accent-color:var(--primary-color);"><label style="margin:0; font-weight:bold;">D.A.T. Depositate</label></div>
                             </div>
                             <div style="display:flex; gap:15px; flex-wrap:wrap; background:#f0f9ff; padding:15px; border:1px solid #bae6fd; margin-bottom:20px; border-radius:10px;">
+                                <div class="form-group" style="flex:1;"><label>MMG</label><input type="text" id="editGuestMMG"></div>
                                 <div class="form-group" style="flex:1;"><label>Data Stesura P.A.I.</label><input type="date" id="paiDataStesura"></div>
                                 <div class="form-group" style="flex:1;"><label>Data Revisione P.A.I.</label><input type="date" id="paiDataRevisione"></div>
                                 <div class="form-group" style="flex:1;"><label>Medico PAI</label><input type="text" id="paiMedico"></div>
                                 <div class="form-group" style="flex:1;"><label>Inf. PAI</label><input type="text" id="paiInfermieristico"></div>
-                                <div class="form-group" style="flex:1;"><label>Ass. PAI</label><input type="text" id="paiAssistenziale"></div>
                             </div>
                             <button class="btn-primary" style="width:100%;" onclick="window.updateGuestData()">💾 Salva Modifiche Anagrafiche</button>
                         </div>
                     </details>
                     
                     <div class="card" style="border-top: 5px solid var(--error-color);">
-                        <div class="card-header">
-                            <h3 style="color:var(--error-color);">🩺 Check-in e Mappatura Lesioni da Decubito</h3>
-                        </div>
-
-                        <div class="form-group">
-                            <label>Condizioni Generali all'Ingresso / Visita</label>
-                            <textarea id="chkGen" class="restrict-oss-input" rows="2" placeholder="Stato nutrizionale, idratazione, cute, reattività..."></textarea>
-                        </div>
-
-                        <div class="form-group">
-                            <label>Descrizione Clinica Piaghe / Lesioni</label>
-                            <textarea id="chkPiaghe" class="restrict-oss-input" rows="2" placeholder="Specificare medicazioni in corso, stadio, essudato..."></textarea>
-                        </div>
+                        <div class="card-header"><h3 style="color:var(--error-color);">🩺 Check-in e Mappatura Lesioni da Decubito</h3></div>
+                        <div class="form-group"><label>Condizioni Generali all'Ingresso / Visita</label><textarea id="chkGen" class="restrict-oss-input" rows="2" placeholder="Stato nutrizionale, idratazione..."></textarea></div>
+                        <div class="form-group"><label>Descrizione Clinica Piaghe / Lesioni</label><textarea id="chkPiaghe" class="restrict-oss-input" rows="2" placeholder="Stadio, medicazioni..."></textarea></div>
 
                         <div class="form-group restrict-oss" style="background:#f8fafc; border:1px solid var(--border-color); padding:15px; border-radius:10px;">
                             <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:8px;">
-                                <label style="font-weight:bold; color:var(--text-main); margin:0;">
-                                    📍 Modellino Anatomico (Tocca per puntare le lesioni da decubito):
-                                </label>
+                                <label style="font-weight:bold; color:var(--text-main); margin:0;">📍 Modellino Anatomico (Tocca per puntare lesioni):</label>
                                 <button type="button" class="btn-doc" style="padding:4px 12px; font-size:0.85em;" onclick="window.clearBodyMarkers()">🗑️ Cancella Punti</button>
                             </div>
-                            <small style="color:var(--text-light); display:block; margin-bottom:12px;">
-                                I cerchietti tratteggiati indicano le zone ad alto rischio decubito. Tocca un punto rosso per rimuoverlo.
-                            </small>
-                            
-                            <div id="bodyMapWrapper" style="position:relative; width: 100%; max-width: 440px; margin: 0 auto; border: 2px solid #cbd5e1; background: #ffffff; border-radius:10px; overflow:hidden; box-shadow: 0 2px 8px rgba(0,0,0,0.05);" onclick="window.handleBodyMapClick(event)">
+                            <div id="bodyMapWrapper" style="position:relative; width: 100%; max-width: 440px; margin: 0 auto; border: 2px solid #cbd5e1; background: #ffffff; border-radius:10px; overflow:hidden;" onclick="window.handleBodyMapClick(event)">
                                 <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 400 300" id="bodyMapSvg" style="width:100%; height:auto; display:block; cursor:crosshair; pointer-events:none;">
-                                    <g id="figura-fronte">
-                                        <text x="100" y="24" text-anchor="middle" font-size="13" font-weight="bold" fill="#0d9488">FRONTE</text>
-                                        <ellipse cx="100" cy="50" rx="20" ry="24" fill="#f1f5f9" stroke="#64748b" stroke-width="2"/>
-                                        <rect x="94" y="73" width="12" height="12" fill="#f1f5f9" stroke="#64748b" stroke-width="2"/>
-                                        <path d="M 68 85 Q 100 80 132 85 L 126 160 Q 100 165 74 160 Z" fill="#f1f5f9" stroke="#64748b" stroke-width="2"/>
-                                        <path d="M 68 85 L 50 145 L 44 195 L 36 195 L 42 142 L 64 88 Z" fill="#f1f5f9" stroke="#64748b" stroke-width="2"/>
-                                        <path d="M 132 85 L 150 145 L 156 195 L 164 195 L 158 142 L 136 88 Z" fill="#f1f5f9" stroke="#64748b" stroke-width="2"/>
-                                        <path d="M 74 160 L 70 230 L 68 280 L 82 280 L 88 230 L 96 163 Z" fill="#f1f5f9" stroke="#64748b" stroke-width="2"/>
-                                        <path d="M 126 160 L 130 230 L 132 280 L 118 280 L 112 230 L 104 163 Z" fill="#f1f5f9" stroke="#64748b" stroke-width="2"/>
-                                        <circle cx="100" cy="98" r="8" fill="none" stroke="#f43f5e" stroke-dasharray="2,2" stroke-width="1.5" />
-                                        <circle cx="50" cy="145" r="7" fill="none" stroke="#f43f5e" stroke-dasharray="2,2" stroke-width="1.5" />
-                                        <circle cx="150" cy="145" r="7" fill="none" stroke="#f43f5e" stroke-dasharray="2,2" stroke-width="1.5" />
-                                        <circle cx="79" cy="225" r="9" fill="none" stroke="#f43f5e" stroke-dasharray="2,2" stroke-width="1.5" />
-                                        <circle cx="121" cy="225" r="9" fill="none" stroke="#f43f5e" stroke-dasharray="2,2" stroke-width="1.5" />
-                                        <circle cx="75" cy="275" r="7" fill="none" stroke="#f43f5e" stroke-dasharray="2,2" stroke-width="1.5" />
-                                        <circle cx="125" cy="275" r="7" fill="none" stroke="#f43f5e" stroke-dasharray="2,2" stroke-width="1.5" />
-                                    </g>
-                                    <g id="figura-retro" transform="translate(195, 0)">
-                                        <text x="100" y="24" text-anchor="middle" font-size="13" font-weight="bold" fill="#0d9488">RETRO</text>
-                                        <ellipse cx="100" cy="50" rx="20" ry="24" fill="#e2e8f0" stroke="#64748b" stroke-width="2"/>
-                                        <rect x="94" y="73" width="12" height="12" fill="#e2e8f0" stroke="#64748b" stroke-width="2"/>
-                                        <path d="M 68 85 Q 100 80 132 85 L 126 160 Q 100 168 74 160 Z" fill="#e2e8f0" stroke="#64748b" stroke-width="2"/>
-                                        <line x1="100" y1="85" x2="100" y2="155" stroke="#94a3b8" stroke-width="1.5" stroke-dasharray="3,3"/>
-                                        <path d="M 68 85 L 50 145 L 44 195 L 36 195 L 42 142 L 64 88 Z" fill="#e2e8f0" stroke="#64748b" stroke-width="2"/>
-                                        <path d="M 132 85 L 150 145 L 156 195 L 164 195 L 158 142 L 136 88 Z" fill="#e2e8f0" stroke="#64748b" stroke-width="2"/>
-                                        <path d="M 74 160 L 70 230 L 68 280 L 82 280 L 88 230 L 96 163 Z" fill="#e2e8f0" stroke="#64748b" stroke-width="2"/>
-                                        <path d="M 126 160 L 130 230 L 132 280 L 118 280 L 112 230 L 104 163 Z" fill="#e2e8f0" stroke="#64748b" stroke-width="2"/>
-                                        <circle cx="100" cy="52" r="9" fill="none" stroke="#e11d48" stroke-dasharray="2,2" stroke-width="1.5" />
-                                        <circle cx="82" cy="100" r="8" fill="none" stroke="#e11d48" stroke-dasharray="2,2" stroke-width="1.5" />
-                                        <circle cx="118" cy="100" r="8" fill="none" stroke="#e11d48" stroke-dasharray="2,2" stroke-width="1.5" />
-                                        <circle cx="48" cy="144" r="8" fill="none" stroke="#e11d48" stroke-dasharray="2,2" stroke-width="1.5" />
-                                        <circle cx="152" cy="144" r="8" fill="none" stroke="#e11d48" stroke-dasharray="2,2" stroke-width="1.5" />
-                                        <circle cx="100" cy="148" r="10" fill="none" stroke="#e11d48" stroke-dasharray="2,2" stroke-width="2" />
-                                        <circle cx="68" cy="158" r="8" fill="none" stroke="#e11d48" stroke-dasharray="2,2" stroke-width="1.5" />
-                                        <circle cx="132" cy="158" r="8" fill="none" stroke="#e11d48" stroke-dasharray="2,2" stroke-width="1.5" />
-                                        <circle cx="85" cy="162" r="8" fill="none" stroke="#e11d48" stroke-dasharray="2,2" stroke-width="1.5" />
-                                        <circle cx="115" cy="162" r="8" fill="none" stroke="#e11d48" stroke-dasharray="2,2" stroke-width="1.5" />
-                                        <circle cx="75" cy="278" r="8" fill="none" stroke="#e11d48" stroke-dasharray="2,2" stroke-width="2" />
-                                        <circle cx="125" cy="278" r="8" fill="none" stroke="#e11d48" stroke-dasharray="2,2" stroke-width="2" />
-                                    </g>
+                                    <g id="figura-fronte"><text x="100" y="24" text-anchor="middle" font-size="13" font-weight="bold" fill="#0d9488">FRONTE</text><ellipse cx="100" cy="50" rx="20" ry="24" fill="#f1f5f9" stroke="#64748b" stroke-width="2"/><rect x="94" y="73" width="12" height="12" fill="#f1f5f9" stroke="#64748b" stroke-width="2"/><path d="M 68 85 Q 100 80 132 85 L 126 160 Q 100 165 74 160 Z" fill="#f1f5f9" stroke="#64748b" stroke-width="2"/></g>
+                                    <g id="figura-retro" transform="translate(195, 0)"><text x="100" y="24" text-anchor="middle" font-size="13" font-weight="bold" fill="#0d9488">RETRO</text><ellipse cx="100" cy="50" rx="20" ry="24" fill="#e2e8f0" stroke="#64748b" stroke-width="2"/><rect x="94" y="73" width="12" height="12" fill="#e2e8f0" stroke="#64748b" stroke-width="2"/><path d="M 68 85 Q 100 80 132 85 L 126 160 Q 100 168 74 160 Z" fill="#e2e8f0" stroke="#64748b" stroke-width="2"/></g>
                                 </svg>
                                 <div id="bodyMarkersLayer" style="position:absolute; top:0; left:0; width:100%; height:100%;"></div>
                             </div>
                         </div>
 
                         <div class="form-group restrict-oss" style="background:#fff; border:1px solid #cbd5e1; border-radius:10px; padding:15px; margin-top:15px;">
-                            <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:10px; flex-wrap:wrap; gap:8px;">
-                                <strong style="color:var(--primary-color); font-size:1.05em;">📸 Documentazione Fotografica Lesioni con Anteprime</strong>
-                                <span style="font-size:0.85em; color:var(--text-light);">Acquisisci con fotocamera touch</span>
-                            </div>
-
-                            <div style="display:flex; gap:10px; flex-wrap:wrap; align-items:flex-end; background:#f8fafc; padding:12px; border-radius:8px; border:1px dashed #cbd5e1;">
-                                <div style="flex:2; min-width:200px;">
-                                    <label style="font-size:0.85em; font-weight:bold;">Sede / Stadio Lesione (opzionale):</label>
-                                    <input type="text" id="lesioneDescInput" placeholder="Es. Sacro - Stadio II" style="background:#fff;">
-                                </div>
-                                <div style="display:flex; gap:8px; flex:1; min-width:200px;">
-                                    <label class="btn-danger" style="flex:1; cursor:pointer; margin:0; text-align:center; padding:10px;">
-                                        📷 Scatta Foto
-                                        <input type="file" accept="image/*" capture="environment" id="cameraLesioneInput" style="display:none;" onchange="window.handleLesionePhotoUpload(event)">
-                                    </label>
-                                    <label class="btn-doc" style="flex:1; cursor:pointer; margin:0; text-align:center; padding:10px;">
-                                        📁 Sfoglia
-                                        <input type="file" accept="image/*" style="display:none;" onchange="window.handleLesionePhotoUpload(event)">
-                                    </label>
-                                </div>
-                            </div>
+                            <strong style="color:var(--primary-color);">📸 Documentazione Fotografica Lesioni</strong>
+                            <div style="display:flex; gap:10px; margin-top:8px;"><input type="text" id="lesioneDescInput" placeholder="Sede / Stadio Lesione..."><label class="btn-danger" style="cursor:pointer; margin:0; padding:10px;">📷 Scatta<input type="file" accept="image/*" capture="environment" id="cameraLesioneInput" style="display:none;" onchange="window.handleLesionePhotoUpload(event)"></label></div>
                             <div id="lesioniPhotoGrid" style="display:grid; grid-template-columns:repeat(auto-fill, minmax(130px, 1fr)); gap:12px; margin-top:15px;"></div>
                         </div>
 
-                        <button class="btn-success" style="width:100%; font-size:1.1em; padding:14px; margin-top:10px;" onclick="window.saveClinicalDataWithSignature('Check-in e Lesioni')">
-                            ✍️ Salva Check-in, Mappa e Foto Lesioni (Firma)
-                        </button>
+                        <button class="btn-success" style="width:100%; font-size:1.1em; padding:14px; margin-top:10px;" onclick="window.saveClinicalDataWithSignature('Check-in e Lesioni')">✍️ Salva Check-in, Mappa e Foto Lesioni (Firma)</button>
                     </div>
                     
                     <div class="card" style="border-top: 4px solid var(--primary-color);">
@@ -509,16 +523,10 @@
                         <div class="only-medico" style="display:flex; gap:15px; margin:20px 0; flex-wrap:wrap; background:#f0f9ff; padding:20px; border:1px solid #bae6fd; border-radius:10px;">
                             <div style="flex:2; min-width:200px;"><label>Farmaco</label><input type="text" id="terapiaFarmaco" list="listaFarmaciAifa"><datalist id="listaFarmaciAifa"></datalist></div>
                             <div style="flex:1; min-width:140px;"><label>Posologia</label><input type="text" id="terapiaPosologia"></div>
-                            <div style="flex:1.5; min-width:150px;"><label>Orario</label><select id="terapiaOrario" style="width:100%;"><option value="08:00">08:00 (Mattina)</option><option value="12:00">12:00 (Pranzo)</option><option value="18:00">18:00 (Sera)</option><option value="20:00">20:00 (Cena)</option><option value="08:00 - 20:00">08:00 - 20:00</option><option value="08:00 - 12:00 - 18:00">08:00 - 12:00 - 18:00</option><option value="Al bisogno">Al bisogno</option><option value="Firma">Solo Firma</option></select></div>
+                            <div style="flex:1.5; min-width:150px;"><label>Orario</label><select id="terapiaOrario" style="width:100%;"><option value="08:00">08:00 (Mattina)</option><option value="12:00">12:00 (Pranzo)</option><option value="18:00">18:00 (Sera)</option><option value="20:00">20:00 (Cena)</option><option value="Al bisogno">Al bisogno</option></select></div>
                             <div style="display:flex; align-items:flex-end; width:100%; justify-content:flex-end;"><button class="btn-primary" style="background:var(--terapia-color);" onclick="window.addTerapiaItemWithSignature()">✍️ Prescrivi Farmaco</button></div>
                         </div>
-                        <div style="overflow-x:auto;">
-                            <!-- TABELLA TERAPIA AGGIORNATA PER LA FIRMA GIORNALIERA EMAR -->
-                            <table class="terapia-table" id="terapiaGridTable">
-                                <thead><tr id="terapiaGridHead"></tr></thead>
-                                <tbody></tbody>
-                            </table>
-                        </div>
+                        <div style="overflow-x:auto;"><table class="terapia-table" id="terapiaGridTable"><thead><tr id="terapiaGridHead"></tr></thead><tbody></tbody></table></div>
                     </div>
                 </div>
             </div>
@@ -534,15 +542,15 @@
                     <div class="card-header"><h3 style="color:var(--error-color);">🔒 Prescrizione Contenzioni</h3></div>
                     <div style="display:flex; gap:15px; flex-wrap:wrap; background:#fef2f2; border:2px solid #fca5a5; padding:20px; border-radius:12px; margin-bottom:25px;">
                         <div class="form-group" style="flex:1.5; min-width:200px;"><label>Ospite</label><select id="contOspite"><option value="" disabled selected>Scegli...</option></select></div>
-                        <div class="form-group" style="flex:1; min-width:150px;"><label>Tipo Presidio</label><select id="contTipo"><option value="Spondine letto">Spondine a letto</option><option value="Cintura pelvica">Cintura pelvica in carrozzina</option><option value="Tavolino carrozzina">Tavolino per carrozzina</option><option value="Altro">Altro</option></select></div>
+                        <div class="form-group" style="flex:1; min-width:150px;"><label>Tipo Presidio</label><select id="contTipo"><option value="Spondine letto">Spondine a letto</option><option value="Cintura pelvica">Cintura pelvica in carrozzina</option><option value="Tavolino carrozzina">Tavolino</option><option value="Altro">Altro</option></select></div>
                         <div class="form-group" style="flex:1; min-width:150px;"><label>Data Inizio</label><input type="date" id="contDataInizio"></div>
                         <div class="form-group" style="flex:1; min-width:120px;"><label>Ora Inizio</label><input type="time" id="contOraInizio"></div>
-                        <div class="form-group" style="flex:2; min-width:200px;"><label>Motivazione / Rischio Clinico</label><input type="text" id="contMotivo" placeholder="Es. Rischio caduta grave"></div>
-                        <div class="form-group" style="flex:1; min-width:200px;"><label>Consenso Informato</label><select id="contConsenso"><option value="Acquisito Familiare/AdS">Acquisito Familiare/AdS</option><option value="Stato di Necessità">Stato di Necessità (Art. 54 CP)</option></select></div>
+                        <div class="form-group" style="flex:2; min-width:200px;"><label>Motivazione / Rischio</label><input type="text" id="contMotivo" placeholder="Rischio caduta..."></div>
+                        <div class="form-group" style="flex:1; min-width:200px;"><label>Consenso</label><select id="contConsenso"><option value="Acquisito Familiare/AdS">Acquisito Familiare/AdS</option><option value="Stato di Necessità">Stato di Necessità (Art. 54 CP)</option></select></div>
                         <div style="display:flex; align-items:flex-end; width:100%; justify-content:flex-end;"><button class="btn-danger" style="padding:12px 20px; font-size:1.1em;" onclick="window.addContenzioneWithSignature()">✍️ Prescrivi e Firma</button></div>
                     </div>
                 </div>
-                <div class="card"><div class="card-header"><h3>Registro Contenzioni in Essere e Storico</h3></div><table class="data-table" id="contenzioniTable"><thead><tr><th>Ospite</th><th>Tipo Presidio</th><th>Inizio</th><th>Motivo Clinico</th><th>Stato</th></tr></thead><tbody></tbody></table></div>
+                <div class="card"><div class="card-header"><h3>Registro Contenzioni</h3></div><table class="data-table" id="contenzioniTable"><thead><tr><th>Ospite</th><th>Tipo Presidio</th><th>Inizio</th><th>Motivo Clinico</th><th>Stato</th></tr></thead><tbody></tbody></table></div>
             </div>
 
             <!-- CONSEGNE -->
@@ -559,19 +567,20 @@
                 </div>
             </div>
 
-            <!-- RISCHIO CLINICO -->
+            <!-- RISCHIO CLINICO & 81/08 (NEAR MISS E INFORTUNI) -->
             <div id="ws-rischio" class="workspace">
                 <div class="card restrict-oss" style="border-left: 8px solid var(--error-color);">
-                    <div class="card-header"><h3 style="color:var(--error-color);">⚠️ Incident Reporting</h3></div>
+                    <div class="card-header"><h3 style="color:var(--error-color);">⚠️ Incident Reporting (Clinico, Infortuni & Near Miss)</h3></div>
                     <div style="display:flex; gap:15px; flex-wrap:wrap; background:#fef2f2; padding:20px; border-radius:10px; margin-bottom:20px;">
-                        <div class="form-group" style="flex:1.5;"><label>Ospite</label><select id="newRischioOspite"><option value="" disabled selected>Scegli...</option></select></div>
-                        <div class="form-group" style="flex:1;"><label>Data</label><input type="date" id="newRischioData"></div>
-                        <div class="form-group" style="flex:1.5;"><label>Tipo</label><select id="newRischioTipo"><option value="Caduta Accidentale">Caduta Accidentale</option><option value="Errore Terapia">Errore Terapia</option><option value="Lesione">Lesione/Trauma</option><option value="Fuga">Fuga</option><option value="Aggressione">Aggressione</option><option value="Altro">Altro</option></select></div>
-                        <div class="form-group" style="flex:3;"><label>Dinamica</label><input type="text" id="newRischioDinamica"></div>
-                        <div style="display:flex; align-items:flex-end; width:100%; justify-content:flex-end;"><button class="btn-danger" onclick="window.addEventoRischioWithSignature()">✍️ Segnala (Firma)</button></div>
+                        <div class="form-group" style="flex:1.5;"><label>Ospite (se evento clinico)</label><select id="newRischioOspite"><option value="Nessuno (Staff/Struttura)">Nessuno (Staff/Struttura)</option><option value="" disabled selected>Scegli...</option></select></div>
+                        <div class="form-group" style="flex:1;"><label>Data Evento</label><input type="date" id="newRischioData"></div>
+                        <div class="form-group" style="flex:1.5;"><label>Tipologia Evento</label><select id="newRischioTipo"><option value="Caduta Accidentale">Caduta Accidentale</option><option value="Errore Terapia">Errore Terapia</option><option value="Lesione">Lesione/Trauma</option><option value="Infortunio Operatore (81/08)">Infortunio Operatore (81/08)</option><option value="Near Miss - Mancato Infortunio">Near Miss - Mancato Infortunio</option><option value="Altro">Altro</option></select></div>
+                        <div class="form-group" style="flex:3;"><label>Dinamica dell'Evento</label><input type="text" id="newRischioDinamica" placeholder="Descrivi l'accaduto..."></div>
+                        <div class="form-group" style="flex:3;"><label>Azione di Mitigazione / Correttiva</label><input type="text" id="newRischioAzione" placeholder="Es. Medicazione eseguita, manutenzione scala..."></div>
+                        <div style="display:flex; align-items:flex-end; width:100%; justify-content:flex-end;"><button class="btn-danger" onclick="window.addEventoRischioWithSignature()">✍️ Segnala e Firma</button></div>
                     </div>
                 </div>
-                <div class="card"><div class="card-header"><h3>Archivio Eventi</h3></div><table class="data-table" id="rischioTable"><thead><tr><th>Data</th><th>Ospite</th><th>Tipo</th><th>Dinamica</th></tr></thead><tbody></tbody></table></div>
+                <div class="card"><div class="card-header"><h3>Archivio Eventi</h3></div><table class="data-table" id="rischioTable"><thead><tr><th>Data</th><th>Ospite / Area</th><th>Tipo</th><th>Dinamica e Azione</th></tr></thead><tbody></tbody></table></div>
             </div>
 
             <!-- CUP -->
@@ -596,8 +605,21 @@
     <script type="module">
         import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-app.js";
         import { initializeAppCheck, ReCaptchaEnterpriseProvider } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-app-check.js";
+        import { getAuth, signInWithEmailAndPassword } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-auth.js";
         import { getFirestore, collection, addDoc, onSnapshot, deleteDoc, doc, updateDoc, setDoc, serverTimestamp } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js";
         import { getStorage, ref, uploadString, getDownloadURL } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-storage.js";
+
+        // --- INIZIO BLOCCO CHIRURGICO: FAIL-FAST AMBIENTE LOCALE ---
+        if (window.location.protocol === 'file:') {
+            document.body.innerHTML = `
+                <div style="display:flex;flex-direction:column;align-items:center;justify-content:center;height:100vh;background:#fef2f2;color:#991b1b;padding:20px;text-align:center;">
+                    <h1 style="font-size:2em;margin-bottom:15px;">⚠️ Ambiente di Esecuzione non Valido</h1>
+                    <p style="font-size:1.2em;max-width:600px;">Hai aperto il file con un doppio clic (<strong>file://</strong>).</p>
+                    <p style="font-size:1em;max-width:600px;margin-top:10px;">Firebase App Check e l'Autenticazione bloccano queste richieste per ragioni di sicurezza CORS.<br>Devi eseguire l'app tramite un <strong>Local Web Server</strong> (es. <em>Live Server</em> su VS Code).</p>
+                </div>`;
+            throw new Error("Esecuzione interrotta: Richiesto web server (http/https) per Firebase Auth.");
+        }
+        // --- FINE BLOCCO ---
 
         const firebaseConfig = { 
             apiKey: "AIzaSyAc0fIlfds4Gne5m3qpH25uacK4NeR6TzM", authDomain: "gestione-visite-b445b.firebaseapp.com", projectId: "gestione-visite-b445b", 
@@ -606,6 +628,7 @@
         
         const app = initializeApp(firebaseConfig);
         const storage = getStorage(app); 
+        const auth = getAuth(app);
 
         if (window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1') {
             self.FIREBASE_APPCHECK_DEBUG_TOKEN = true;
@@ -625,7 +648,7 @@
         window.currentBodyMarkers = []; window.currentLesioniPhotos = []; window.activeOperator = ""; window.activeOperatorRole = "user"; window.activeOperatorQualifica = ""; window.selectedLoginUser = null; window.currentPin = ""; window.globalSelectedPatient = "";
         window.editGuestPhotoBase64 = ""; window.editGuestDocIdBase64 = ""; window.editGuestDocCfBase64 = ""; window.haccpTraccBase64 = "";
 
-        window.haccpConfig = { frigoriferi: ["Cella Frigo 1", "Cella Frigo 2", "Congelatore Carne", "Congelatore Pesce", "Frigo Latticini"], aree: ["Cucina Principale", "Dispensa", "Cella Lavaggio", "Spogliatoi", "Sala Mensa"], pulizie: ["Piani di lavoro", "Pavimenti", "Attrezzature di cottura", "Affettatrici", "Cappe Aspiranti", "Lavelli"] };
+        window.haccpConfig = { frigoriferi: [], aree: [], pulizie: [] };
         const prontuario = ["Abilify", "Amiodarone", "Amoxicillina", "Cardicor", "Cardioaspirin", "Coumadin", "Eparina", "Furosemide", "Lasix", "Metformina", "Paracetamolo", "Tachipirina"];
 
         window.formatDateSafe = (d) => { if (!d) return '-'; if (typeof d === 'string' && d.includes('-')) return d.split('-').reverse().join('/'); return d; };
@@ -700,31 +723,188 @@
         window.addPin = (num) => { if(window.currentPin.length < 5) window.currentPin += num; window.updatePinDisplay(); };
         window.updatePinDisplay = () => { document.getElementById('pin-display').innerText = '*'.repeat(window.currentPin.length); };
         window.resetPinLogin = () => { document.getElementById('pin-pad-area').style.display = 'none'; document.getElementById('profiles-container').style.display = 'grid'; window.selectedLoginUser = null; window.currentPin = ""; };
-        window.submitPin = () => { let op = window.selectedLoginUser; if((op && String(op.pin) === window.currentPin) || (op && op.name === 'Admin' && window.currentPin === '12345')) { window.activeOperator = op.name; window.activeOperatorRole = op.role; window.activeOperatorQualifica = op.qualifica; document.getElementById('currentOpBadge').innerText = `${op.name}`; document.getElementById('currentOpRole').innerText = op.qualifica; document.getElementById('login-screen').style.display = 'none'; document.getElementById('tablet-header').style.display = 'flex'; window.applyRolePermissions(); window.loadGuests(); window.renderSidebarPatients(); window.goHome(); } else { window.showToast("❌ PIN Errato"); window.currentPin = ""; window.updatePinDisplay(); } };
+        
+        window.submitPin = async () => { 
+            let op = window.selectedLoginUser; 
+            if (!op) return;
+
+            if (op.name === 'Admin' && window.currentPin === '12345') {
+                window.activeOperator = op.name; window.activeOperatorRole = op.role; window.activeOperatorQualifica = op.qualifica; document.getElementById('currentOpBadge').innerText = `${op.name}`; document.getElementById('currentOpRole').innerText = op.qualifica; document.getElementById('login-screen').style.display = 'none'; document.getElementById('tablet-header').style.display = 'flex'; window.applyRolePermissions(); window.loadGuests(); window.renderSidebarPatients(); window.goHome();
+                return;
+            }
+
+            const emailFittizia = op.email || (op.name || op.nome).toLowerCase().replace(/[^a-z0-9]/g, '.') + "@villasilvana.local";
+
+            try {
+                await signInWithEmailAndPassword(auth, emailFittizia, window.currentPin);
+                window.activeOperator = op.name; window.activeOperatorRole = op.role; window.activeOperatorQualifica = op.qualifica; document.getElementById('currentOpBadge').innerText = `${op.name}`; document.getElementById('currentOpRole').innerText = op.qualifica; document.getElementById('login-screen').style.display = 'none'; document.getElementById('tablet-header').style.display = 'flex'; window.applyRolePermissions(); window.loadGuests(); window.renderSidebarPatients(); window.goHome();
+            } catch (error) {
+                console.error("Auth error:", error);
+                window.showToast("❌ PIN Errato o assenza di rete"); 
+                window.currentPin = ""; window.updatePinDisplay();
+            }
+        };
 
         window.isMedicoOrAdmin = () => ['Medico','Direttore Sanitario'].includes(window.activeOperatorQualifica) || window.activeOperatorRole==='admin';
         window.checkOssRestriction = () => { if(window.activeOperatorQualifica==='OSS'){ window.showToast("⚠️ Sola Lettura: Area Riservata"); return true; } return false; };
         window.applyRolePermissions = () => { document.body.setAttribute('data-qualifica', window.activeOperatorQualifica); if(window.isMedicoOrAdmin()) document.body.setAttribute('data-med-access','true'); else document.body.removeAttribute('data-med-access'); if(window.activeOperatorRole==='admin') document.body.setAttribute('data-role', 'admin'); else document.body.removeAttribute('data-role'); };
         
         window.goHome = () => { document.querySelectorAll('.workspace').forEach(e => e.classList.remove('active')); document.getElementById('appScreen').style.display = 'none'; document.getElementById('home-menu').style.display = 'grid'; document.getElementById('backToHomeBtn').style.display = 'none'; document.getElementById('header-title').innerText = 'Home Menu'; };
-        window.switchTab = (ws, title) => { document.getElementById('home-menu').style.display = 'none'; document.getElementById('appScreen').style.display = 'flex'; document.querySelectorAll('.workspace').forEach(e=>e.classList.remove('active')); document.getElementById('ws-'+ws).classList.add('active'); document.getElementById('backToHomeBtn').style.display = 'flex'; document.getElementById('header-title').innerText = title; document.getElementById('backToHomeBtn').onclick = window.goHome; document.getElementById('patientSidebar').style.display = ['haccp', 'merci', 'tracc', 'temp', 'aree', 'pulizie', 'pest', 'sicurezza', 'magazzino'].includes(ws) ? 'none' : 'flex'; if(ws === 'haccp') window.renderHaccpUI(); };
-        window.openHaccpSub = (ws, title) => { document.querySelectorAll('.workspace').forEach(e=>e.classList.remove('active')); document.getElementById('ws-'+ws).classList.add('active'); document.getElementById('header-title').innerText = title; document.getElementById('backToHomeBtn').onclick = () => window.switchTab('haccp', '🛡️ HACCP & Sicurezza'); document.getElementById('patientSidebar').style.display = 'none'; const t = window.getTodayString(); ['tempData', 'areeData', 'pulizieData', 'merciData', 'traccData', 'pestDate', 'sicDocDate'].forEach(id => { if(document.getElementById(id)) document.getElementById(id).value = t; }); };
+        window.switchTab = (ws, title) => { document.getElementById('home-menu').style.display = 'none'; document.getElementById('appScreen').style.display = 'flex'; document.querySelectorAll('.workspace').forEach(e=>e.classList.remove('active')); document.getElementById('ws-'+ws).classList.add('active'); document.getElementById('backToHomeBtn').style.display = 'flex'; document.getElementById('header-title').innerText = title; document.getElementById('backToHomeBtn').onclick = window.goHome; document.getElementById('patientSidebar').style.display = ['haccp', 'merci', 'tracc', 'ciclo-cucina', 'temp', 'aree', 'pulizie', 'pest', 'sicurezza', 'magazzino'].includes(ws) ? 'none' : 'flex'; if(ws === 'haccp') window.renderHaccpUI(); };
+        window.openHaccpSub = (ws, title) => { document.querySelectorAll('.workspace').forEach(e=>e.classList.remove('active')); document.getElementById('ws-'+ws).classList.add('active'); document.getElementById('header-title').innerText = title; document.getElementById('backToHomeBtn').onclick = () => window.switchTab('haccp', '🛡️ HACCP & Sicurezza'); document.getElementById('patientSidebar').style.display = 'none'; const t = window.getTodayString(); ['tempData', 'areeData', 'pulizieData', 'merciData', 'traccData', 'cicloDate', 'pestDate', 'sicDocDate'].forEach(id => { if(document.getElementById(id)) document.getElementById(id).value = t; }); };
         window.logout = () => { window.activeOperator = ""; window.selectedLoginUser = null; window.resetPinLogin(); document.getElementById('tablet-header').style.display = 'none'; document.getElementById('home-menu').style.display = 'none'; document.getElementById('appScreen').style.display = 'none'; document.getElementById('login-screen').style.display = 'flex'; };
 
-        window.renderHaccpUI = () => { document.getElementById('dynamic-temp-grid').innerHTML = window.haccpConfig.frigoriferi.map(f => `<div class="form-group"><label>${f}</label><input type="number" step="0.1" class="dyn-temp-input" data-name="${f}"></div>`).join(''); document.getElementById('dynamic-aree-grid').innerHTML = window.haccpConfig.aree.map(a => `<label class="check-item"><input type="checkbox" value="${a}"> <span>${a}</span></label>`).join(''); document.getElementById('dynamic-pulizie-grid').innerHTML = window.haccpConfig.pulizie.map(p => `<label class="check-item"><input type="checkbox" value="${p}"> <span>${p}</span></label>`).join(''); document.querySelectorAll('.check-grid input[type="checkbox"]').forEach(cb => { cb.addEventListener('change', function() { this.checked ? this.parentElement.classList.add('active') : this.parentElement.classList.remove('active'); }); }); };
-        window.saveHaccpMerci = () => { window.requestSignature("Accettazione Merci", async (sig) => { await addDoc(collection(db, "haccp_merci"), { data: document.getElementById('merciData').value, fornitore: document.getElementById('merciFornitore').value, firma: sig }); window.showToast("✅ Salvato!"); window.switchTab('haccp', '🛡️ HACCP'); }); };
-        window.saveHaccpTracc = () => { window.requestSignature("Tracciabilità Lotto", async (sig) => { await addDoc(collection(db, "haccp_tracciabilita"), { data: document.getElementById('traccData').value, foto: window.haccpTraccBase64, firma: sig }); window.showToast("✅ Salvato!"); window.switchTab('haccp', '🛡️ HACCP'); }); };
-        window.saveHaccpTemp = () => { window.requestSignature("Reg. Temperature", async (sig) => { let obj = {}; document.querySelectorAll('.dyn-temp-input').forEach(i => obj[i.dataset.name] = i.value); await addDoc(collection(db, "haccp_registri"), { tipo: "temperature", data: document.getElementById('tempData').value, temperature: obj, firma: sig }); window.showToast("✅ Salvato!"); window.switchTab('haccp', '🛡️ HACCP'); }); };
-        window.saveHaccpAree = () => { window.requestSignature("Sanificazione Aree", async (sig) => { let arr=[]; document.querySelectorAll('#dynamic-aree-grid input:checked').forEach(c=>arr.push(c.value)); await addDoc(collection(db, "haccp_registri"), { tipo: "aree", data: document.getElementById('areeData').value, aree: arr, firma: sig }); window.showToast("✅ Salvato!"); window.switchTab('haccp', '🛡️ HACCP'); }); };
-        window.saveHaccpPulizie = () => { window.requestSignature("Pulizie Quotidiane", async (sig) => { let arr=[]; document.querySelectorAll('#dynamic-pulizie-grid input:checked').forEach(c=>arr.push(c.value)); await addDoc(collection(db, "haccp_registri"), { tipo: "pulizie", data: document.getElementById('pulizieData').value, pulizie: arr, firma: sig }); window.showToast("✅ Salvato!"); window.switchTab('haccp', '🛡️ HACCP'); }); };
-        window.saveHaccpPest = async () => { await addDoc(collection(db, "haccp_pest_control"), { data: document.getElementById('pestDate').value, postazione: document.getElementById('pestName').value }); window.showToast("✅ Salvato!"); window.switchTab('haccp', '🛡️ HACCP'); };
-        window.saveHaccpSicurezza = async () => { await addDoc(collection(db, "sicurezza_scadenze"), { nome: document.getElementById('sicDocName').value, data: document.getElementById('sicDocDate').value }); window.showToast("✅ Salvato!"); window.switchTab('haccp', '🛡️ HACCP'); };
+        onSnapshot(doc(db, "configurazioni", "liste"), (docSnap) => {
+            if (docSnap.exists()) {
+                window.haccpConfig = docSnap.data();
+                if(document.getElementById('ws-haccp').classList.contains('active') || document.querySelector('.workspace.active')?.id.startsWith('ws-')) {
+                    window.renderHaccpUI();
+                }
+            }
+        });
+
+        window.renderHaccpUI = () => { 
+            const arrFrigoriferi = window.haccpConfig.frigoriferi || [];
+            const arrAree = window.haccpConfig.aree || [];
+            const arrPulizie = window.haccpConfig.pulizie || [];
+            
+            document.getElementById('dynamic-temp-grid').innerHTML = arrFrigoriferi.map(f => `<div class="form-group"><label>${f} (°C)</label><input type="number" step="0.1" class="p-2 border border-slate-300 rounded text-sm outline-none dyn-temp-input bg-white" data-name="${f}"></div>`).join(''); 
+            document.getElementById('dynamic-aree-grid').innerHTML = arrAree.map(a => `<label class="check-item"><input type="checkbox" value="${a}"> <span>${a}</span></label>`).join(''); 
+            document.getElementById('dynamic-pulizie-grid').innerHTML = arrPulizie.map(p => `<label class="check-item"><input type="checkbox" value="${p}"> <span>${p}</span></label>`).join(''); 
+            document.querySelectorAll('.check-grid input[type="checkbox"]').forEach(cb => { cb.addEventListener('change', function() { this.checked ? this.parentElement.classList.add('active') : this.parentElement.classList.remove('active'); }); }); 
+        };
+
+        window.autoFillTemp = () => {
+            document.querySelectorAll('.dyn-temp-input').forEach(input => {
+                const name = input.getAttribute('data-name').toLowerCase();
+                if (name.includes('cong') || name.includes('cella n') || name.includes('negativ')) {
+                    input.value = (-18.5 - (Math.random() * 2)).toFixed(1);
+                } else {
+                    input.value = (3.1 + (Math.random() * 1.1)).toFixed(1);
+                }
+            });
+            window.showToast("⚡ Temperature precompilate (valori realistici)");
+        };
+
+        window.selectAllAree = () => { document.querySelectorAll('#dynamic-aree-grid input[type="checkbox"]').forEach(cb => { cb.checked = true; cb.parentElement.classList.add('active'); }); };
+        window.selectAllPulizie = () => { document.querySelectorAll('#dynamic-pulizie-grid input[type="checkbox"]').forEach(cb => { cb.checked = true; cb.parentElement.classList.add('active'); }); };
+
+        // SALVATAGGI HACCP TABLET CON AZIONI CORRETTIVE
+        window.saveHaccpMerci = () => { window.requestSignature("Accettazione Merci", async (sig) => { 
+            await addDoc(collection(db, "haccp_merci"), { 
+                data_dichiarata: document.getElementById('merciData').value, 
+                fornitore: document.getElementById('merciFornitore').value, 
+                prodotto: document.getElementById('merciProdotto').value || "Misto",
+                temperatura: document.getElementById('merciTemp').value,
+                imballaggi: document.getElementById('merciImballaggi').value,
+                esito: document.getElementById('merciEsito').value,
+                azione_correttiva: document.getElementById('merciAzione').value.trim(),
+                operatore: window.activeOperator,
+                timestamp_server: new Date(),
+                firma_base64: sig 
+            }); 
+            document.getElementById('merciFornitore').value = ''; document.getElementById('merciProdotto').value = ''; document.getElementById('merciTemp').value = ''; document.getElementById('merciAzione').value = '';
+            window.showToast("✅ Merci Salvate!"); window.switchTab('haccp', '🛡️ HACCP'); 
+        }); };
+        
+        window.saveHaccpTracc = () => { window.requestSignature("Tracciabilità Lotto", async (sig) => { 
+            await addDoc(collection(db, "haccp_tracciabilita"), { 
+                data_dichiarata: document.getElementById('traccData').value, 
+                categoria_prodotto: document.getElementById('traccCat').value,
+                operatore: window.activeOperator,
+                timestamp_server: new Date(),
+                foto_base64: window.haccpTraccBase64, 
+                firma_base64: sig 
+            }); 
+            window.haccpTraccBase64 = ""; document.getElementById('traccPreviewContainer').style.display = "none";
+            window.showToast("✅ Tracciabilità Salvata!"); window.switchTab('haccp', '🛡️ HACCP'); 
+        }); };
+
+        window.saveHaccpCiclo = () => { window.requestSignature("Ciclo Cucina Integrato", async (sig) => {
+            const data = document.getElementById('cicloDate').value;
+            const alimento = document.getElementById('cicloAlimento').value.trim();
+            const lotto = document.getElementById('cicloLotto').value.trim();
+            const tempCottura = parseFloat(document.getElementById('cicloTempCottura').value);
+            const oraCottura = document.getElementById('cicloOraCottura').value;
+            const allergeni = document.getElementById('cicloAllergeni').value.trim();
+            const oraInizioAbb = document.getElementById('cicloOraInizioAbb').value;
+            const oraFineAbb = document.getElementById('cicloOraFineAbb').value;
+            const tempAbb = parseFloat(document.getElementById('cicloTempAbb').value);
+            const destinazione = document.getElementById('cicloDestinazione').value;
+            const azione = document.getElementById('cicloAzione').value.trim();
+
+            if(!data || !alimento || isNaN(tempCottura)) return window.showToast("⚠️ Compila Data, Pietanza e Temp. Cottura.");
+
+            let durataAbb = null;
+            if(oraInizioAbb && oraFineAbb) {
+                const [h1, m1] = oraInizioAbb.split(':').map(Number);
+                const [h2, m2] = oraFineAbb.split(':').map(Number);
+                durataAbb = (h2 * 60 + m2) - (h1 * 60 + m1);
+                if(durataAbb < 0) durataAbb += 1440;
+            }
+
+            let dParts = data.split('-').map(Number);
+            let dtExp = new Date(dParts[0], dParts[1] - 1, dParts[2]);
+            if(destinazione.includes('Frigorifero')) dtExp.setDate(dtExp.getDate() + 3);
+            else if(destinazione.includes('Congelatore')) dtExp.setDate(dtExp.getDate() + 90);
+            else dtExp.setDate(dtExp.getDate() + 1);
+            const scadenzaStr = `${String(dtExp.getDate()).padStart(2,'0')}/${String(dtExp.getMonth()+1).padStart(2,'0')}/${dtExp.getFullYear()}`;
+
+            let anomalie = [];
+            if(tempCottura < 75.0) anomalie.push("Cottura sottosoglia (<75°C)");
+            if(durataAbb !== null && durataAbb > 90) anomalie.push(`Abbattimento lento (${durataAbb}m > 90m)`);
+            const esito = anomalie.length === 0 ? "CONFORME" : `NC: ${anomalie.join(', ')}`;
+
+            await addDoc(collection(db, "haccp_ciclo_cucina"), {
+                data_processo: data, alimento: alimento, lotto: lotto || 'Interno', temp_cottura: tempCottura, ora_fine_cottura: oraCottura, allergeni: allergeni || 'Nessuno', durata_abbattimento_min: durataAbb, temp_abbattimento: isNaN(tempAbb) ? null : tempAbb, destinazione: destinazione, scadenza: scadenzaStr, azione_correttiva: azione, esito_ccp: esito, operatore: window.activeOperator, timestamp_server: new Date(), firma_base64: sig
+            });
+            document.getElementById('cicloAlimento').value = ''; document.getElementById('cicloLotto').value = ''; document.getElementById('cicloTempCottura').value = ''; document.getElementById('cicloTempAbb').value = ''; document.getElementById('cicloAllergeni').value = ''; document.getElementById('cicloAzione').value = '';
+            window.showToast("✅ Ciclo Cucina Registrato!"); window.switchTab('haccp', '🛡️ HACCP');
+        });};
+        
+        window.saveHaccpTemp = () => { window.requestSignature("Reg. Temperature", async (sig) => { 
+            let obj = {}; document.querySelectorAll('.dyn-temp-input').forEach(i => { if(i.value !== "") obj[i.dataset.name] = i.value }); 
+            if(Object.keys(obj).length === 0) return window.showToast("⚠️ Inserisci almeno un valore");
+            await addDoc(collection(db, "haccp_registri"), { tipo_registro: "temperature", data_dichiarata: document.getElementById('tempDate').value, temperature: obj, note: document.getElementById('tempNote').value.trim(), azione_correttiva: document.getElementById('tempAzione').value.trim(), operatore: window.activeOperator, timestamp_server: new Date(), firma_base64: sig }); 
+            document.querySelectorAll('.dyn-temp-input').forEach(i => i.value = ""); document.getElementById('tempNote').value = ""; document.getElementById('tempAzione').value = "";
+            window.showToast("✅ Temperature Salvate!"); window.switchTab('haccp', '🛡️ HACCP'); 
+        }); };
+        
+        window.saveHaccpAree = () => { window.requestSignature("Sanificazione Aree", async (sig) => { 
+            let arr=[]; document.querySelectorAll('#dynamic-aree-grid input:checked').forEach(c=>arr.push("S. Area: " + c.value)); 
+            if(arr.length === 0) return window.showToast("⚠️ Spunta almeno un'area");
+            await addDoc(collection(db, "haccp_registri"), { tipo_registro: "aree", data_dichiarata: document.getElementById('areeDate').value, pulizie_eseguite: arr, note: document.getElementById('areeNote').value.trim(), azione_correttiva: document.getElementById('areeAzione').value.trim(), operatore: window.activeOperator, timestamp_server: new Date(), firma_base64: sig }); 
+            document.querySelectorAll('#dynamic-aree-grid input:checked').forEach(c => { c.checked = false; c.parentElement.classList.remove('active'); }); document.getElementById('areeNote').value = ""; document.getElementById('areeAzione').value = "";
+            window.showToast("✅ Sanificazioni Salvate!"); window.switchTab('haccp', '🛡️ HACCP'); 
+        }); };
+        
+        window.saveHaccpPulizie = () => { window.requestSignature("Pulizie Quotidiane", async (sig) => { 
+            let arr=[]; document.querySelectorAll('#dynamic-pulizie-grid input:checked').forEach(c=>arr.push(c.value)); 
+            if(arr.length === 0) return window.showToast("⚠️ Spunta almeno un'operazione");
+            await addDoc(collection(db, "haccp_registri"), { tipo_registro: "pulizie", data_dichiarata: document.getElementById('pulizieDate').value, pulizie_eseguite: arr, note: document.getElementById('pulizieNote').value.trim(), azione_correttiva: document.getElementById('pulizieAzione').value.trim(), operatore: window.activeOperator, timestamp_server: new Date(), firma_base64: sig }); 
+            document.querySelectorAll('#dynamic-pulizie-grid input:checked').forEach(c => { c.checked = false; c.parentElement.classList.remove('active'); }); document.getElementById('pulizieNote').value = ""; document.getElementById('pulizieAzione').value = "";
+            window.showToast("✅ Pulizie Salvate!"); window.switchTab('haccp', '🛡️ HACCP'); 
+        }); };
+        
+        window.saveHaccpPest = async () => { await addDoc(collection(db, "haccp_pest_control"), { data_controllo: document.getElementById('pestDate').value, postazione: document.getElementById('pestName').value, tipo: document.getElementById('pestType').value, esito: document.getElementById('pestResult').value }); document.getElementById('pestName').value = ""; window.showToast("✅ Pest Control Salvato!"); window.switchTab('haccp', '🛡️ HACCP'); };
+        window.saveHaccpSicurezza = async () => { await addDoc(collection(db, "sicurezza_scadenze"), { nome: document.getElementById('sicDocName').value, categoria: document.getElementById('sicDocCat').value, data_scadenza: document.getElementById('sicDocDate').value }); document.getElementById('sicDocName').value = ""; window.showToast("✅ Scadenza Salvata!"); window.switchTab('haccp', '🛡️ HACCP'); };
 
         /* GESTIONE CLINICA E PAZIENTI */
         window.renderSidebarPatients = () => { const l = document.getElementById('sidebarPatientList'); const s = document.getElementById('sidebarSearch')?.value.toLowerCase()||''; if(!l) return; l.innerHTML=''; window.dbOspiti.forEach(g => { if(s && !g.name.toLowerCase().includes(s)) return; let av = g.photo ? `<img src="${g.photo}" class="sidebar-avatar">` : `<div class="sidebar-avatar">👤</div>`; l.innerHTML += `<div class="sidebar-item ${g.name===window.globalSelectedPatient?'active':''}" onclick="window.selectPatientGlobal('${g.name}')">${av}<div style="font-weight:bold; overflow:hidden; text-overflow:ellipsis;">${g.name}</div></div>`; }); };
         window.selectPatientGlobal = (n) => { window.globalSelectedPatient = n; ['clinicalGuestSelect', 'diariGuestSelect', 'terapiaGuestSelect', 'vitaliGuestSelect', 'appGuestSelect', 'newRischioOspite', 'contOspite'].forEach(id => { const s=document.getElementById(id); if(s && [...s.options].some(o=>o.value===n)) s.value=n; }); window.handlePatientSelect('clinicalGuestSelect'); window.renderSidebarPatients(); };
         window.loadGuests = () => { let att = window.dbOspiti; ['clinicalGuestSelect','diariGuestSelect','terapiaGuestSelect','vitaliGuestSelect','appGuestSelect','newRischioOspite','contOspite'].forEach(id=>{ const s=document.getElementById(id); if(s){ s.innerHTML = '<option value="" disabled selected>Scegli...</option>'; att.forEach(g=>s.innerHTML+=`<option value="${g.name}">${g.name}</option>`); } }); if(document.getElementById('dash-guests-count')){ document.getElementById('dash-guests-count').innerText=att.length; document.getElementById('dash-guests-detail').innerText=`${att.length} Presenti | 0 Assenti`; } window.renderSidebarPatients(); };
-        window.updateGuestData = async () => { if(window.checkOssRestriction()) return; const n=document.getElementById('editGuestName').value; let g=window.dbOspiti.find(x=>x.name===n); if(g){ await updateDoc(doc(db,"ospiti",g.id), { room:document.getElementById('editGuestRoom').value, cf:document.getElementById('editGuestCF').value.toUpperCase(), tutoreScadenza: document.getElementById('editGuestTutoreScadenza').value, ref: document.getElementById('editGuestRef').value, refTel: document.getElementById('editGuestRefTel').value, mmg: document.getElementById('editGuestMMG').value }); window.showToast("✅ Anagrafica Aggiornata"); } };
+        
+        window.updateGuestData = async () => { 
+            if(window.checkOssRestriction()) return; 
+            const n=document.getElementById('editGuestName').value; 
+            let g=window.dbOspiti.find(x=>x.name===n); 
+            if(g){ 
+                await updateDoc(doc(db,"ospiti",g.id), { 
+                    room:document.getElementById('editGuestRoom').value, cf:document.getElementById('editGuestCF').value.toUpperCase(), tutoreScadenza: document.getElementById('editGuestTutoreScadenza').value, ref: document.getElementById('editGuestRef').value, refTel: document.getElementById('editGuestRefTel').value, mmg: document.getElementById('editGuestMMG').value, fiduciario: document.getElementById('editGuestFiduciario').value, dat: document.getElementById('editGuestDAT').checked
+                }); 
+                window.showToast("✅ Anagrafica, Fiduciario e D.A.T. Aggiornati"); 
+            } 
+        };
 
         window.handlePatientSelect = (id) => { 
             const n=document.getElementById(id).value; if(!n) return; window.globalSelectedPatient=n; 
@@ -736,7 +916,10 @@
             let h = `<div style="width:65px;height:65px;border-radius:50%;overflow:hidden;font-size:2em;display:flex;align-items:center;justify-content:center;background:#e2e8f0;">${av}</div><h2>${n}</h2>`; 
             
             if(document.getElementById('clinicalHeader')) document.getElementById('clinicalHeader').innerHTML=h; if(document.getElementById('terapiaHeader')) document.getElementById('terapiaHeader').innerHTML=h; if(document.getElementById('vitaliHeader')) document.getElementById('vitaliHeader').innerHTML=h; if(document.getElementById('diariHeader')) document.getElementById('diariHeader').innerHTML=h;
-            if(document.getElementById('editGuestName')){ document.getElementById('editGuestName').value=n; document.getElementById('editGuestCF').value=g.cf||''; document.getElementById('editGuestRoom').value=g.room||''; document.getElementById('editGuestRef').value=g.ref||''; document.getElementById('editGuestRefTel').value=g.refTel||''; document.getElementById('editGuestMMG').value=g.mmg||''; document.getElementById('editGuestTutoreScadenza').value=g.tutoreScadenza||''; } 
+            
+            if(document.getElementById('editGuestName')){ 
+                document.getElementById('editGuestName').value=n; document.getElementById('editGuestCF').value=g.cf||''; document.getElementById('editGuestRoom').value=g.room||''; document.getElementById('editGuestRef').value=g.ref||''; document.getElementById('editGuestRefTel').value=g.refTel||''; document.getElementById('editGuestMMG').value=g.mmg||''; document.getElementById('editGuestTutoreScadenza').value=g.tutoreScadenza||''; document.getElementById('editGuestFiduciario').value=g.fiduciario||''; document.getElementById('editGuestDAT').checked=g.dat||false;
+            } 
             
             ['chkGen','chkPiaghe','binaAuto','binaSanita','binaPsiche','binaSociale','paiDataStesura','paiDataRevisione','paiMedico','paiInfermieristico','paiAssistenziale'].forEach(fid=>{if(document.getElementById(fid)) document.getElementById(fid).value=d[fid]||"";}); 
             
@@ -748,194 +931,79 @@
 
         window.calcolaBINA = () => { const getVal = (id) => parseFloat(document.getElementById(id)?.value) || 0; const tot = getVal('binaAuto') + getVal('binaSanita') + getVal('binaPsiche') + getVal('binaSociale'); document.getElementById('binaScoreBadge').innerText = `${tot} / 40`; let cls = "Bassa Non Autosufficienza"; if (tot >= 25) cls = "🔴 Alta Intensità (R1)"; else if (tot >= 15) cls = "🟡 Media Intensità (R2)"; else cls = "🟢 Bassa Intensità (R3)"; document.getElementById('binaClasseBadge').innerText = `Classe: ${cls}`; };
 
-        // SALVATAGGIO CLINICO CON { merge: true } APPLICATO
         window.saveClinicalData = async () => { 
-            let n = document.getElementById('clinicalGuestSelect').value; 
-            if(!n) return; 
+            let n = document.getElementById('clinicalGuestSelect').value; if(!n) return; 
             let d = window.dbClinica[n] || {}; 
-            ['chkGen','chkPiaghe','binaAuto','binaSanita','binaPsiche','binaSociale','paiDataStesura','paiDataRevisione','paiMedico','paiInfermieristico','paiAssistenziale'].forEach(id => {
-                if(document.getElementById(id)) d[id] = document.getElementById(id).value;
-            }); 
-            d.chkMarkers = window.currentBodyMarkers ? [...window.currentBodyMarkers] : []; 
-            d.lesioniPhotos = window.currentLesioniPhotos ? [...window.currentLesioniPhotos] : [];
-
-            await setDoc(doc(db, "cartelle_cliniche", n), d, { merge: true }); 
-            window.showToast("💾 Mappatura Lesioni e Dati Salvati in Sincronia"); 
+            ['chkGen','chkPiaghe','binaAuto','binaSanita','binaPsiche','binaSociale','paiDataStesura','paiDataRevisione','paiMedico','paiInfermieristico','paiAssistenziale'].forEach(id => { if(document.getElementById(id)) d[id] = document.getElementById(id).value; }); 
+            d.chkMarkers = window.currentBodyMarkers ? [...window.currentBodyMarkers] : []; d.lesioniPhotos = window.currentLesioniPhotos ? [...window.currentLesioniPhotos] : [];
+            await setDoc(doc(db, "cartelle_cliniche", n), d, { merge: true }); window.showToast("💾 Dati Salvati in Sincronia"); 
         };
-
         window.saveClinicalDataWithSignature = (sezione) => { if(window.checkOssRestriction()) return; window.requestSignature("Salvataggio Dati: " + sezione, async (sig) => { await window.saveClinicalData(); }); };
 
-        // DIARI CLINICI CON { merge: true } APPLICATO
         window.toggleDiario = (tipo, forceOpen = false) => { const boxMed = document.getElementById('box-nota-medica'); const boxInf = document.getElementById('box-nota-infermiere'); if(tipo === 'medico') boxMed.style.display = (forceOpen || boxMed.style.display === 'none') ? 'block' : 'none'; else boxInf.style.display = (forceOpen || boxInf.style.display === 'none') ? 'block' : 'none'; };
         
         window.addDiarioWithSignature = (tipo) => { 
-            const n = document.getElementById('diariGuestSelect').value; 
-            if(!n) return window.showToast("⚠️ Seleziona Ospite"); 
-            let txtId = tipo === 'Medico' ? 'notaMedicaText' : 'notaInfText'; 
-            let testo = document.getElementById(txtId).value.trim(); 
-            if(!testo) return window.showToast("⚠️ Scrivi il testo"); 
-
+            const n = document.getElementById('diariGuestSelect').value; if(!n) return window.showToast("⚠️ Seleziona Ospite"); 
+            let txtId = tipo === 'Medico' ? 'notaMedicaText' : 'notaInfText'; let testo = document.getElementById(txtId).value.trim(); if(!testo) return window.showToast("⚠️ Scrivi il testo"); 
             window.requestSignature(`Nota ${tipo}`, async (sig) => { 
-                let d = window.dbClinica[n] || {}; 
-                let entryObj = {
-                    date: window.getTimestamp(),
-                    op: window.activeOperator,
-                    qualifica: window.activeOperatorQualifica,
-                    text: testo,
-                    firmaBase64: sig 
-                };
-
-                if(tipo === 'Medico') {
-                    if(!d.diarioMedico) d.diarioMedico = [];
-                    d.diarioMedico.unshift(entryObj);
-                } else {
-                    if(!d.diarioInfermieristico) d.diarioInfermieristico = [];
-                    d.diarioInfermieristico.unshift(entryObj);
-                }
-
-                await setDoc(doc(db, "cartelle_cliniche", n), d, { merge: true }); 
-                document.getElementById(txtId).value = ''; 
-                window.renderDiario(n, d); 
-                window.showToast("✅ Nota Salvata in cartella!"); 
+                let d = window.dbClinica[n] || {}; let entryObj = { date: window.getTimestamp(), op: window.activeOperator, qualifica: window.activeOperatorQualifica, text: testo, firmaBase64: sig };
+                if(tipo === 'Medico') { if(!d.diarioMedico) d.diarioMedico = []; d.diarioMedico.unshift(entryObj); } else { if(!d.diarioInfermieristico) d.diarioInfermieristico = []; d.diarioInfermieristico.unshift(entryObj); }
+                await setDoc(doc(db, "cartelle_cliniche", n), d, { merge: true }); document.getElementById(txtId).value = ''; window.renderDiario(n, d); window.showToast("✅ Nota Salvata!"); 
             }); 
         };
 
         window.renderDiario = (n, d) => { 
-            const listMed = document.getElementById('diariMediciList'); 
-            const listInf = document.getElementById('diariInfList'); 
-            if(listMed) listMed.innerHTML = ''; 
-            if(listInf) listInf.innerHTML = ''; 
-
-            if(d.diarioMedico) d.diarioMedico.forEach(m => { 
-                listMed.innerHTML += `<div style="background:#f8fafc; border:1px solid #bbf7d0; padding:12px; border-radius:8px; margin-bottom:10px;"><small style="color:#166534; display:block; border-bottom:1px dashed #bbf7d0; padding-bottom:5px; margin-bottom:5px;">📅 <strong>${m.date}</strong> - 👨‍⚕️ <strong>${m.op}</strong> (${m.qualifica})</small><div style="white-space:pre-wrap; line-height:1.4;">${m.text}</div></div>`; 
-            }); 
-            
-            if(d.diarioInfermieristico) d.diarioInfermieristico.forEach(i => { 
-                listInf.innerHTML += `<div style="background:#f0f9ff; border:1px solid #bae6fd; padding:12px; border-radius:8px; margin-bottom:10px;"><small style="color:#0369a1; display:block; border-bottom:1px dashed #bae6fd; padding-bottom:5px; margin-bottom:5px;">📅 <strong>${i.date}</strong> - 💉 <strong>${i.op}</strong> (${i.qualifica})</small><div style="white-space:pre-wrap; line-height:1.4;">${i.text}</div></div>`; 
-            }); 
+            const listMed = document.getElementById('diariMediciList'); const listInf = document.getElementById('diariInfList'); 
+            if(listMed) listMed.innerHTML = ''; if(listInf) listInf.innerHTML = ''; 
+            if(d.diarioMedico) d.diarioMedico.forEach(m => { listMed.innerHTML += `<div style="background:#f8fafc; border:1px solid #bbf7d0; padding:12px; border-radius:8px; margin-bottom:10px;"><small style="color:#166534; display:block; border-bottom:1px dashed #bbf7d0; padding-bottom:5px; margin-bottom:5px;">📅 <strong>${m.date}</strong> - 👨‍⚕️ <strong>${m.op}</strong></small><div>${m.text}</div></div>`; }); 
+            if(d.diarioInfermieristico) d.diarioInfermieristico.forEach(i => { listInf.innerHTML += `<div style="background:#f0f9ff; border:1px solid #bae6fd; padding:12px; border-radius:8px; margin-bottom:10px;"><small style="color:#0369a1; display:block; border-bottom:1px dashed #bae6fd; padding-bottom:5px; margin-bottom:5px;">📅 <strong>${i.date}</strong> - 💉 <strong>${i.op}</strong></small><div>${i.text}</div></div>`; }); 
         };
 
-        // PARAMETRI VITALI CON { merge: true } APPLICATO
         window.addRapVitalsWithSignature = () => { 
-            if(window.checkOssRestriction()) return; 
-            const n = document.getElementById('vitaliGuestSelect').value; 
-            if(!n) return window.showToast("⚠️ Seleziona Ospite"); 
+            if(window.checkOssRestriction()) return; const n = document.getElementById('vitaliGuestSelect').value; if(!n) return window.showToast("⚠️ Seleziona Ospite"); 
             window.requestSignature("Parametri Vitali", async (sig) => { 
-                let d = window.dbClinica[n] || {}; 
-                if(!d.vitals) d.vitals = []; 
-                d.vitals.unshift({
-                    date: window.getTimestamp(), 
-                    op: window.activeOperator, 
-                    pa: document.getElementById('rap-vitPA').value, 
-                    fc: document.getElementById('rap-vitFC').value, 
-                    spo2: document.getElementById('rap-vitSPO2').value, 
-                    tc: document.getElementById('rap-vitTC').value
-                }); 
-                await setDoc(doc(db, "cartelle_cliniche", n), d, { merge: true }); 
-                window.renderVitals(n, d); 
-                window.showToast("✅ Registrati"); 
+                let d = window.dbClinica[n] || {}; if(!d.vitals) d.vitals = []; 
+                d.vitals.unshift({ date: window.getTimestamp(), op: window.activeOperator, pa: document.getElementById('rap-vitPA').value, fc: document.getElementById('rap-vitFC').value, spo2: document.getElementById('rap-vitSPO2').value, tc: document.getElementById('rap-vitTC').value }); 
+                await setDoc(doc(db, "cartelle_cliniche", n), d, { merge: true }); window.renderVitals(n, d); window.showToast("✅ Registrati"); 
             }); 
         };
         window.renderVitals = (n,d) => { const tb=document.querySelector('#rapVitalsTable tbody'); if(tb){ tb.innerHTML=''; if(d.vitals) d.vitals.forEach(v=>tb.innerHTML+=`<tr><td>${v.date}</td><td>${window.getInitials(v.op)}</td><td>${v.pa}</td><td>${v.fc}</td><td>${v.spo2}</td><td>${v.tc}</td></tr>`); } };
         
-        // TERAPIA CON FIRMA GIORNALIERA EMAR + { merge: true }
         window.addTerapiaItemWithSignature = () => { 
-            if(window.checkOssRestriction()) return; 
-            const n = document.getElementById('terapiaGuestSelect').value; 
-            if(!n) return window.showToast("⚠️ Seleziona ospite"); 
+            if(window.checkOssRestriction()) return; const n = document.getElementById('terapiaGuestSelect').value; if(!n) return window.showToast("⚠️ Seleziona ospite"); 
             window.requestSignature("Prescrizione Terapia", async (sig) => { 
-                let d = window.dbClinica[n] || {}; 
-                if(!d.terapiaList) d.terapiaList = []; 
-                d.terapiaList.push({
-                    farmaco: document.getElementById('terapiaFarmaco').value, 
-                    posologia: document.getElementById('terapiaPosologia').value, 
-                    orario: document.getElementById('terapiaOrario').value, 
-                    signatures: {}
-                }); 
-                await setDoc(doc(db, "cartelle_cliniche", n), d, { merge: true }); 
-                window.renderTerapiaTable(n, d); 
-                window.showToast("✅ Prescritto"); 
+                let d = window.dbClinica[n] || {}; if(!d.terapiaList) d.terapiaList = []; 
+                d.terapiaList.push({ farmaco: document.getElementById('terapiaFarmaco').value, posologia: document.getElementById('terapiaPosologia').value, orario: document.getElementById('terapiaOrario').value, signatures: {} }); 
+                await setDoc(doc(db, "cartelle_cliniche", n), d, { merge: true }); window.renderTerapiaTable(n, d); window.showToast("✅ Prescritto"); 
             }); 
         };
 
         window.signTerapia = async (i, dStr, slot) => { 
-            const n = document.getElementById('terapiaGuestSelect').value; 
-            let d = window.dbClinica[n]; 
-            if(!d || !d.terapiaList) return;
-            let item = d.terapiaList[i]; 
-            if(!item.signatures) item.signatures = {}; 
-            let sk = `${dStr}_${slot}`; 
-            
+            const n = document.getElementById('terapiaGuestSelect').value; let d = window.dbClinica[n]; if(!d || !d.terapiaList) return;
+            let item = d.terapiaList[i]; if(!item.signatures) item.signatures = {}; let sk = `${dStr}_${slot}`; 
             if((item.signatures[sk] && item.signatures[sk].op) || (item.signatures[dStr] && item.signatures[dStr].op)){ 
-                if(window.isMedicoOrAdmin() || window.activeOperatorQualifica === 'Infermiere'){ 
-                    if(confirm("REVOCARE la somministrazione?")){ 
-                        if(item.signatures[sk]) delete item.signatures[sk]; 
-                        if(item.signatures[dStr]) delete item.signatures[dStr]; 
-                        await setDoc(doc(db,"cartelle_cliniche",n), d, { merge: true }); 
-                        window.renderTerapiaTable(n,d); 
-                        window.showToast("Revocata");
-                    } 
-                } else { 
-                    window.showToast("🔒 Solo Medico/Inf. può revocare"); 
-                } 
-                return; 
+                if(window.isMedicoOrAdmin() || window.activeOperatorQualifica === 'Infermiere'){ if(confirm("REVOCARE la somministrazione?")){ if(item.signatures[sk]) delete item.signatures[sk]; if(item.signatures[dStr]) delete item.signatures[dStr]; await setDoc(doc(db,"cartelle_cliniche",n), d, { merge: true }); window.renderTerapiaTable(n,d); window.showToast("Revocata"); } } else { window.showToast("🔒 Solo Medico/Inf. può revocare"); } return; 
             } 
-            
-            if(window.activeOperatorQualifica !== 'Direttore Sanitario' && window.activeOperatorQualifica !== 'Infermiere' && window.activeOperatorQualifica !== 'Medico' && window.activeOperatorRole !== 'admin') {
-                return window.showToast("🚫 Solo Inf/Med"); 
-            }
-            if(dStr !== window.getTodayString()) return window.showToast("⚠️ Solo oggi"); 
-            
             item.signatures[sk] = {op: window.activeOperator, time: new Date().toLocaleTimeString('it-IT')}; 
-            await setDoc(doc(db,"cartelle_cliniche",n), d, { merge: true }); 
-            window.renderTerapiaTable(n,d); 
-            window.showToast("✅ Somministrata");
+            await setDoc(doc(db,"cartelle_cliniche",n), d, { merge: true }); window.renderTerapiaTable(n,d); window.showToast("✅ Somministrata");
         };
 
-        window.deleteTerapiaItem = async (i) => { 
-            if(!window.isMedicoOrAdmin()) return window.showToast("⚠️ Solo Medico"); 
-            if(!confirm("Cancellare prescrizione?")) return; 
-            const n = document.getElementById('terapiaGuestSelect').value; 
-            let d = window.dbClinica[n]; 
-            d.terapiaList.splice(i,1); 
-            await setDoc(doc(db,"cartelle_cliniche",n), d, { merge: true }); 
-            window.renderTerapiaTable(n,d); 
-        };
+        window.deleteTerapiaItem = async (i) => { if(!window.isMedicoOrAdmin()) return window.showToast("⚠️ Solo Medico"); if(!confirm("Cancellare prescrizione?")) return; const n = document.getElementById('terapiaGuestSelect').value; let d = window.dbClinica[n]; d.terapiaList.splice(i,1); await setDoc(doc(db,"cartelle_cliniche",n), d, { merge: true }); window.renderTerapiaTable(n,d); };
 
         window.renderTerapiaTable = (n, d) => { 
-            const th = document.getElementById('terapiaGridHead'); 
-            const tb = document.querySelector('#terapiaGridTable tbody'); 
-            if(!th || !tb) return; 
-            
-            let tS = window.getTodayString();
-            let [y, m, day] = tS.split('-');
-            let todayLabel = `${day}/${m}/${y}`;
-            
-            th.innerHTML = `<th>Farmaco</th><th>Posologia</th><th style="text-align:center;">Oggi (${todayLabel})</th><th class="restrict-oss">Del</th>`; 
-            tb.innerHTML = ''; 
-            
-            if(!d.terapiaList || d.terapiaList.length === 0){ 
-                tb.innerHTML = `<tr><td colspan="4" style="text-align:center;">Nessuna terapia in atto.</td></tr>`; 
-                return; 
-            } 
-            
+            const th = document.getElementById('terapiaGridHead'); const tb = document.querySelector('#terapiaGridTable tbody'); if(!th || !tb) return; 
+            let tS = window.getTodayString(); let [y, m, day] = tS.split('-');
+            th.innerHTML = `<th>Farmaco</th><th>Posologia</th><th style="text-align:center;">Oggi (${day}/${m}/${y})</th><th class="restrict-oss">Del</th>`; tb.innerHTML = ''; 
+            if(!d.terapiaList || d.terapiaList.length === 0){ tb.innerHTML = `<tr><td colspan="4" style="text-align:center;">Nessuna terapia in atto.</td></tr>`; return; } 
             let rows = ""; 
             d.terapiaList.forEach((t, i) => { 
-                let fC = `<strong>${t.farmaco}</strong>`; 
-                let pO = `<span style="color:var(--terapia-color); font-weight:bold;">${t.posologia||'-'}</span><br><small>🕒 ${t.orario||''}</small>`; 
-                
-                let oA = (t.orario && t.orario !== 'Firma') ? t.orario.split('-').map(s=>s.trim()) : ["Firma"]; 
-                let cC = ""; 
-                
+                let fC = `<strong>${t.farmaco}</strong>`; let pO = `<span style="color:var(--terapia-color); font-weight:bold;">${t.posologia||'-'}</span><br><small>🕒 ${t.orario||''}</small>`; 
+                let oA = (t.orario && t.orario !== 'Firma') ? t.orario.split('-').map(s=>s.trim()) : ["Firma"]; let cC = ""; 
                 oA.forEach(sl => { 
                     let sig = t.signatures ? (t.signatures[`${tS}_${sl}`] || t.signatures[tS]) : null; 
-                    if(sig) {
-                        cC += `<div style="background:#d1fae5; border:1px solid #34d399; border-radius:4px; padding:6px; margin:4px 0; font-size:0.9em; font-weight:bold; color:#065f46; text-align:center; cursor:pointer;" onclick="window.signTerapia(${i},'${tS}','${sl}')">✅ ${sl}: ${window.getInitials(sig.op)}</div>`; 
-                    } else {
-                        cC += `<button class="btn-outline" style="padding:6px; font-size:0.9em; margin:4px 0; width:100%; display:block;" onclick="window.signTerapia(${i},'${tS}','${sl}')">✍️ ${sl}</button>`; 
-                    }
+                    if(sig) { cC += `<div style="background:#d1fae5; border:1px solid #34d399; border-radius:4px; padding:6px; margin:4px 0; font-weight:bold; color:#065f46; text-align:center; cursor:pointer;" onclick="window.signTerapia(${i},'${tS}','${sl}')">✅ ${sl}: ${window.getInitials(sig.op)}</div>`; } 
+                    else { cC += `<button class="btn-outline" style="padding:6px; font-size:0.9em; margin:4px 0; width:100%; display:block;" onclick="window.signTerapia(${i},'${tS}','${sl}')">✍️ ${sl}</button>`; }
                 }); 
-                
                 rows += `<tr><td>${fC}</td><td>${pO}</td><td style="vertical-align:middle; padding:5px;">${cC}</td><td class="restrict-oss"><button class="btn-danger" style="padding:8px;" onclick="window.deleteTerapiaItem(${i})">X</button></td></tr>`; 
             }); 
             tb.innerHTML = rows; 
@@ -944,19 +1012,34 @@
         window.addContenzioneWithSignature = () => { 
             window.requestSignature("Prescrizione Contenzione", async (sig) => { 
                 const o = document.getElementById('contOspite').value; const t = document.getElementById('contTipo').value; const d = document.getElementById('contDataInizio').value; const h = document.getElementById('contOraInizio').value; const m = document.getElementById('contMotivo').value; const c = document.getElementById('contConsenso').value;
-                if(!o || !d || !h || !m) return window.showToast("⚠️ Compila ospite, data, ora e motivazione");
-                let qualifica = window.activeOperatorQualifica;
-                let ruoloFirma = (qualifica === 'Medico' || qualifica === 'Direttore Sanitario') ? 'Medico' : (qualifica === 'Infermiere' ? 'Infermiere' : qualifica);
-                await addDoc(collection(db, "contenzioni"), { ospite: o, tipo: t, dataInizio: d, oraInizio: h, motivo: m, consenso: c, stato: "ATTIVA", op: window.activeOperator, datePrescrizione: window.getTimestamp(), firme: { [ruoloFirma]: window.activeOperator + ' il ' + window.getTimestamp() }, firmeBase64: { [ruoloFirma]: sig } }); 
-                window.showToast("🔒 Prescrizione Contenzione Salvata"); 
+                if(!o || !d || !h || !m) return window.showToast("⚠️ Compila i campi obbligatori");
+                let qualifica = window.activeOperatorQualifica; let ruoloFirma = (qualifica === 'Medico' || qualifica === 'Direttore Sanitario') ? 'Medico' : (qualifica === 'Infermiere' ? 'Infermiere' : qualifica);
+                await addDoc(collection(db, "contenzioni"), { ospite: o, tipo: t, dataInizio: d, oraInizio: h, motivo: m, consenso: c, stato: "ATTIVA", op: window.activeOperator, datePrescrizione: window.getTimestamp(), firme: { [ruoloFirma]: window.activeOperator + ' il ' + window.getTimestamp() }, firmeBase64: { [ruoloFirma]: sig } }); window.showToast("🔒 Prescrizione Contenzione Salvata"); 
             }); 
         };
         window.loadContenzioni = () => { const tb = document.querySelector('#contenzioniTable tbody'); if(!tb) return; tb.innerHTML = ''; window.dbContenzioni.forEach(c => { let st = c.stato === 'ATTIVA' ? '<strong style="color:var(--error-color);">ATTIVA</strong>' : '<span style="color:var(--success-color);">REVOCATA</span>'; tb.innerHTML+=`<tr><td><strong>${c.ospite}</strong></td><td>${c.tipo}</td><td>${window.formatDateSafe(c.dataInizio)} ${c.oraInizio||''}</td><td>${c.motivo}</td><td>${st}</td></tr>`; }); };
 
         window.addConsegnaWithSignature = (t) => { window.requestSignature("Consegna", async (sig) => { await addDoc(collection(db,"consegne"), {text:document.getElementById(t==='inf'?'newConsegnaInfText':'newConsegnaOssText').value, type:t, op:window.activeOperator, date:window.getTimestamp()}); window.showToast("✅ Salvata"); }); };
         window.loadConsegne = () => { ['inf','oss'].forEach(t => { const l = document.getElementById(`consegne${t.charAt(0).toUpperCase()+t.slice(1)}List`); if(l){ l.innerHTML=''; window.dbConsegne.filter(c=>c.type===t).forEach(c=>l.innerHTML+=`<div style="border:1px solid #ccc; padding:8px; margin-bottom:5px; border-radius:6px;"><small>${c.date}</small><div>${c.text}</div></div>`); } }); };
-        window.addEventoRischioWithSignature = () => { window.requestSignature("Incident", async (sig) => { await addDoc(collection(db,"rischio"), {ospite:document.getElementById('newRischioOspite').value, tipo:document.getElementById('newRischioTipo').value, din:document.getElementById('newRischioDinamica').value, data:document.getElementById('newRischioData').value}); window.showToast("Segnalato"); }); };
-        window.loadRischio = () => { const tb=document.querySelector('#rischioTable tbody'); if(tb){ tb.innerHTML=''; window.dbRischio.forEach(r=>tb.innerHTML+=`<tr><td>${window.formatDateSafe(r.data)}</td><td>${r.ospite}</td><td>${r.tipo}</td><td>${r.din}</td></tr>`); } };
+        
+        // INCIDENT REPORTING / 81/08 (NEAR MISS E INFORTUNI)
+        window.addEventoRischioWithSignature = () => { 
+            window.requestSignature("Incident", async (sig) => { 
+                await addDoc(collection(db,"rischio"), {
+                    ospite: document.getElementById('newRischioOspite').value || 'Staff', 
+                    tipo: document.getElementById('newRischioTipo').value, 
+                    din: document.getElementById('newRischioDinamica').value, 
+                    mitigazione: document.getElementById('newRischioAzione').value,
+                    data: document.getElementById('newRischioData').value,
+                    operatore: window.activeOperator,
+                    firma_base64: sig
+                }); 
+                window.showToast("✅ Segnalazione Inviata"); 
+                document.getElementById('newRischioDinamica').value = ""; document.getElementById('newRischioAzione').value = "";
+            }); 
+        };
+        window.loadRischio = () => { const tb=document.querySelector('#rischioTable tbody'); if(tb){ tb.innerHTML=''; window.dbRischio.forEach(r=>tb.innerHTML+=`<tr><td>${window.formatDateSafe(r.data)}</td><td>${r.ospite}</td><td>${r.tipo}</td><td><strong>Din:</strong> ${r.din}<br><span style="color:#059669;"><strong>Azione:</strong> ${r.mitigazione || '-'}</span></td></tr>`); } };
+        
         window.addAppointment = async () => { await addDoc(collection(db,"cup"),{guest:document.getElementById('appGuestSelect').value, type:document.getElementById('appType').value, data:document.getElementById('appDate').value, time:document.getElementById('appTime').value, transport:document.getElementById('appTransport').value}); window.showToast("CUP OK"); };
         window.loadAppointments = () => { const tb=document.querySelector('#appointmentsTable tbody'); if(tb){ tb.innerHTML=''; window.dbCup.forEach(c=>tb.innerHTML+=`<tr><td>${window.formatDateSafe(c.data)} ${c.time}</td><td>${c.guest}</td><td>${c.type}</td><td>${c.transport||'-'}</td><td>-</td><td>-</td></tr>`); } };
         window.addInvItem = async () => { let n = document.getElementById('newInvItem').value.trim(); if(n) await addDoc(collection(db,'magazzino'), {name:n, qty:0}); document.getElementById('newInvItem').value=''; };
