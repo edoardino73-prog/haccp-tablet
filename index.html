@@ -359,7 +359,7 @@
                 </div>
             </div>
 
-            <!-- DASHBOARD -->
+            <!-- DASHBOARD AGGIORNATA -->
             <div id="ws-dashboard" class="workspace active">
                 <div class="metrics-grid">
                     <div class="metric-card"><h2 id="dash-guests-count" style="margin-bottom:0;">0</h2><span id="dash-guests-detail" style="font-size:1.05em; color:var(--text-light);">0 Presenti | 0 Assenti</span><br><span style="margin-top:6px; display:inline-block; font-weight:bold; text-transform:uppercase;">Posti Letto Occupati</span></div>
@@ -367,8 +367,15 @@
                     <div class="metric-card" style="border-left-color: var(--error-color);"><h2 id="dash-cont-count" style="color: var(--error-color);">0</h2><span style="font-weight:bold; text-transform:uppercase;">Contenzioni Attive</span></div>
                 </div>
                 <div style="display:flex; gap:20px; flex-wrap:wrap;">
-                    <div class="card" style="flex:2; min-width:300px; border-top:4px solid var(--warning-color);"><div class="card-header"><h3 style="color:var(--warning-color);">Alert Clinici & Scadenze PAI</h3></div><div id="dashboardAlertsList"></div></div>
-                    <div class="card" style="flex:1; min-width:250px;"><div class="card-header"><h3>Agenda CUP</h3></div><div id="dashMiniCalendar"></div></div>
+                    <div class="card" style="flex:2; min-width:300px; border-top:4px solid var(--warning-color);">
+                        <!-- NUOVO TITOLO CHE INCLUDE LO SCADENZIARIO LEGALE -->
+                        <div class="card-header"><h3 style="color:var(--warning-color);">⚖️ Scadenziario Legale e Alert Clinici</h3></div>
+                        <div id="dashboardAlertsList"></div>
+                    </div>
+                    <div class="card" style="flex:1; min-width:250px;">
+                        <div class="card-header"><h3>Agenda CUP</h3></div>
+                        <div id="dashMiniCalendar"></div>
+                    </div>
                 </div>
             </div>
 
@@ -659,7 +666,43 @@
 
         window.processFileUpload = (e, targetVar) => { const file = e.target.files[0]; if(!file) return; const reader = new FileReader(); reader.onload = (ev) => { const img = new Image(); img.onload = () => { const cv = document.createElement('canvas'); cv.width = img.width > 800 ? 800 : img.width; cv.height = img.height * (cv.width / img.width); cv.getContext('2d').drawImage(img, 0, 0, cv.width, cv.height); window[targetVar + 'Base64'] = cv.toDataURL('image/jpeg', 0.6); if(targetVar === 'haccpTracc') { document.getElementById('traccPreviewContainer').style.display = 'block'; document.getElementById('traccImgPreview').src = window[targetVar + 'Base64']; } }; img.src = ev.target.result; }; reader.readAsDataURL(file); };
 
-        window.loadAlerts = () => { const container = document.getElementById('dashboardAlertsList'); if (!container) return; container.innerHTML = ''; let count = 0; (window.dbOspiti || []).forEach(g => { const d = (window.dbClinica && window.dbClinica[g.name]) ? window.dbClinica[g.name] : {}; if (d.paiDataRevisione) { const rDate = new Date(d.paiDataRevisione); const diff = Math.ceil((rDate - new Date()) / (1000 * 60 * 60 * 24)); if (diff < 0) { container.innerHTML += `<div class="alert-item">🚨 P.A.I. Scaduto: <strong>${g.name}</strong></div>`; count++; } else if (diff <= 15) { container.innerHTML += `<div class="alert-item warning">⚠️ P.A.I. in scadenza (${diff} gg): <strong>${g.name}</strong></div>`; count++; } } }); if (count === 0) container.innerHTML = '<div style="padding:15px; color:var(--success-color); font-weight:bold;">✅ Nessun alert clinico attivo.</div>'; };
+        // AGGIUNTA SCADENZIARIO LEGALE ALLA DASHBOARD
+        window.loadAlerts = () => { 
+            const container = document.getElementById('dashboardAlertsList'); 
+            if (!container) return; 
+            container.innerHTML = ''; 
+            let count = 0; 
+            
+            (window.dbOspiti || []).forEach(g => { 
+                // 1. ALERT CLINICO (PAI)
+                const d = (window.dbClinica && window.dbClinica[g.name]) ? window.dbClinica[g.name] : {}; 
+                if (d.paiDataRevisione) { 
+                    const rDate = new Date(d.paiDataRevisione); 
+                    const diff = Math.ceil((rDate - new Date()) / (1000 * 60 * 60 * 24)); 
+                    if (diff < 0) { 
+                        container.innerHTML += `<div class="alert-item">🚨 P.A.I. Scaduto: <strong>${g.name}</strong></div>`; 
+                        count++; 
+                    } else if (diff <= 15) { 
+                        container.innerHTML += `<div class="alert-item warning">⚠️ P.A.I. in scadenza (${diff} gg): <strong>${g.name}</strong></div>`; 
+                        count++; 
+                    } 
+                }
+                
+                // 2. ALERT LEGALE (TUTORE / AdS)
+                if (g.tutoreScadenza) {
+                    const tDate = new Date(g.tutoreScadenza);
+                    const diffT = Math.ceil((tDate - new Date()) / (1000 * 60 * 60 * 24));
+                    if (diffT < 0) {
+                        container.innerHTML += `<div class="alert-item" style="border-color:#a855f7; border-left-color:#7e22ce; background:#faf5ff; color:#6b21a8;">⚖️ AdS/Tutore Scaduto: <strong>${g.name}</strong></div>`;
+                        count++;
+                    } else if (diffT <= 30) {
+                        container.innerHTML += `<div class="alert-item warning" style="border-color:#d8b4fe; border-left-color:#a855f7;">⚖️ AdS/Tutore in scadenza (${diffT} gg): <strong>${g.name}</strong></div>`;
+                        count++;
+                    }
+                }
+            }); 
+            if (count === 0) container.innerHTML = '<div style="padding:15px; color:var(--success-color); font-weight:bold;">✅ Nessuna scadenza legale o clinica in sospeso.</div>'; 
+        };
 
         let sigCanvas = document.getElementById('sig-canvas'); let ctx = sigCanvas.getContext('2d'); let isDrawing = false; let signatureCallback = null;
         const resizeCanvas = () => { sigCanvas.width = sigCanvas.offsetWidth; sigCanvas.height = sigCanvas.offsetHeight; ctx.lineWidth = 3; ctx.lineCap = "round"; ctx.strokeStyle = "#0f172a"; };
@@ -1017,7 +1060,22 @@
                 await addDoc(collection(db, "contenzioni"), { ospite: o, tipo: t, dataInizio: d, oraInizio: h, motivo: m, consenso: c, stato: "ATTIVA", op: window.activeOperator, datePrescrizione: window.getTimestamp(), firme: { [ruoloFirma]: window.activeOperator + ' il ' + window.getTimestamp() }, firmeBase64: { [ruoloFirma]: sig } }); window.showToast("🔒 Prescrizione Contenzione Salvata"); 
             }); 
         };
-        window.loadContenzioni = () => { const tb = document.querySelector('#contenzioniTable tbody'); if(!tb) return; tb.innerHTML = ''; window.dbContenzioni.forEach(c => { let st = c.stato === 'ATTIVA' ? '<strong style="color:var(--error-color);">ATTIVA</strong>' : '<span style="color:var(--success-color);">REVOCATA</span>'; tb.innerHTML+=`<tr><td><strong>${c.ospite}</strong></td><td>${c.tipo}</td><td>${window.formatDateSafe(c.dataInizio)} ${c.oraInizio||''}</td><td>${c.motivo}</td><td>${st}</td></tr>`; }); };
+        
+        // AGGIORNAMENTO DINAMICO COUNTER DASHBOARD CONTENZIONI
+        window.loadContenzioni = () => { 
+            const tb = document.querySelector('#contenzioniTable tbody'); 
+            let attive = 0;
+            if(tb) {
+                tb.innerHTML = ''; 
+                window.dbContenzioni.forEach(c => { 
+                    let st = c.stato === 'ATTIVA' ? '<strong style="color:var(--error-color);">ATTIVA</strong>' : '<span style="color:var(--success-color);">REVOCATA</span>'; 
+                    if (c.stato === 'ATTIVA') attive++;
+                    tb.innerHTML+=`<tr><td><strong>${c.ospite}</strong></td><td>${c.tipo}</td><td>${window.formatDateSafe(c.dataInizio)} ${c.oraInizio||''}</td><td>${c.motivo}</td><td>${st}</td></tr>`; 
+                }); 
+            }
+            const dashCount = document.getElementById('dash-cont-count');
+            if(dashCount) dashCount.innerText = attive;
+        };
 
         window.addConsegnaWithSignature = (t) => { window.requestSignature("Consegna", async (sig) => { await addDoc(collection(db,"consegne"), {text:document.getElementById(t==='inf'?'newConsegnaInfText':'newConsegnaOssText').value, type:t, op:window.activeOperator, date:window.getTimestamp()}); window.showToast("✅ Salvata"); }); };
         window.loadConsegne = () => { ['inf','oss'].forEach(t => { const l = document.getElementById(`consegne${t.charAt(0).toUpperCase()+t.slice(1)}List`); if(l){ l.innerHTML=''; window.dbConsegne.filter(c=>c.type===t).forEach(c=>l.innerHTML+=`<div style="border:1px solid #ccc; padding:8px; margin-bottom:5px; border-radius:6px;"><small>${c.date}</small><div>${c.text}</div></div>`); } }); };
@@ -1049,9 +1107,24 @@
         window.renderStupefacenti = () => { const tb = document.querySelector('#narcoticInvTable tbody'); if(!tb) return; tb.innerHTML = ''; window.dbStupefacentiInv.forEach(s => { tb.innerHTML += `<tr><td>${s.nome||'-'}</td><td>${s.qta===0?'🔴':'🟢'}</td><td style="font-weight:bold;">${s.qta||'0'}</td><td>${s.barcode||'-'}</td></tr>`; }); };
         window.renderDashCalendar = () => { const cal = document.getElementById('dashMiniCalendar'); if(!cal) return; cal.innerHTML = ''; const today = window.getTodayString(); const upcoming = window.dbCup.filter(c => c.data >= today).sort((a,b) => a.data.localeCompare(b.data) || a.time.localeCompare(b.time)).slice(0, 5); if(upcoming.length === 0) { cal.innerHTML = '<div style="padding:10px; color:var(--text-light);">Nessun appuntamento imminente.</div>'; return; } upcoming.forEach(c => { cal.innerHTML += `<div style="border-bottom:1px solid #cbd5e1; padding:8px 0;"><strong>${window.formatDateSafe(c.data)} ${c.time}</strong><br>${c.guest} - ${c.type}</div>`; }); if(document.getElementById('dash-app-count')) document.getElementById('dash-app-count').innerText = upcoming.length; };
 
+        // FIX RACE CONDITION ASINCRONA
         onSnapshot(collection(db, "operatori"), snap => { let ops = snap.docs.map(d => ({id: d.id, ...d.data()})).filter(o => o && o.name && o.name.trim() !== ""); if(!ops.some(o => o.name === "Admin")) { ops.push({id:"admin-fallback", name:"Admin", pin:"12345", role:"admin", qualifica:"Direttore Sanitario"}); } window.dbOperatori = ops.sort((a,b) => a.name.localeCompare(b.name)); window.renderLoginProfiles(); }, err => { window.dbOperatori = [{id:"admin-fallback", name:"Admin", pin:"12345", role:"admin", qualifica:"Direttore Sanitario"}]; window.renderLoginProfiles(); });
-        onSnapshot(collection(db, "ospiti"), snap => { window.dbOspiti = snap.docs.map(d=>({id:d.id, ...d.data()})); window.loadGuests(); });
-        onSnapshot(collection(db, "cartelle_cliniche"), snap => { window.dbClinica = {}; snap.forEach(d => { window.dbClinica[d.id] = d.data(); }); if(window.dbOspiti.length > 0) window.loadAlerts(); if(window.globalSelectedPatient && window.dbClinica[window.globalSelectedPatient]) { window.renderDiario(window.globalSelectedPatient, window.dbClinica[window.globalSelectedPatient]); } });
+        
+        onSnapshot(collection(db, "ospiti"), snap => { 
+            window.dbOspiti = snap.docs.map(d=>({id:d.id, ...d.data()})); 
+            window.loadGuests(); 
+            window.loadAlerts(); // Forza refresh se ospiti arrivano dopo cartelle
+        });
+        
+        onSnapshot(collection(db, "cartelle_cliniche"), snap => { 
+            window.dbClinica = {}; 
+            snap.forEach(d => { window.dbClinica[d.id] = d.data(); }); 
+            window.loadAlerts(); // Forza refresh se cartelle arrivano dopo ospiti
+            if(window.globalSelectedPatient && window.dbClinica[window.globalSelectedPatient]) { 
+                window.renderDiario(window.globalSelectedPatient, window.dbClinica[window.globalSelectedPatient]); 
+            } 
+        });
+
         onSnapshot(collection(db, "rischio"), snap => { window.dbRischio = snap.docs.map(d=>({id:d.id, ...d.data()})); window.loadRischio(); });
         onSnapshot(collection(db, "cup"), snap => { window.dbCup = snap.docs.map(d=>({id:d.id, ...d.data()})); window.loadAppointments(); window.renderDashCalendar(); });
         onSnapshot(collection(db, "stupefacenti_inv"), snap => { window.dbStupefacentiInv = snap.docs.map(d=>({id:d.id, ...d.data()})); window.renderStupefacenti(); });
