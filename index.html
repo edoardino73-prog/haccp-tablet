@@ -219,7 +219,7 @@
         <button class="module-btn" style="background: linear-gradient(135deg, #d97706, #b45309);" onclick="window.switchTab('appuntamenti', '📅 Agenda e CUP')"><span class="module-icon">📅</span>Agenda CUP</button>
         <button class="module-btn" style="background: linear-gradient(135deg, #059669, #047857);" onclick="window.switchTab('magazzino', '📦 Scorte Magazzino')"><span class="module-icon">📦</span>Magazzino</button>
         
-        <!-- COLLEGAMENTI CROSS-FILE PER NAVIGAZIONE ECOSISTEMA -->
+        <!-- COLLEGAMENTI CROSS-FILE PER NAVIGAZIONE ECOSISTEMA (Bridge integrato su index tel) -->
         <button class="module-btn req-haccp" style="background: linear-gradient(135deg, #334155, #0f172a); border: 2px solid #94a3b8;" onclick="window.location.href='haccp_sicurezza_dash.html'"><span class="module-icon">📊</span>Cruscotto HACCP</button>
         <button class="module-btn req-medico" style="background: linear-gradient(135deg, #7c3aed, #5b21b6); border: 2px solid #a78bfa;" onclick="window.location.href='iso_9001_accreditamento.html'"><span class="module-icon">🏆</span>Qualità & ISO</button>
     </div>
@@ -767,26 +767,33 @@
         window.updatePinDisplay = () => { document.getElementById('pin-display').innerText = '*'.repeat(window.currentPin.length); };
         window.resetPinLogin = () => { document.getElementById('pin-pad-area').style.display = 'none'; document.getElementById('profiles-container').style.display = 'grid'; window.selectedLoginUser = null; window.currentPin = ""; };
         
+        // --- INIZIO BLOCCO CHIRURGICO: FIX AUTH FIREBASE / FIRESTORE ---
         window.submitPin = async () => { 
             let op = window.selectedLoginUser; 
             if (!op) return;
 
-            if (op.name === 'Admin' && window.currentPin === '12345') {
-                window.activeOperator = op.name; window.activeOperatorRole = op.role; window.activeOperatorQualifica = op.qualifica; document.getElementById('currentOpBadge').innerText = `${op.name}`; document.getElementById('currentOpRole').innerText = op.qualifica; document.getElementById('login-screen').style.display = 'none'; document.getElementById('tablet-header').style.display = 'flex'; window.applyRolePermissions(); window.loadGuests(); window.renderSidebarPatients(); window.goHome();
-                return;
-            }
-
-            const emailFittizia = op.email || (op.name || op.nome).toLowerCase().replace(/[^a-z0-9]/g, '.') + "@villasilvana.local";
-
-            try {
-                await signInWithEmailAndPassword(auth, emailFittizia, window.currentPin);
-                window.activeOperator = op.name; window.activeOperatorRole = op.role; window.activeOperatorQualifica = op.qualifica; document.getElementById('currentOpBadge').innerText = `${op.name}`; document.getElementById('currentOpRole').innerText = op.qualifica; document.getElementById('login-screen').style.display = 'none'; document.getElementById('tablet-header').style.display = 'flex'; window.applyRolePermissions(); window.loadGuests(); window.renderSidebarPatients(); window.goHome();
-            } catch (error) {
-                console.error("Auth error:", error);
-                window.showToast("❌ PIN Errato o assenza di rete"); 
+            // Verifica PIN dal database Firestore (già caricato in memoria) o bypass Admin
+            if ((op.name === 'Admin' && window.currentPin === '12345') || (window.currentPin === op.pin)) {
+                // LOGIN OK
+                window.activeOperator = op.name || op.nome; 
+                window.activeOperatorRole = op.role; 
+                window.activeOperatorQualifica = op.qualifica; 
+                document.getElementById('currentOpBadge').innerText = `${window.activeOperator}`; 
+                document.getElementById('currentOpRole').innerText = op.qualifica; 
+                document.getElementById('login-screen').style.display = 'none'; 
+                document.getElementById('tablet-header').style.display = 'flex'; 
+                window.applyRolePermissions(); 
+                window.loadGuests(); 
+                window.renderSidebarPatients(); 
+                window.goHome();
+            } else {
+                // PIN ERRATO
+                console.warn("Auth error: PIN non corrispondente nel database locale.");
+                window.showToast("❌ PIN Errato"); 
                 window.currentPin = ""; window.updatePinDisplay();
             }
         };
+        // --- FINE BLOCCO ---
 
         window.isMedicoOrAdmin = () => ['Medico','Direttore Sanitario'].includes(window.activeOperatorQualifica) || window.activeOperatorRole==='admin';
         window.checkOssRestriction = () => { if(window.activeOperatorQualifica==='OSS'){ window.showToast("⚠️ Sola Lettura: Area Riservata"); return true; } return false; };
