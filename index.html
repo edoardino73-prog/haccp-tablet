@@ -668,7 +668,7 @@
         window.processFileUpload = (e, targetVar) => { const file = e.target.files[0]; if(!file) return; const reader = new FileReader(); reader.onload = (ev) => { const img = new Image(); img.onload = () => { const cv = document.createElement('canvas'); cv.width = img.width > 800 ? 800 : img.width; cv.height = img.height * (cv.width / img.width); cv.getContext('2d').drawImage(img, 0, 0, cv.width, cv.height); window[targetVar + 'Base64'] = cv.toDataURL('image/jpeg', 0.6); if(targetVar === 'haccpTracc') { document.getElementById('traccPreviewContainer').style.display = 'block'; document.getElementById('traccImgPreview').src = window[targetVar + 'Base64']; } }; img.src = ev.target.result; }; reader.readAsDataURL(file); };
 
         // ----------------------------------------------------
-        // AGGIORNAMENTO ROBUSTO DEGLI ALERT CON STATO DI CARICAMENTO
+        // AGGIORNAMENTO ROBUSTO DEGLI ALERT CON STATO DI CARICAMENTO E SCADENZIARIO TEMPORALE ESATTO
         // ----------------------------------------------------
         window.loadAlerts = () => { 
             const container = document.getElementById('dashboardAlertsList'); 
@@ -677,11 +677,15 @@
             let count = 0; 
             let htmlBuffer = '';
             
+            let oggi = new Date();
+            oggi.setHours(0, 0, 0, 0);
+            
             (window.dbOspiti || []).forEach(g => { 
                 const d = (window.dbClinica && window.dbClinica[g.name]) ? window.dbClinica[g.name] : {}; 
+                
                 if (d.paiDataRevisione) { 
                     const rDate = new Date(d.paiDataRevisione); 
-                    const diff = Math.ceil((rDate - new Date()) / (1000 * 60 * 60 * 24)); 
+                    const diff = Math.ceil((rDate.getTime() - oggi.getTime()) / (1000 * 60 * 60 * 24)); 
                     if (diff < 0) { 
                         htmlBuffer += `<div class="alert-item">🚨 P.A.I. Scaduto: <strong>${g.name}</strong></div>`; 
                         count++; 
@@ -693,7 +697,7 @@
                 
                 if (g.tutoreScadenza) {
                     const tDate = new Date(g.tutoreScadenza);
-                    const diffT = Math.ceil((tDate - new Date()) / (1000 * 60 * 60 * 24));
+                    const diffT = Math.ceil((tDate.getTime() - oggi.getTime()) / (1000 * 60 * 60 * 24));
                     if (diffT < 0) {
                         htmlBuffer += `<div class="alert-item" style="border-color:#a855f7; border-left-color:#7e22ce; background:#faf5ff; color:#6b21a8;">⚖️ AdS/Tutore Scaduto: <strong>${g.name}</strong></div>`;
                         count++;
@@ -769,9 +773,9 @@
         window.renderLesioniPhotos = () => { const grid = document.getElementById('lesioniPhotoGrid'); if(!grid) return; grid.innerHTML = ''; if(!window.currentLesioniPhotos || window.currentLesioniPhotos.length === 0) { grid.innerHTML = '<div style="grid-column:1/-1; color:var(--text-light); text-align:center; padding:15px; font-size:0.9em;">Nessuna foto acquisita per questo paziente.</div>'; return; } window.currentLesioniPhotos.forEach((item, idx) => { const card = document.createElement('div'); card.style.cssText = 'background:#f1f5f9; border:1px solid #cbd5e1; border-radius:6px; padding:6px; display:flex; flex-direction:column; gap:4px; text-align:center; box-shadow:0 1px 3px rgba(0,0,0,0.05);'; let imgSrc = item.url || item.b64; card.innerHTML = `<a href="${imgSrc}" target="_blank"><img src="${imgSrc}" style="width:100%; height:95px; object-fit:cover; border-radius:4px; border:1px solid #cbd5e1;"></a><div style="font-size:0.8em; font-weight:bold; overflow:hidden; text-overflow:ellipsis; white-space:nowrap;" title="${item.desc}">${item.desc}</div><div style="font-size:0.7em; color:var(--text-light);">${item.data.split(' alle ')[0]} (${window.getInitials(item.op)})</div><button type="button" class="btn-danger restrict-oss" style="padding:4px; font-size:0.75em; margin-top:2px;" onclick="window.deleteLesionePhoto(${idx})">🗑️ Rimuovi</button>`; grid.appendChild(card); }); };
         window.deleteLesionePhoto = (idx) => { if(window.checkOssRestriction()) return; if(confirm("Eliminare questa fotografia di lesione?")) { window.currentLesioniPhotos.splice(idx, 1); window.renderLesioniPhotos(); window.showToast("Fotografia rimossa. Salva le modifiche."); } };
 
-        /* LOGIN E PROFILI */
-        window.renderLoginProfiles = () => { const c = document.getElementById('profiles-container'); if(!c) return; c.innerHTML = ''; let vOps = (window.dbOperatori && window.dbOperatori.length > 0) ? window.dbOperatori : [{id: "admin-fallback", name: "Admin", pin: "12345", role: "admin", qualifica: "Direttore Sanitario"}]; vOps.forEach(op => { let div = document.createElement('div'); div.className = 'profile-card'; div.innerHTML = `<div class="profile-avatar">🧑‍⚕️</div><div class="profile-name">${op.name.split(' ')[0]}</div><div class="profile-role">${op.qualifica||''}</div>`; div.onclick = () => window.showPinPad(op); c.appendChild(div); }); };
-        window.showPinPad = (op) => { window.selectedLoginUser = op; window.currentPin = ""; document.getElementById('profiles-container').style.display = 'none'; document.getElementById('pin-pad-area').style.display = 'flex'; document.getElementById('pin-welcome').innerText = "Ciao " + op.name.split(' ')[0]; window.updatePinDisplay(); };
+        /* LOGIN E PROFILI ALLINEATI */
+        window.renderLoginProfiles = () => { const c = document.getElementById('profiles-container'); if(!c) return; c.innerHTML = ''; let vOps = (window.dbOperatori && window.dbOperatori.length > 0) ? window.dbOperatori : [{id: "admin-fallback", name: "Admin", pin: "12345", role: "admin", qualifica: "Direttore Sanitario"}]; vOps.forEach(op => { let n = op.name || op.nome || "Operatore"; let div = document.createElement('div'); div.className = 'profile-card'; div.innerHTML = `<div class="profile-avatar">🧑‍⚕️</div><div class="profile-name">${n.split(' ')[0]}</div><div class="profile-role">${op.qualifica||''}</div>`; div.onclick = () => window.showPinPad(op); c.appendChild(div); }); };
+        window.showPinPad = (op) => { window.selectedLoginUser = op; window.currentPin = ""; document.getElementById('profiles-container').style.display = 'none'; document.getElementById('pin-pad-area').style.display = 'flex'; document.getElementById('pin-welcome').innerText = "Ciao " + (op.name || op.nome || "Operatore").split(' ')[0]; window.updatePinDisplay(); };
         window.addPin = (num) => { if(window.currentPin.length < 5) window.currentPin += num; window.updatePinDisplay(); };
         window.updatePinDisplay = () => { document.getElementById('pin-display').innerText = '*'.repeat(window.currentPin.length); };
         window.resetPinLogin = () => { document.getElementById('pin-pad-area').style.display = 'none'; document.getElementById('profiles-container').style.display = 'grid'; window.selectedLoginUser = null; window.currentPin = ""; };
@@ -782,7 +786,8 @@
             if (!op) return;
 
             let loginValid = false;
-            const emailFittizia = op.email || (op.name || op.nome).toLowerCase().replace(/[^a-z0-9]/g, '.') + "@villasilvana.local";
+            let opName = op.name || op.nome || "Operatore";
+            const emailFittizia = op.email || opName.toLowerCase().replace(/[^a-z0-9]/g, '.') + "@villasilvana.local";
 
             try {
                 // Tentativo 1: Standard Firebase Auth (Per account creati dal backend nativo)
@@ -791,7 +796,7 @@
             } catch (error) {
                 // Se Firebase Auth risponde "400 Bad Request" o "Invalid Credential", 
                 // controlliamo se il PIN digitato matcha con quello del db "operatori"
-                if ((op.name === 'Admin' && window.currentPin === '12345') || (op.pin && window.currentPin === String(op.pin))) {
+                if ((opName === 'Admin' && window.currentPin === '12345') || (op.pin && window.currentPin === String(op.pin))) {
                     try {
                         // Tentativo 2: Convalida locale OK -> Forza Login Anonimo per sbloccare i permessi Firestore!
                         await signInAnonymously(auth);
@@ -810,7 +815,7 @@
 
             // SE IL LOGIN E' VALIDO:
             if(loginValid) {
-                window.activeOperator = op.name || op.nome; 
+                window.activeOperator = opName; 
                 window.activeOperatorRole = op.role || 'user'; 
                 window.activeOperatorQualifica = op.qualifica || ''; 
                 document.getElementById('currentOpBadge').innerText = window.activeOperator; 
@@ -1153,7 +1158,7 @@
         window.renderStupefacenti = () => { const tb = document.querySelector('#narcoticInvTable tbody'); if(!tb) return; tb.innerHTML = ''; window.dbStupefacentiInv.forEach(s => { tb.innerHTML += `<tr><td>${s.nome||'-'}</td><td>${s.qta===0?'🔴':'🟢'}</td><td style="font-weight:bold;">${s.qta||'0'}</td><td>${s.barcode||'-'}</td></tr>`; }); };
         window.renderDashCalendar = () => { const cal = document.getElementById('dashMiniCalendar'); if(!cal) return; cal.innerHTML = ''; const today = window.getTodayString(); const upcoming = window.dbCup.filter(c => c.data >= today).sort((a,b) => a.data.localeCompare(b.data) || a.time.localeCompare(b.time)).slice(0, 5); if(upcoming.length === 0) { cal.innerHTML = '<div style="padding:10px; color:var(--text-light);">Nessun appuntamento imminente.</div>'; return; } upcoming.forEach(c => { cal.innerHTML += `<div style="border-bottom:1px solid #cbd5e1; padding:8px 0;"><strong>${window.formatDateSafe(c.data)} ${c.time}</strong><br>${c.guest} - ${c.type}</div>`; }); if(document.getElementById('dash-app-count')) document.getElementById('dash-app-count').innerText = upcoming.length; };
 
-        onSnapshot(collection(db, "operatori"), snap => { let ops = snap.docs.map(d => ({id: d.id, ...d.data()})).filter(o => o && o.name && o.name.trim() !== ""); if(!ops.some(o => o.name === "Admin")) { ops.push({id:"admin-fallback", name:"Admin", pin:"12345", role:"admin", qualifica:"Direttore Sanitario"}); } window.dbOperatori = ops.sort((a,b) => a.name.localeCompare(b.name)); window.renderLoginProfiles(); }, err => { window.dbOperatori = [{id:"admin-fallback", name:"Admin", pin:"12345", role:"admin", qualifica:"Direttore Sanitario"}]; window.renderLoginProfiles(); });
+        onSnapshot(collection(db, "operatori"), snap => { let ops = snap.docs.map(d => ({id: d.id, ...d.data()})).filter(o => o && (o.name || o.nome)); if(!ops.some(o => (o.name === "Admin" || o.nome === "Admin"))) { ops.push({id:"admin-fallback", name:"Admin", pin:"12345", role:"admin", qualifica:"Direttore Sanitario"}); } window.dbOperatori = ops.sort((a,b) => (a.name || a.nome || "").localeCompare(b.name || b.nome || "")); window.renderLoginProfiles(); }, err => { window.dbOperatori = [{id:"admin-fallback", name:"Admin", pin:"12345", role:"admin", qualifica:"Direttore Sanitario"}]; window.renderLoginProfiles(); });
         
         onSnapshot(collection(db, "ospiti"), snap => { 
             window.dbOspiti = snap.docs.map(d=>({id:d.id, ...d.data()})); 
